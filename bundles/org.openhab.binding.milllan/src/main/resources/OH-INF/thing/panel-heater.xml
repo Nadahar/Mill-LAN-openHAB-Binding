@@ -16,6 +16,11 @@
 			<channel typeId="raw-ambient-temperature" id="raw-ambient-temperature"/>
 			<channel typeId="current-power" id="current-power"/>
 			<channel typeId="control-signal" id="control-signal"/>
+			<channel typeId="lock-status" id="lock-status"/>
+			<channel typeId="open-window-status" id="open-window-status"/>
+			<channel typeId="set-temperature" id="set-temperature"/>
+			<channel typeId="connected-to-cloud" id="connected-to-cloud"/>
+			<channel typeId="operation-mode" id="operation-mode"/>
 		</channels>
 
 		<properties>
