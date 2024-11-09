@@ -16,6 +16,7 @@ package org.openhab.binding.milllan.internal;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 
 /**
@@ -43,9 +44,24 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
     public static final String RAW_AMBIENT_TEMPERATURE = "raw-ambient-temperature";
     public static final String CURRENT_POWER = "current-power";
     public static final String CONTROL_SIGNAL = "control-signal";
+    public static final String LOCK_STATUS = "lock-status";
+    public static final String OPEN_WINDOW_STATUS = "open-window-status";
+    public static final String SET_TEMPERATURE = "set-temperature";
+    public static final String CONNECTED_CLOUD = "connected-to-cloud";
+    public static final String OPERATION_MODE = "operation-mode";
+
+    // Propery constants
+    public static final String PROPERTY_NAME = "name";
+    public static final String PROPERTY_CUSTOM_NAME = "customName";
+    public static final String PROPERTY_OPERATION_KEY = "operationKey";
+
+    public static final Set<String> PROPERTIES_DYNAMIC = Set.of(
+        PROPERTY_NAME, PROPERTY_CUSTOM_NAME, Thing.PROPERTY_FIRMWARE_VERSION, PROPERTY_OPERATION_KEY
+    );
 
     // Configuration parameter constants
     public static final String CONFIG_PARAM_HOSTNAME = "hostname";
+    public static final String CONFIG_PARAM_API_KEY = "apiKey";
     public static final String CONFIG_PARAM_REFRESH_INTERVAL = "refreshInterval";
 
     private MillBindingConstants() {
