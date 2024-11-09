@@ -1,5 +1,6 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Mill LAN Binding, an add-on for openHAB for controlling Mill devices which
+ * exposes a local REST API. Copyright (c) 2024 Nadahar
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,28 +15,39 @@ package org.openhab.binding.milllan.internal;
 
 import static org.openhab.binding.milllan.internal.MillBindingConstants.*;
 
-import java.util.Set;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.BaseThingHandlerFactory;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
- * The {@link MillHandlerFactory} is responsible for creating things and thing
+ * The {@link MillThingHandlerFactory} is responsible for creating things and thing
  * handlers.
  *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
 @Component(configurationPid = "binding.milllan", service = ThingHandlerFactory.class)
-public class MillHandlerFactory extends BaseThingHandlerFactory {
+public class MillThingHandlerFactory extends BaseThingHandlerFactory { // TODO: (Nad) JavaDocs
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_SAMPLE);
+    private final MillHTTPClientProvider httpClientProvider;
+
+    @Activate
+    public MillThingHandlerFactory(
+        @Reference MillHTTPClientProvider httpClientProvider,
+        ComponentContext componentContext
+    ) {
+        super.activate(componentContext);
+        this.httpClientProvider = httpClientProvider;
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -46,8 +58,11 @@ public class MillHandlerFactory extends BaseThingHandlerFactory {
     protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
-        if (THING_TYPE_SAMPLE.equals(thingTypeUID)) {
-            return new MillHandler(thing);
+        if (THING_TYPE_PANEL_HEATER.equals(thingTypeUID)) {
+            return new MillPanelHeaterHandler(thing, httpClientProvider);
+        }
+        if (THING_TYPE_ALL_FUNCTIONS.equals(thingTypeUID)) {
+            return new MillAllFunctionsHandler(thing, httpClientProvider);
         }
 
         return null;
