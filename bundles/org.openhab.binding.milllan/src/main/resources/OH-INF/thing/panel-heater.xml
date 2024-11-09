@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="milllan"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Panel heater thing type -->
+	<thing-type id="panel-heater">
+
+		<label>Mill Panel Heater</label>
+		<description>A Mill panel heater.</description>
+		<category>radiator</category>
+
+		<channels>
+			<channel typeId="ambient-temperature" id="ambient-temperature"/>
+			<channel typeId="raw-ambient-temperature" id="raw-ambient-temperature"/>
+			<channel typeId="current-power" id="current-power"/>
+			<channel typeId="control-signal" id="control-signal"/>
+		</channels>
+
+		<properties>
+			<property name="vendor">Mill</property>
+		</properties>
+		<representation-property>macAddress</representation-property>
+
+		<config-description-ref uri="thing-type:milllan:heater"/>
+	</thing-type>
+
+</thing:thing-descriptions>

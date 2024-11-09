@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="milllan"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<channel-type id="ambient-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Ambient Temperature</label>
+		<description>The temperature measured by the device sensor corrected by the calibration offset.</description>
+		<category>Temperature</category>
+		<tags>
+			<tag>Measurement</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="raw-ambient-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Raw Ambient Temperature</label>
+		<description>The temperature measured by the device sensor without any offset.</description>
+		<category>Temperature</category>
+		<tags>
+			<tag>Measurement</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="current-power">
+		<item-type>Number:Power</item-type>
+		<label>Current Power</label>
+		<description>The power the device is currently using to produce heat.</description>
+		<category>Energy</category>
+		<tags>
+			<tag>Measurement</tag>
+			<tag>Power</tag>
+		</tags>
+		<state readOnly="true" pattern="%.0f %unit%"/>
+	</channel-type>
+	<channel-type id="control-signal">
+		<item-type unitHint="%">Number:Dimensionless</item-type>
+		<label>Current Control Signal</label>
+		<description>The current control signal of the PID regulator (0-100%).</description>
+		<category>heating</category>
+		<tags>
+			<tag>Status</tag>
+		</tags>
+		<state readOnly="true" pattern="%.0f %%"/>
+	</channel-type>
+</thing:thing-descriptions>

@@ -15,8 +15,8 @@
 
   <packaging>pom</packaging>
 
-  <name>openHAB Add-ons</name>
-  <description>This project contains the official add-ons of openHAB</description>
+  <name>Mill LAN Add-on</name>
+  <description>This project contains the Mill LAN add-on for openHAB</description>
 
   <organization>
     <name>openHAB.org</name>
@@ -38,15 +38,15 @@
   </modules>
 
   <scm>
-    <connection>scm:git:https://github.com/openhab/openhab-addons.git</connection>
-    <developerConnection>scm:git:https://github.com/openhab/openhab-addons.git</developerConnection>
+    <connection>scm:git:https://github.com/Nadahar/Mill-LAN-openHAB-Binding.git</connection>
+    <developerConnection>scm:git:https://github.com/Nadahar/Mill-LAN-openHAB-Binding.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://github.com/openhab/openhab-addons</url>
+    <url>https://github.com/Nadahar/Mill-LAN-openHAB-Binding</url>
   </scm>
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/openhab/openhab-addons/issues</url>
+    <url>https://github.com/Nadahar/Mill-LAN-openHAB-Binding/issues</url>
   </issueManagement>
 
   <distributionManagement>
@@ -443,7 +443,7 @@ Import-Package: \\
             <strictCheck>true</strictCheck>
             <aggregate>true</aggregate>
             <mapping>
-              <java>JAVADOC_STYLE</java>
+              <java>SLASHSTAR_STYLE</java>
               <xml>xml-header-style</xml>
             </mapping>
             <useDefaultExcludes>true</useDefaultExcludes>
@@ -490,6 +490,8 @@ Import-Package: \\
           <artifactId>sat-plugin</artifactId>
           <version>${sat.version}</version>
           <configuration>
+            <failOnError>true</failOnError>
+            <checkstyleRuleset>${basedirRoot}/tools/static-code-analysis/checkstyle/milllan.xml</checkstyleRuleset>
             <checkstyleProperties>${basedirRoot}/tools/static-code-analysis/checkstyle/ruleset.properties</checkstyleProperties>
             <checkstyleFilter>${basedirRoot}/tools/static-code-analysis/checkstyle/suppressions.xml</checkstyleFilter>
             <spotbugsExclude>${basedirRoot}/tools/static-code-analysis/spotbugs/suppressions.xml</spotbugsExclude>
@@ -594,7 +596,7 @@ Import-Package: \\
               <goals>
                 <goal>check</goal>
               </goals>
-              <phase>initialize</phase>
+              <phase>none</phase>
             </execution>
           </executions>
         </plugin>
