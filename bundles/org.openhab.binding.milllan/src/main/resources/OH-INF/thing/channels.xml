@@ -47,4 +47,74 @@
 		</tags>
 		<state readOnly="true" pattern="%.0f %%"/>
 	</channel-type>
+	<channel-type id="lock-status">
+		<item-type>String</item-type>
+		<label>Lock Status</label>
+		<description>The current lock status.</description>
+		<category>lock</category>
+		<tags>
+			<tag>Status</tag>
+		</tags>
+		<state readOnly="true">
+			<options>
+				<option value="NO_LOCK">No Lock</option>
+				<option value="CHILD_LOCK">Child-Lock</option>
+				<option value="COMMERCIAL_LOCK">Commercial-Lock</option>
+			</options>
+		</state>
+	</channel-type>
+	<channel-type id="open-window-status">
+		<item-type>String</item-type>
+		<label>Open Window Status</label>
+		<description>The "open window" status.</description>
+		<category>window</category>
+		<tags>
+			<tag>Status</tag>
+		</tags>
+		<state readOnly="true">
+			<options>
+				<option value="DISABLED">Disabled</option>
+				<option value="ENABLED_ACTIVE">Enabled and Active</option>
+				<option value="ENABLED_INACTIVE">Enabled and Inactive</option>
+			</options>
+		</state>
+	</channel-type>
+	<channel-type id="set-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Set Temperature</label>
+		<description>The current target temperature.</description>
+		<category>Temperature</category>
+		<tags>
+			<tag>Status</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="connected-to-cloud">
+		<item-type>Switch</item-type>
+		<label>Connected to Cloud</label>
+		<description>Whether the device is currently connected to the cloud.</description>
+		<tags>
+			<tag>Status</tag>
+		</tags>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="operation-mode">
+		<item-type>String</item-type>
+		<label>Operation Mode</label>
+		<description>The current mode of operation.</description>
+		<tags>
+			<tag>Control</tag>
+		</tags>
+		<state>
+			<options>
+				<option value="OFF">Off</option>
+				<option value="WEEKLY_PROGRAM">Weekly Program</option>
+				<option value="INDEPENDENT_DEVICE">Independent Device</option>
+				<option value="CONTROL_INDIVIDUALLY">Control Individually</option>
+				<option value="INVALID">Invalid</option>
+			</options>
+		</state>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
 </thing:thing-descriptions>

@@ -16,7 +16,9 @@ package org.openhab.binding.milllan.internal;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.semantics.Property;
 import org.openhab.core.thing.Channel;
+import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.type.ThingType;
 
@@ -61,10 +63,44 @@ public class MillBindingConstants {
     /** The Control Signal {@link Channel} */
     public static final String CONTROL_SIGNAL = "control-signal";
 
+    /** The Lock Status {@link Channel} */
+    public static final String LOCK_STATUS = "lock-status";
+
+    /** The Open Window Status {@link Channel} */
+    public static final String OPEN_WINDOW_STATUS = "open-window-status";
+
+    /** The Set Temperature {@link Channel} */
+    public static final String SET_TEMPERATURE = "set-temperature";
+
+    /** The Connected to Cloud {@link Channel} */
+    public static final String CONNECTED_CLOUD = "connected-to-cloud";
+
+    /** The Operation Mode {@link Channel} */
+    public static final String OPERATION_MODE = "operation-mode";
+
+    // Property constants
+
+    /** The {@code name} {@link Property} */
+    public static final String PROPERTY_NAME = "name";
+
+    /** The {@code customName} {@link Property} */
+    public static final String PROPERTY_CUSTOM_NAME = "customName";
+
+    /** The {@code operationKey} {@link Property} */
+    public static final String PROPERTY_OPERATION_KEY = "operationKey";
+
+    /** The {@link Set} of dynamic {@link Property} constants */
+    public static final Set<String> PROPERTIES_DYNAMIC = Set.of(
+        PROPERTY_NAME, PROPERTY_CUSTOM_NAME, Thing.PROPERTY_FIRMWARE_VERSION, PROPERTY_OPERATION_KEY
+    );
+
     // Configuration parameter constants
 
     /** The hostname or IP address configuration parameter */
     public static final String CONFIG_PARAM_HOSTNAME = "hostname";
+
+    /** The API key configuration parameter */
+    public static final String CONFIG_PARAM_API_KEY = "apiKey";
 
     /** The refresh interval configuration parameter */
     public static final String CONFIG_PARAM_REFRESH_INTERVAL = "refreshInterval";
