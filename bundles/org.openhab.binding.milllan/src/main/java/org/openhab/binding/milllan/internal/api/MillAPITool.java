@@ -30,6 +30,8 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.milllan.internal.MillUtil;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
+import org.openhab.binding.milllan.internal.api.response.GenericResponse;
+import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.StatusResponse;
 import org.openhab.binding.milllan.internal.exception.MillException;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 
@@ -83,6 +86,36 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             8L,
             TimeUnit.SECONDS,
             true
+        );
+    }
+
+    public OperationModeResponse getOperationMode(String hostname) throws MillException {
+        return request(
+            OperationModeResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/operation-mode",
+            null,
+            5L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setOperationMode(String hostname, OperationMode mode) throws MillException {
+        JsonObject object = new JsonObject();
+        object.add("mode", gson.toJsonTree(mode));
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/operation-mode",
+            gson.toJson(object),
+            5L,
+            TimeUnit.SECONDS,
+            false
         );
     }
 
