@@ -21,11 +21,15 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.milllan.internal.api.LockStatus;
 import org.openhab.binding.milllan.internal.api.MillAPITool;
 import org.openhab.binding.milllan.internal.api.OpenWindowStatus;
 import org.openhab.binding.milllan.internal.api.OperationMode;
+import org.openhab.binding.milllan.internal.api.ResponseStatus;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
+import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
+import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.StatusResponse;
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
@@ -41,6 +45,7 @@ import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
+import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +68,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
     /** Current online state, must be synchronized on {@link #lock} */
     protected boolean isOnline;
 
+    // must be synched on lock
+    protected boolean onlineWithError;
+
     protected final MillAPITool apiTool;
 
     public AbstractMillThingHandler(Thing thing, MillHTTPClientProvider httpClientProvider) {
@@ -73,7 +81,32 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        switch (channelUID.getId()) {
+        try {
+            switch (channelUID.getId()) {
+                case AMBIENT_TEMPERATURE:
+                case RAW_AMBIENT_TEMPERATURE:
+                case CURRENT_POWER:
+                case CONTROL_SIGNAL:
+                case SET_TEMPERATURE:
+                case LOCK_STATUS:
+                case OPEN_WINDOW_STATUS:
+                case CONNECTED_CLOUD:
+                    if (command instanceof RefreshType) {
+                        pollControlStatus();
+                    }
+                    break;
+                case OPERATION_MODE:
+                    if (command instanceof RefreshType) {
+                        pollOperationMode();
+                    } else if (command instanceof StringType) {
+                        setOperationMode(command.toString());
+                    }
+                    break;
+
+
+            }
+        } catch (MillException e) {
+            setOffline(e);
         }
     }
 
@@ -93,7 +126,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
     });
     }
 
-    public void pollStatus() throws MillException {
+    @Override
+    public void dispose() {
+        if (logger.isTraceEnabled()) {
+            logger.trace("Disposing of Thing handler for {}", getThing().getUID());
+        }
+    }
+
+    public void pollStatus() throws MillException { //TODO: (Nad) Remember to run: mvn i18n:generate-default-translations
         StatusResponse statusResponse = apiTool.getStatus(getHostname());
         setOnline();
         Map<String, String> properties = editProperties();
@@ -179,16 +219,79 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
         }
     }
 
+    public void pollOperationMode() throws MillException {
+        OperationModeResponse operationModeResponse;
+        try {
+            operationModeResponse = apiTool.getOperationMode(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support operation mode", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
+        OperationMode om;
+        if ((om = operationModeResponse.getMode()) != null) {
+            updateState(OPERATION_MODE, new StringType(om.name()));
+        }
+    }
+
+    public void setOperationMode(@Nullable String modeValue) throws MillException {
+        OperationMode mode = OperationMode.typeOf(modeValue);
+        if (mode == null) {
+            logger.warn("setOperationMode() received an invalid operation mode {} - ignoring", modeValue);
+            return;
+        }
+
+        Response response = apiTool.setOperationMode(getHostname(), mode);
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set operation mode to \"{}\": {}",
+                mode,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
     protected void setOnline() {
+        setOnline(null, null);
+    }
+
+    protected void setOnline(@Nullable ThingStatusDetail statusDetail, @Nullable String description) {
+        boolean isError = statusDetail != null && statusDetail != ThingStatusDetail.NONE;
         synchronized (lock) {
             // setOnline is called a lot, and most of the times there's nothing to do, so we want a quick escape early
-            if (isOnline) {
+            if (isOnline && !isError && !onlineWithError) {
                 return;
             }
             isOnline = true;
+            onlineWithError = isError;
         }
-        updateStatus(ThingStatus.ONLINE);
-        // Do schedulers etc
+
+        // Clear dynamic configuration parameters and properties
+        Map<String, String> properties = editProperties();
+        for (String property : PROPERTIES_DYNAMIC) {
+            properties.remove(property);
+        }
+        updateProperties(properties);
+
+        if (isError && statusDetail != null) {
+            updateStatus(ThingStatus.ONLINE, statusDetail, description);
+        } else {
+            updateStatus(ThingStatus.ONLINE);
+        }
     }
 
     protected void setOffline(MillException e) {
