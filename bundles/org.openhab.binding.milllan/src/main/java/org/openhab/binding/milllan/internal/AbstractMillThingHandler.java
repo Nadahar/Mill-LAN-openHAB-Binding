@@ -16,8 +16,11 @@ package org.openhab.binding.milllan.internal;
 import static org.openhab.binding.milllan.internal.MillBindingConstants.*;
 import static org.openhab.binding.milllan.internal.MillUtil.isBlank;
 
+import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.util.Map;
+
+import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -27,10 +30,15 @@ import org.openhab.binding.milllan.internal.api.MillAPITool;
 import org.openhab.binding.milllan.internal.api.OpenWindowStatus;
 import org.openhab.binding.milllan.internal.api.OperationMode;
 import org.openhab.binding.milllan.internal.api.ResponseStatus;
+import org.openhab.binding.milllan.internal.api.TemperatureType;
+import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
+import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
+import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
 import org.openhab.binding.milllan.internal.api.response.StatusResponse;
+import org.openhab.binding.milllan.internal.api.response.TemperatureCalibrationOffsetResponse;
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
@@ -111,7 +119,113 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler {
                         setOperationMode(command.toString());
                     }
                     break;
-
+                case TEMPERATURE_CALIBRATION_OFFSET:
+                    if (command instanceof RefreshType) {
+                        pollTemperatureCalibrationOffset();
+                    } else if (command instanceof QuantityType) {
+                        @SuppressWarnings("unchecked")
+                        QuantityType<?> celsiusOffset =
+                            ((QuantityType<Temperature>) command).toUnitRelative(SIUnits.CELSIUS);
+                        if (celsiusOffset == null) {
+                            logger.warn(
+                                "Failed to set temperature calibration offset: Could not convert {} to degrees celsius",
+                                command
+                            );
+                        } else {
+                            setTemperatureCalibrationOffset(celsiusOffset.toBigDecimal());
+                        }
+                    }
+                    break;
+                case COMMERCIAL_LOCK:
+                    if (command instanceof RefreshType) {
+                        pollCommercialLock();
+                    } else if (command instanceof OnOffType) {
+                        setCommercialLock(command == OnOffType.ON);
+                    }
+                    break;
+                case CHILD_LOCK:
+                    if (command instanceof RefreshType) {
+                        pollChildLock();
+                    } else if (command instanceof OnOffType) {
+                        setChildLock(command == OnOffType.ON);
+                    }
+                    break;
+                case NORMAL_SET_TEMPERATURE:
+                    if (command instanceof RefreshType) {
+                        pollSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
+                    } else if (command instanceof QuantityType) {
+                        @SuppressWarnings("unchecked")
+                        QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
+                        if (celsiusValue == null) {
+                            logger.warn(
+                                "Failed to set \"normal\" set-temperature: Could not convert {} to degrees celsius",
+                                command
+                            );
+                        } else {
+                            setSetTemperature(
+                                NORMAL_SET_TEMPERATURE,
+                                TemperatureType.NORMAL,
+                                celsiusValue.toBigDecimal()
+                            );
+                        }
+                    }
+                    break;
+                case COMFORT_SET_TEMPERATURE:
+                    if (command instanceof RefreshType) {
+                        pollSetTemperature(COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
+                    } else if (command instanceof QuantityType) {
+                        @SuppressWarnings("unchecked")
+                        QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
+                        if (celsiusValue == null) {
+                            logger.warn(
+                                "Failed to set \"comfort\" set-temperature: Could not convert {} to degrees celsius",
+                                command
+                            );
+                        } else {
+                            setSetTemperature(
+                                COMFORT_SET_TEMPERATURE,
+                                TemperatureType.COMFORT,
+                                celsiusValue.toBigDecimal()
+                            );
+                        }
+                    }
+                    break;
+                case SLEEP_SET_TEMPERATURE:
+                    if (command instanceof RefreshType) {
+                        pollSetTemperature(SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
+                    } else if (command instanceof QuantityType) {
+                        @SuppressWarnings("unchecked")
+                        QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
+                        if (celsiusValue == null) {
+                            logger.warn(
+                                "Failed to set \"sleep\" set-temperature: Could not convert {} to degrees celsius",
+                                command
+                            );
+                        } else {
+                            setSetTemperature(
+                                SLEEP_SET_TEMPERATURE,
+                                TemperatureType.SLEEP,
+                                celsiusValue.toBigDecimal()
+                            );
+                        }
+                    }
+                    break;
+                case AWAY_SET_TEMPERATURE:
+                    if (command instanceof RefreshType) {
+                        pollSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
+                    } else if (command instanceof QuantityType) {
+                        @SuppressWarnings("unchecked")
+                        QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
+                        if (celsiusValue == null) {
+                            logger.warn(
+                                "Failed to set \"away\" set-temperature: Could not convert {} to degrees celsius",
+                                command
+                            );
+                        } else {
+                            setSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY, celsiusValue.toBigDecimal());
+                        }
+                    }
+                    break;
 
             }
         } catch (MillException e) {
@@ -129,6 +243,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler {
             try {
                 pollStatus();
                 pollControlStatus();
+                pollTemperatureCalibrationOffset();
+                pollCommercialLock();
+                pollSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
+                pollSetTemperature(COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
+                pollSetTemperature(SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
+                pollSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
             } catch (MillException e) {
                 setOffline(e);
             }
@@ -220,6 +340,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler {
         LockStatus ls;
         if ((ls = controlStatusResponse.getLockStatus()) != null) {
             updateState(LOCK_STATUS, new StringType(ls.name()));
+            updateState(CHILD_LOCK, ls == LockStatus.CHILD_LOCK ? OnOffType.ON : OnOffType.OFF);
         }
         OpenWindowStatus ows;
         if ((ows = controlStatusResponse.getOpenWindowStatus()) != null) {
@@ -286,6 +407,209 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler {
             logger.warn(
                 "Failed to set operation mode to \"{}\": {}",
                 mode,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
+    /**
+     * Retrieves the temperature calibration offset and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void pollTemperatureCalibrationOffset() throws MillException {
+        TemperatureCalibrationOffsetResponse calibrationOffsetResponse = apiTool.getTemperatureCalibrationOffset(
+            getHostname()
+        );
+        setOnline();
+        Double d;
+        if ((d = calibrationOffsetResponse.getValue()) != null) {
+            updateState(TEMPERATURE_CALIBRATION_OFFSET, new QuantityType<>(d, SIUnits.CELSIUS));
+        }
+    }
+
+    /**
+     * Sends the specified temperature calibration offset value to the device and immediately queries
+     * the device for the same value, so that the result of the operation is known.
+     *
+     * @param offset the temperature calibration offset in °C.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void setTemperatureCalibrationOffset(BigDecimal offset) throws MillException {
+        Response response = apiTool.setTemperatureCalibrationOffset(getHostname(), offset);
+        pollTemperatureCalibrationOffset();
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set temperature calibration offset to \"{}\": {}",
+                offset,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
+    /**
+     * Retrieves the commercial lock state and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void pollCommercialLock() throws MillException {
+        CommercialLockResponse commercialLockResponse;
+        try {
+            commercialLockResponse = apiTool.getCommercialLock(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support commercial lock", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
+        Boolean b;
+        if ((b = commercialLockResponse.getValue()) != null) {
+            updateState(COMMERCIAL_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
+        }
+    }
+
+    /**
+     * Sends the specified commercial lock enabled value to the device and immediately queries the
+     * device for the same value, so that the result of the operation is known.
+     *
+     * @param value the commercial lock enabled value.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void setCommercialLock(Boolean value) throws MillException {
+        Response response = apiTool.setCommercialLock(getHostname(), value);
+        pollCommercialLock();
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set commercial-lock to \"{}\": {}",
+                value,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
+    /**
+     * Retrieves the child lock state and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void pollChildLock() throws MillException {
+        ChildLockResponse childLockResponse;
+        try {
+            childLockResponse = apiTool.getChildLock(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support child lock", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
+        Boolean b;
+        if ((b = childLockResponse.getValue()) != null) {
+            updateState(CHILD_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
+        }
+    }
+
+    /**
+     * Sends the specified child lock enabled value value to the device and immediately queries the device for
+     * the same value, so that the result of the operation is known.
+     *
+     * @param value the child lock enabled value.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void setChildLock(Boolean value) throws MillException {
+        Response response = apiTool.setChildLock(getHostname(), value);
+        pollChildLock();
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set child-lock to \"{}\": {}",
+                value,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
+    /**
+     * Retrieves the set-temperature value in °C and updates the {@link Channel} if necessary.
+     *
+     * @param channel the ID of the {@link Channel} to update.
+     * @param temperatureType the {@link TemperatureType} to retrieve.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void pollSetTemperature(String channel, TemperatureType temperatureType) throws MillException {
+        SetTemperatureResponse setTemperatureResponse = apiTool.getSetTemperature(getHostname(), temperatureType);
+        setOnline();
+        BigDecimal bd;
+        if ((bd = setTemperatureResponse.getSetTemperature()) != null) {
+            updateState(channel, new QuantityType<>(bd, SIUnits.CELSIUS));
+        }
+    }
+
+    /**
+     * Sends the specified set-temperature and {@link TemperatureType} values to the device and immediately
+     * queries the device for the same value, so that the result of the operation is known.
+     *
+     * @param channel the ID of the {@link Channel} to update.
+     * @param temperatureType the {@link TemperatureType} to set.
+     * @param value the new set-temperature in °C.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void setSetTemperature(
+        String channel,
+        TemperatureType temperatureType,
+        BigDecimal value
+    ) throws MillException {
+        Response response = apiTool.setSetTemperature(getHostname(), temperatureType, value);
+        pollSetTemperature(channel, temperatureType);
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set {} set-temperature to \"{}\": {}",
+                temperatureType.name(),
+                value,
                 responseStatus == null ? null : responseStatus.getDescription()
             );
             setOnline(

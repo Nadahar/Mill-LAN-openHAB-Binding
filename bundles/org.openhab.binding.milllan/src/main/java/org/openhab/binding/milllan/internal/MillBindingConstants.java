@@ -78,6 +78,27 @@ public class MillBindingConstants {
     /** The Operation Mode {@link Channel} */
     public static final String OPERATION_MODE = "operation-mode";
 
+    /** The Temperature Calibration Offset {@link Channel} */
+    public static final String TEMPERATURE_CALIBRATION_OFFSET = "temperature-calibration-offset";
+
+    /** The Commercial Lock {@link Channel} */
+    public static final String COMMERCIAL_LOCK = "commercial-lock";
+
+    /** The Child Lock {@link Channel} */
+    public static final String CHILD_LOCK = "child-lock";
+
+    /** The Normal Set Temperature {@link Channel} */
+    public static final String NORMAL_SET_TEMPERATURE = "normal-set-temperature";
+
+    /** The Comfort Set Temperature {@link Channel} */
+    public static final String COMFORT_SET_TEMPERATURE = "comfort-set-temperature";
+
+    /** The Sleep Set Temperature {@link Channel} */
+    public static final String SLEEP_SET_TEMPERATURE = "sleep-set-temperature";
+
+    /** The Away Set Temperature {@link Channel} */
+    public static final String AWAY_SET_TEMPERATURE = "away-set-temperature";
+
     // Property constants
 
     /** The {@code name} {@link Property} */

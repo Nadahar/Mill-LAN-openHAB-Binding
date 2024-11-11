@@ -16,6 +16,7 @@ package org.openhab.binding.milllan.internal.api;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -29,11 +30,16 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.milllan.internal.MillUtil;
+import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
+import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
+import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.GenericResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
+import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
 import org.openhab.binding.milllan.internal.api.response.StatusResponse;
+import org.openhab.binding.milllan.internal.api.response.TemperatureCalibrationOffsetResponse;
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
@@ -150,6 +156,242 @@ public class MillAPITool {
             "/operation-mode",
             gson.toJson(object),
             5L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/temperature-calibration-offset} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link TemperatureCalibrationOffsetResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public TemperatureCalibrationOffsetResponse getTemperatureCalibrationOffset(String hostname) throws MillException {
+        return request(
+            TemperatureCalibrationOffsetResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/temperature-calibration-offset",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/temperature-calibration-offset} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param offset the temperature offset in °C.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setTemperatureCalibrationOffset(String hostname, BigDecimal offset) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("value", offset);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/temperature-calibration-offset",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/commercial-lock} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link CommercialLockResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public CommercialLockResponse getCommercialLock(String hostname) throws MillException {
+        return request(
+            CommercialLockResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET, "/commercial-lock",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/commercial-lock} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param value whether the commercial lock should be enabled or not.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setCommercialLock(String hostname, Boolean value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("value", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/commercial-lock",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/child-lock} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link ChildLockResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public ChildLockResponse getChildLock(String hostname) throws MillException {
+        return request(
+            ChildLockResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/child-lock",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/child-lock} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param value whether the child lock should be enabled or not.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setChildLock(String hostname, Boolean value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("value", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/child-lock",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/display-unit} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link DisplayUnitResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public DisplayUnitResponse getDisplayUnit(String hostname) throws MillException {
+        return request(
+            DisplayUnitResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/display-unit",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/display-unit} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param displayUnit the {@link DisplayUnit}.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setDisplayUnit(String hostname, DisplayUnit displayUnit) throws MillException {
+        JsonObject object = new JsonObject();
+        object.add("value", gson.toJsonTree(displayUnit));
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/display-unit",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/set-temperature} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param temperatureType the {@link TemperatureType} whose set-temperature to get.
+     * @return The resulting {@link SetTemperatureResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public SetTemperatureResponse getSetTemperature(
+        String hostname,
+        TemperatureType temperatureType
+    ) throws MillException {
+        JsonObject object = new JsonObject();
+        object.add("type", gson.toJsonTree(temperatureType));
+        return request(
+            SetTemperatureResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/set-temperature",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/set-temperature} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param temperatureType the {@link TemperatureType} for which to set the target temperature.
+     * @param value the target temperature in °C.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setSetTemperature(
+        String hostname,
+        TemperatureType temperatureType,
+        BigDecimal value
+    ) throws MillException {
+        JsonObject object = new JsonObject();
+        object.add("type", gson.toJsonTree(temperatureType));
+        object.addProperty("value", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/set-temperature",
+            gson.toJson(object),
+            1L,
             TimeUnit.SECONDS,
             false
         );
