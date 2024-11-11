@@ -117,4 +117,99 @@
 		</state>
 		<autoUpdatePolicy>veto</autoUpdatePolicy>
 	</channel-type>
+	<channel-type id="temperature-calibration-offset">
+		<item-type>Number:Temperature</item-type>
+		<label>Temperature Calibration Offset</label>
+		<description>The calibration offset value.</description>
+		<category>Temperature</category>
+		<tags>
+			<tag>Setpoint</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state min="-20" max="20" step="0.1" pattern="%.1f %unit%"/>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="commercial-lock">
+		<item-type>Switch</item-type>
+		<label>Commercial-Lock Status</label>
+		<description>The status of the commercial-lock</description>
+		<category>lock</category>
+		<tags>
+			<tag>Switch</tag>
+		</tags>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="child-lock">
+		<item-type>Switch</item-type>
+		<label>Child-Lock Status</label>
+		<description>The status of the child-lock</description>
+		<category>lock</category>
+		<tags>
+			<tag>Switch</tag>
+		</tags>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="display-unit">
+		<item-type>String</item-type>
+		<label>Display Unit</label>
+		<description>The temperature unit ("Celsius" or "Fahrenheit") displayed on the device</description>
+		<tags>
+			<tag>Control</tag>
+		</tags>
+		<state>
+			<options>
+				<option value="CELSIUS">Celsius</option>
+				<option value="FAHRENHEIT">Fahrenheit</option>
+			</options>
+		</state>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="normal-set-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Normal Set-Temperature</label>
+		<description>The "normal" set-temperature value.</description>
+		<category>Temperature</category>
+		<tags>
+			<tag>Setpoint</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state min="0" max="99" step="0.5" pattern="%.1f %unit%"/>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="comfort-set-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Comfort Set-Temperature</label>
+		<description>The "comfort" set-temperature value.</description>
+		<category>Temperature</category>
+		<tags>
+			<tag>Setpoint</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state min="0" max="99" step="0.5" pattern="%.1f %unit%"/>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="sleep-set-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Sleep Set-Temperature</label>
+		<description>The "sleep" set-temperature value.</description>
+		<category>Temperature</category>
+		<tags>
+			<tag>Setpoint</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state min="0" max="99" step="0.5" pattern="%.1f %unit%"/>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="away-set-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Away Set-Temperature</label>
+		<description>The "away" set-temperature value.</description>
+		<category>Temperature</category>
+		<tags>
+			<tag>Setpoint</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state min="0" max="99" step="0.5" pattern="%.1f %unit%"/>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
 </thing:thing-descriptions>

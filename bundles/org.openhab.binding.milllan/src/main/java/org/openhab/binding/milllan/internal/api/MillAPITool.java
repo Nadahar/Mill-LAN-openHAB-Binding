@@ -16,6 +16,7 @@ package org.openhab.binding.milllan.internal.api;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -29,11 +30,16 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.milllan.internal.MillUtil;
+import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
+import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
+import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.GenericResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
+import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
 import org.openhab.binding.milllan.internal.api.response.StatusResponse;
+import org.openhab.binding.milllan.internal.api.response.TemperatureCalibrationOffsetResponse;
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
@@ -114,6 +120,158 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             "/operation-mode",
             gson.toJson(object),
             5L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public TemperatureCalibrationOffsetResponse getTemperatureCalibrationOffset(String hostname) throws MillException {
+        return request(
+            TemperatureCalibrationOffsetResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/temperature-calibration-offset",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setTemperatureCalibrationOffset(String hostname, BigDecimal offset) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("value", offset);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/temperature-calibration-offset",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public CommercialLockResponse getCommercialLock(String hostname) throws MillException {
+        return request(
+            CommercialLockResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET, "/commercial-lock",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setCommercialLock(String hostname, Boolean value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("value", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/commercial-lock",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public ChildLockResponse getChildLock(String hostname) throws MillException {
+        return request(
+            ChildLockResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/child-lock",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setChildLock(String hostname, Boolean value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("value", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/child-lock",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public DisplayUnitResponse getDisplayUnit(String hostname) throws MillException {
+        return request(
+            DisplayUnitResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/display-unit",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setDisplayUnit(String hostname, DisplayUnit displayUnit) throws MillException {
+        JsonObject object = new JsonObject();
+        object.add("value", gson.toJsonTree(displayUnit));
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/display-unit",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public SetTemperatureResponse getSetTemperature(String hostname, TemperatureType temperatureType) throws MillException {
+        JsonObject object = new JsonObject();
+        object.add("type", gson.toJsonTree(temperatureType));
+        return request(
+            SetTemperatureResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/set-temperature",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setSetTemperature(String hostname, TemperatureType temperatureType, BigDecimal value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.add("type", gson.toJsonTree(temperatureType));
+        object.addProperty("value", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/set-temperature",
+            gson.toJson(object),
+            1L,
             TimeUnit.SECONDS,
             false
         );
