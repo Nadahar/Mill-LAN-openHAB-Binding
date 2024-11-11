@@ -49,6 +49,14 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
     public static final String SET_TEMPERATURE = "set-temperature";
     public static final String CONNECTED_CLOUD = "connected-to-cloud";
     public static final String OPERATION_MODE = "operation-mode";
+    public static final String TEMPERATURE_CALIBRATION_OFFSET = "temperature-calibration-offset";
+    public static final String COMMERCIAL_LOCK = "commercial-lock";
+    public static final String CHILD_LOCK = "child-lock";
+    public static final String NORMAL_SET_TEMPERATURE = "normal-set-temperature";
+    public static final String COMFORT_SET_TEMPERATURE = "comfort-set-temperature";
+    public static final String SLEEP_SET_TEMPERATURE = "sleep-set-temperature";
+    public static final String AWAY_SET_TEMPERATURE = "away-set-temperature";
+//    public static final String DISPLAY_UNIT = "display-unit";
 
     // Propery constants
     public static final String PROPERTY_NAME = "name";
