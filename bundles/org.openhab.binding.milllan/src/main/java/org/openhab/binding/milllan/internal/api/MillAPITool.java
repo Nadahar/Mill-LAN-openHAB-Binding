@@ -33,8 +33,10 @@ import org.openhab.binding.milllan.internal.MillUtil;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
 import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
+import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.GenericResponse;
+import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
@@ -270,6 +272,66 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             null,
             HttpMethod.POST,
             "/set-temperature",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public LimitedHeatingPowerResponse getLimitedHeatingPower(String hostname) throws MillException {
+        return request(
+            LimitedHeatingPowerResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/limited-heating-power",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setLimitedHeatingPower(String hostname, Integer value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("limited_heating_power", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/limited-heating-power",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public ControllerTypeResponse getControllerType(String hostname) throws MillException {
+        return request(
+            ControllerTypeResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/controller-type",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setControllerType(String hostname, ControllerType controllerType) throws MillException {
+        JsonObject object = new JsonObject();
+        object.add("regulator_type", gson.toJsonTree(controllerType));
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/controller-type",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,
