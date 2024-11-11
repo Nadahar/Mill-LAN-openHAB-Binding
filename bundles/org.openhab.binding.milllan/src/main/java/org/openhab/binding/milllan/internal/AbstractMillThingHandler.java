@@ -25,6 +25,8 @@ import javax.measure.quantity.Temperature;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.http.HttpStatus;
+import org.openhab.binding.milllan.internal.api.ControllerType;
+import org.openhab.binding.milllan.internal.api.DisplayUnit;
 import org.openhab.binding.milllan.internal.api.LockStatus;
 import org.openhab.binding.milllan.internal.api.MillAPITool;
 import org.openhab.binding.milllan.internal.api.OpenWindowStatus;
@@ -34,6 +36,9 @@ import org.openhab.binding.milllan.internal.api.TemperatureType;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
 import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
+import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
+import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
+import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
@@ -43,6 +48,7 @@ import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.library.unit.SIUnits;
@@ -137,6 +143,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
                         setChildLock(command == OnOffType.ON);
                     }
                     break;
+                case DISPLAY_UNIT:
+                    if (command instanceof RefreshType) {
+                        pollDisplayUnit();
+                    } else if (command instanceof StringType) {
+                        setDisplayUnit(command.toString());
+                    }
+                    break;
                 case NORMAL_SET_TEMPERATURE:
                     if (command instanceof RefreshType) {
                         pollSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
@@ -189,6 +202,25 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
                         }
                     }
                     break;
+                case LIMITED_HEATING_POWER:
+                    if (command instanceof RefreshType) {
+                        pollLimitedHeatingPower();
+                    } else if (command instanceof Number) {
+                        int i = ((Number) command).intValue();
+                        if (i < 10 || i > 100) {
+                            logger.warn("Failed to set limited heating power: {} is outside valid range 10-100", i);
+                        } else {
+                            setLimitedHeatingPower(Integer.valueOf(i));
+                        }
+                    }
+                    break;
+                case CONTROLLER_TYPE:
+                    if (command instanceof RefreshType) {
+                        pollControllerType();
+                    } else if (command instanceof StringType) {
+                        setControllerType(command.toString());
+                    }
+                    break;
 
             }
         } catch (MillException e) {
@@ -208,10 +240,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
                 pollControlStatus();
                 pollTemperatureCalibrationOffset();
                 pollCommercialLock();
+                pollDisplayUnit();
                 pollSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
                 pollSetTemperature(COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
                 pollSetTemperature(SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
                 pollSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
+                pollLimitedHeatingPower();
+                pollControllerType();
             } catch (MillException e) {
                 setOffline(e);
             }
@@ -471,6 +506,52 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
         }
     }
 
+    public void pollDisplayUnit() throws MillException {
+        DisplayUnitResponse displayUnitResponse;
+        try {
+            displayUnitResponse = apiTool.getDisplayUnit(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support display unit", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
+        DisplayUnit du;
+        if ((du = displayUnitResponse.getDisplayUnit()) != null) {
+            updateState(DISPLAY_UNIT, new StringType(du.name()));
+        }
+    }
+
+    public void setDisplayUnit(@Nullable String unitValue) throws MillException {
+        DisplayUnit displayUnit = DisplayUnit.typeOf(unitValue);
+        if (displayUnit == null) {
+            logger.warn("setDisplayUnit() received an invalid unit value {} - ignoring", unitValue);
+            return;
+        }
+
+        Response response = apiTool.setDisplayUnit(getHostname(), displayUnit);
+        pollDisplayUnit();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set display unit to \"{}\": {}",
+                displayUnit,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
     public void pollSetTemperature(String channel, TemperatureType temperatureType) throws MillException {
         SetTemperatureResponse setTemperatureResponse = apiTool.getSetTemperature(getHostname(), temperatureType);
         setOnline();
@@ -492,6 +573,94 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
                 "Failed to set {} set-temperature to \"{}\": {}",
                 temperatureType.name(),
                 value,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
+    public void pollLimitedHeatingPower() throws MillException {
+        LimitedHeatingPowerResponse heatingPowerResponse;
+        try {
+            heatingPowerResponse = apiTool.getLimitedHeatingPower(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support limited heating power", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
+        Integer i;
+        if ((i = heatingPowerResponse.getValue()) != null) {
+            updateState(LIMITED_HEATING_POWER, new PercentType(i.intValue()));
+        }
+    }
+
+    public void setLimitedHeatingPower(Integer value) throws MillException {
+        Response response = apiTool.setLimitedHeatingPower(getHostname(), value);
+        pollLimitedHeatingPower();
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set limited heating power to \"{}\": {}",
+                value,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
+    public void pollControllerType() throws MillException {
+        ControllerTypeResponse controllerTypeResponse;
+        try {
+            controllerTypeResponse = apiTool.getControllerType(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support controller type", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
+        ControllerType ct;
+        if ((ct = controllerTypeResponse.getControllerType()) != null) {
+            updateState(CONTROLLER_TYPE, new StringType(ct.name()));
+        }
+    }
+
+    public void setControllerType(@Nullable String controllerTypeValue) throws MillException {
+        ControllerType controllerType = ControllerType.typeOf(controllerTypeValue);
+        if (controllerType == null) {
+            logger.warn("setControllerType() received an invalid controller type value {} - ignoring", controllerTypeValue);
+            return;
+        }
+
+        Response response = apiTool.setControllerType(getHostname(), controllerType);
+        pollControllerType();
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set controller type to \"{}\": {}",
+                controllerType,
                 responseStatus == null ? null : responseStatus.getDescription()
             );
             setOnline(
