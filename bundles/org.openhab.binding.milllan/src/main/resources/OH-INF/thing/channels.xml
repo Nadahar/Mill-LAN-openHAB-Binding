@@ -238,4 +238,20 @@
 		</state>
 		<autoUpdatePolicy>veto</autoUpdatePolicy>
 	</channel-type>
+	<channel-type id="predictive-heating-type">
+		<item-type>String</item-type>
+		<label>Predictive Heating Type</label>
+		<description>The predictive heating type.</description>
+		<tags>
+			<tag>Control</tag>
+		</tags>
+		<state>
+			<options>
+				<option value="OFF">Off</option>
+				<option value="SIMPLE">Simple</option>
+				<option value="ADVANCED">Advanced</option>
+			</options>
+		</state>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
 </thing:thing-descriptions>

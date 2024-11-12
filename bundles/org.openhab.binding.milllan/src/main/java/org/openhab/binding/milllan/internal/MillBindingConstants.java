@@ -108,6 +108,9 @@ public class MillBindingConstants {
     /** The Controller Type {@link Channel} */
     public static final String CONTROLLER_TYPE = "controller-type";
 
+    /** The Predictive Heating Type {@link Channel} */
+    public static final String PREDICTIVE_HEATING_TYPE = "predictive-heating-type";
+
     // Property constants
 
     /** The {@code name} {@link Property} */
