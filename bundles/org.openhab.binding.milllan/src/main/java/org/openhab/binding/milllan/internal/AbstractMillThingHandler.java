@@ -18,6 +18,8 @@ import static org.openhab.binding.milllan.internal.MillUtil.isBlank;
 
 import java.math.BigDecimal;
 import java.net.ConnectException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.measure.quantity.Temperature;
@@ -30,6 +32,7 @@ import org.openhab.binding.milllan.internal.api.LockStatus;
 import org.openhab.binding.milllan.internal.api.MillAPITool;
 import org.openhab.binding.milllan.internal.api.OpenWindowStatus;
 import org.openhab.binding.milllan.internal.api.OperationMode;
+import org.openhab.binding.milllan.internal.api.PredictiveHeatingType;
 import org.openhab.binding.milllan.internal.api.ResponseStatus;
 import org.openhab.binding.milllan.internal.api.TemperatureType;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
@@ -39,6 +42,7 @@ import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
+import org.openhab.binding.milllan.internal.api.response.PredictiveHeatingTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
 import org.openhab.binding.milllan.internal.api.response.StatusResponse;
@@ -46,6 +50,7 @@ import org.openhab.binding.milllan.internal.api.response.TemperatureCalibrationO
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
+import org.openhab.core.config.core.status.ConfigStatusMessage;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
@@ -56,7 +61,7 @@ import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
-import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ConfigStatusThingHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
@@ -69,7 +74,7 @@ import org.slf4j.LoggerFactory;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractMillThingHandler extends BaseThingHandler { // TODO: (Nad) JavaDocs
+public abstract class AbstractMillThingHandler extends ConfigStatusThingHandler { // TODO: (Nad) JavaDocs
 
     private final Logger logger = LoggerFactory.getLogger(AbstractMillThingHandler.class);
 
@@ -218,6 +223,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
                         pollControllerType();
                     } else if (command instanceof StringType) {
                         setControllerType(command.toString());
+                    }
+                    break;
+                case PREDICTIVE_HEATING_TYPE:
+                    if (command instanceof RefreshType) {
+                        pollPredictiveHeatingType();
+                    } else if (command instanceof StringType) {
+                        setPredictiveHeatingType(command.toString());
                     }
                     break;
 
@@ -611,6 +623,43 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
         }
     }
 
+    public void pollPredictiveHeatingType() throws MillException {
+        PredictiveHeatingTypeResponse response = apiTool.getPredictiveHeatingType(getHostname());
+        setOnline();
+        PredictiveHeatingType pht;
+        if ((pht = response.getPredictiveHeatingType()) != null) {
+            updateState(PREDICTIVE_HEATING_TYPE, new StringType(pht.name()));
+        }
+    }
+
+    public void setPredictiveHeatingType(@Nullable String typeValue) throws MillException {
+        PredictiveHeatingType type = PredictiveHeatingType.typeOf(typeValue);
+        if (type == null) {
+            logger.warn("setPredictiveHeatingType() received an invalid predictive heating type value {} - ignoring", typeValue);
+            return;
+        }
+
+        Response response = apiTool.setPredictiveHeatingType(getHostname(), type);
+        pollPredictiveHeatingType();
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set predictive heating type to \"{}\": {}",
+                type,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
     protected void setOnline() {
         setOnline(null, null);
     }
@@ -696,5 +745,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
             );
         }
         return result;
+    }
+
+    @Override
+    public Collection<ConfigStatusMessage> getConfigStatus() {
+        // TODO Auto-generated method stub
+//        ConfigStatusMessage.Builder.pending("parameter");
+        return Collections.singleton(ConfigStatusMessage.Builder.error("hostname").withMessageKeySuffix("test").build());
     }
 }

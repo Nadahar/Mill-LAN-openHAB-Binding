@@ -59,6 +59,7 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
     public static final String AWAY_SET_TEMPERATURE = "away-set-temperature";
     public static final String LIMITED_HEATING_POWER = "limited-heating-power";
     public static final String CONTROLLER_TYPE = "controller-type";
+    public static final String PREDICTIVE_HEATING_TYPE = "predictive-heating-type";
 
     // Propery constants
     public static final String PROPERTY_NAME = "name";
