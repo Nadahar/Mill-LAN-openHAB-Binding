@@ -31,6 +31,7 @@
 			<channel typeId="away-set-temperature" id="away-set-temperature"/>
 			<channel typeId="limited-heating-power" id="limited-heating-power"/>
 			<channel typeId="controller-type" id="controller-type"/>
+			<channel typeId="predictive-heating-type" id="predictive-heating-type"></channel>
 		</channels>
 
 		<properties>

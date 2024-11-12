@@ -18,6 +18,8 @@ import static org.openhab.binding.milllan.internal.MillUtil.isBlank;
 
 import java.math.BigDecimal;
 import java.net.ConnectException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.measure.quantity.Temperature;
@@ -31,6 +33,7 @@ import org.openhab.binding.milllan.internal.api.LockStatus;
 import org.openhab.binding.milllan.internal.api.MillAPITool;
 import org.openhab.binding.milllan.internal.api.OpenWindowStatus;
 import org.openhab.binding.milllan.internal.api.OperationMode;
+import org.openhab.binding.milllan.internal.api.PredictiveHeatingType;
 import org.openhab.binding.milllan.internal.api.ResponseStatus;
 import org.openhab.binding.milllan.internal.api.TemperatureType;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
@@ -40,6 +43,7 @@ import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
+import org.openhab.binding.milllan.internal.api.response.PredictiveHeatingTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
 import org.openhab.binding.milllan.internal.api.response.StatusResponse;
@@ -47,6 +51,9 @@ import org.openhab.binding.milllan.internal.api.response.TemperatureCalibrationO
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
+import org.openhab.core.config.core.status.ConfigStatusCallback;
+import org.openhab.core.config.core.status.ConfigStatusMessage;
+import org.openhab.core.config.core.status.ConfigStatusProvider;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
@@ -70,9 +77,12 @@ import org.slf4j.LoggerFactory;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractMillThingHandler extends BaseThingHandler { // TODO: (Nad) JavaDocs
+public abstract class AbstractMillThingHandler extends BaseThingHandler implements ConfigStatusProvider { // TODO: (Nad) JavaDocs
 
     private final Logger logger = LoggerFactory.getLogger(AbstractMillThingHandler.class);
+
+    @Nullable
+    protected ConfigStatusCallback configStatusCallback;
 
     protected final MillHTTPClientProvider httpClientProvider;
 
@@ -219,6 +229,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
                         pollControllerType();
                     } else if (command instanceof StringType) {
                         setControllerType(command.toString());
+                    }
+                    break;
+                case PREDICTIVE_HEATING_TYPE:
+                    if (command instanceof RefreshType) {
+                        pollPredictiveHeatingType();
+                    } else if (command instanceof StringType) {
+                        setPredictiveHeatingType(command.toString());
                     }
                     break;
 
@@ -672,6 +689,53 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
         }
     }
 
+    public void pollPredictiveHeatingType() throws MillException {
+        PredictiveHeatingTypeResponse response;
+        try {
+            response = apiTool.getPredictiveHeatingType(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support predictive heating type", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
+        PredictiveHeatingType pht;
+        if ((pht = response.getPredictiveHeatingType()) != null) {
+            updateState(PREDICTIVE_HEATING_TYPE, new StringType(pht.name()));
+        }
+    }
+
+    public void setPredictiveHeatingType(@Nullable String typeValue) throws MillException {
+        PredictiveHeatingType type = PredictiveHeatingType.typeOf(typeValue);
+        if (type == null) {
+            logger.warn("setPredictiveHeatingType() received an invalid predictive heating type value {} - ignoring", typeValue);
+            return;
+        }
+
+        Response response = apiTool.setPredictiveHeatingType(getHostname(), type);
+        pollPredictiveHeatingType();
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set predictive heating type to \"{}\": {}",
+                type,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
     protected void setOnline() {
         setOnline(null, null);
     }
@@ -756,5 +820,20 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler { // TOD
             );
         }
         return result;
+    }
+
+    @Override
+    public Collection<ConfigStatusMessage> getConfigStatus() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public boolean supportsEntity(String entityId) {
+        return getThing().getUID().getAsString().equals(entityId);
+    }
+
+    @Override
+    public void setConfigStatusCallback(@Nullable ConfigStatusCallback configStatusCallback) {
+        this.configStatusCallback = configStatusCallback;
     }
 }
