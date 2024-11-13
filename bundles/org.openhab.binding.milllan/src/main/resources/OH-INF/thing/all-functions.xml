@@ -32,6 +32,7 @@
 			<channel typeId="limited-heating-power" id="limited-heating-power"/>
 			<channel typeId="controller-type" id="controller-type"/>
 			<channel typeId="predictive-heating-type" id="predictive-heating-type"></channel>
+			<channel typeId="oil-heater-power" id="oil-heater-power"/>
 		</channels>
 
 		<properties>

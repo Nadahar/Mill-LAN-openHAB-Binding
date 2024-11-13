@@ -47,6 +47,7 @@ import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
+import org.openhab.binding.milllan.internal.api.response.OilHeaterPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.PredictiveHeatingTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
@@ -252,6 +253,18 @@ public abstract class AbstractMillThingHandler extends ConfigStatusThingHandler 
                         pollPredictiveHeatingType();
                     } else if (command instanceof StringType) {
                         setPredictiveHeatingType(command.toString());
+                    }
+                    break;
+                case OIL_HEATER_POWER:
+                    if (command instanceof RefreshType) {
+                        pollOilHeaterPower();
+                    } else if (command instanceof Number) {
+                        int i = ((Number) command).intValue();
+                        if (i != 40 && i != 60 && i != 100) {
+                            logger.warn("Failed to set limited heating power: {} is outside valid range 40,60,100", i);
+                        } else {
+                            setOilHeaterPower(Integer.valueOf(i));
+                        }
                     }
                     break;
 
@@ -690,6 +703,37 @@ public abstract class AbstractMillThingHandler extends ConfigStatusThingHandler 
         }
     }
 
+    public void pollOilHeaterPower() throws MillException {
+        OilHeaterPowerResponse heatingPowerResponse = apiTool.getOilHeaterPower(getHostname());
+        setOnline();
+        Integer i;
+        if ((i = heatingPowerResponse.getValue()) != null) {
+            updateState(OIL_HEATER_POWER, new PercentType(i.intValue()));
+        }
+    }
+
+    public void setOilHeaterPower(Integer value) throws MillException {
+        Response response = apiTool.setLimitedHeatingPower(getHostname(), value);
+        pollOilHeaterPower();
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set limited heating power to \"{}\": {}",
+                value,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
     public void sendReboot() throws MillException {
         Response response = null;
         try {
@@ -1090,6 +1134,8 @@ public abstract class AbstractMillThingHandler extends ConfigStatusThingHandler 
                 pollDisplayUnit();
                 pollLimitedHeatingPower();
                 pollControllerType();
+                pollPredictiveHeatingType();
+//                pollOilHeaterPower(); //TODO: (Nad) Oil only
             } catch (MillException e) {
                 setOffline(e);
             }
