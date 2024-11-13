@@ -254,4 +254,21 @@
 		</state>
 		<autoUpdatePolicy>veto</autoUpdatePolicy>
 	</channel-type>
+	<channel-type id="oil-heater-power">
+		<item-type unitHint="%">Number:Dimensionless</item-type>
+		<label>Oil Heating Power</label>
+		<description>The maximum heating power in percent (40%, 60%, 100%).</description>
+		<category>Heating</category>
+		<tags>
+			<tag>Control</tag>
+		</tags>
+		<state min="40" max="100" pattern="%.0f %%">
+			<options>
+				<option value="40">40%</option>
+				<option value="60">60%</option>
+				<option value="100">100%</option>
+			</options>
+		</state>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
 </thing:thing-descriptions>

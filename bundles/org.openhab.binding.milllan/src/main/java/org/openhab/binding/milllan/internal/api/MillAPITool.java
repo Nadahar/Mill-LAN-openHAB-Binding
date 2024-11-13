@@ -37,6 +37,7 @@ import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.GenericResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
+import org.openhab.binding.milllan.internal.api.response.OilHeaterPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.PredictiveHeatingTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
@@ -221,7 +222,8 @@ public class MillAPITool {
             CommercialLockResponse.class,
             hostname,
             null,
-            HttpMethod.GET, "/commercial-lock",
+            HttpMethod.GET,
+            "/commercial-lock",
             null,
             1L,
             TimeUnit.SECONDS,
@@ -530,6 +532,51 @@ public class MillAPITool {
             null,
             HttpMethod.POST,
             "/predictive-heating-type",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/oil-heater-power} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link OilHeaterPowerResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public OilHeaterPowerResponse getOilHeaterPower(String hostname) throws MillException {
+        return request(
+            OilHeaterPowerResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/oil-heater-power",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/oil-heating-power} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param value the heating power in percentage (40%, 60% or 100%).
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setOilHeaterPower(String hostname, Integer value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("heating_level_percentage", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/oil-heater-power",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,

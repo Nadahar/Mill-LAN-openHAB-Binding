@@ -111,6 +111,9 @@ public class MillBindingConstants {
     /** The Predictive Heating Type {@link Channel} */
     public static final String PREDICTIVE_HEATING_TYPE = "predictive-heating-type";
 
+    /** The Oil Heater Power {@link Channel} */
+    public static final String OIL_HEATER_POWER = "oil-heater-power";
+
     // Property constants
 
     /** The {@code name} {@link Property} */

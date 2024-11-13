@@ -48,6 +48,7 @@ import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
+import org.openhab.binding.milllan.internal.api.response.OilHeaterPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.PredictiveHeatingTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
@@ -296,6 +297,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         pollPredictiveHeatingType();
                     } else if (command instanceof StringType) {
                         setPredictiveHeatingType(command.toString());
+                    }
+                    break;
+                case OIL_HEATER_POWER:
+                    if (command instanceof RefreshType) {
+                        pollOilHeaterPower();
+                    } else if (command instanceof Number) {
+                        int i = ((Number) command).intValue();
+                        if (i != 40 && i != 60 && i != 100) {
+                            logger.warn("Failed to set limited heating power: {} is outside valid range 40,60,100", i);
+                        } else {
+                            setOilHeaterPower(Integer.valueOf(i));
+                        }
                     }
                     break;
 
@@ -931,6 +944,59 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             logger.warn(
                 "Failed to set predictive heating type to \"{}\": {}",
                 type,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
+    /**
+     * Retrieves the oil heater power value and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void pollOilHeaterPower() throws MillException {
+        OilHeaterPowerResponse heatingPowerResponse;
+        try {
+            heatingPowerResponse = apiTool.getOilHeaterPower(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support oil heater power", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
+        Integer i;
+        if ((i = heatingPowerResponse.getValue()) != null) {
+            updateState(OIL_HEATER_POWER, new PercentType(i.intValue()));
+        }
+    }
+
+    /**
+     * Sends the specified time oil heater power value to the device and immediately queries
+     * the device for the same value, so that the result of the operation is known.
+     *
+     * @param value the heating power in percentage (40%, 60% or 100%).
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void setOilHeaterPower(Integer value) throws MillException {
+        Response response = apiTool.setOilHeaterPower(getHostname(), value);
+        pollOilHeaterPower();
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set limited heating power to \"{}\": {}",
+                value,
                 responseStatus == null ? null : responseStatus.getDescription()
             );
             setOnline(

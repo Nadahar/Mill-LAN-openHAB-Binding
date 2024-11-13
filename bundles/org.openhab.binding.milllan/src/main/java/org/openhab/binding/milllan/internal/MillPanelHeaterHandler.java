@@ -85,6 +85,7 @@ public class MillPanelHeaterHandler extends AbstractMillThingHandler {
                 pollDisplayUnit();
                 pollLimitedHeatingPower();
                 pollControllerType();
+                pollPredictiveHeatingType();
                 pollCommercialLock();
             } catch (MillException e) {
                 setOffline(e);
