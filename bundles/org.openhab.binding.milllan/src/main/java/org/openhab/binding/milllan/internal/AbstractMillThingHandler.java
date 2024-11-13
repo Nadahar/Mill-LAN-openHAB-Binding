@@ -16,11 +16,17 @@ package org.openhab.binding.milllan.internal;
 import static org.openhab.binding.milllan.internal.MillBindingConstants.*;
 import static org.openhab.binding.milllan.internal.MillUtil.isBlank;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.measure.quantity.Temperature;
 
@@ -51,6 +57,7 @@ import org.openhab.binding.milllan.internal.api.response.TemperatureCalibrationO
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.status.ConfigStatusCallback;
 import org.openhab.core.config.core.status.ConfigStatusMessage;
 import org.openhab.core.config.core.status.ConfigStatusProvider;
@@ -94,6 +101,21 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
     // must be synched on lock
     protected boolean onlineWithError;
+
+    // Must be synced on lock
+    @Nullable
+    protected ScheduledFuture<?> frequentPollTask;
+
+    // Must be synced on lock
+    @Nullable
+    protected ScheduledFuture<?> infrequentPollTask;
+
+    // Must be synced on lock
+    @Nullable
+    protected ScheduledFuture<?> offlinePollTask;
+
+    // Must be synced on lock
+    protected boolean isDisposed = true;
 
     protected final MillAPITool apiTool;
 
@@ -250,30 +272,38 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         if (logger.isTraceEnabled()) {
             logger.trace("Initializing Thing handler for {}", getThing().getUID());
         }
+        synchronized (lock) {
+            isDisposed = false;
+        }
         updateStatus(ThingStatus.UNKNOWN);
-        scheduler.execute(() -> {
-            try {
-                pollStatus();
-                pollControlStatus();
-                pollTemperatureCalibrationOffset();
-                pollCommercialLock();
-                pollDisplayUnit();
-                pollSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
-                pollSetTemperature(COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
-                pollSetTemperature(SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
-                pollSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
-                pollLimitedHeatingPower();
-                pollControllerType();
-            } catch (MillException e) {
-                setOffline(e);
-            }
-    });
+        scheduler.execute(createInitializeTask());
     }
 
     @Override
     public void dispose() {
         if (logger.isTraceEnabled()) {
             logger.trace("Disposing of Thing handler for {}", getThing().getUID());
+        }
+        ScheduledFuture<?> frequentFuture, infrequentFuture, offlineFuture;
+        synchronized (lock) {
+            frequentFuture = frequentPollTask;
+            frequentPollTask = null;
+            infrequentFuture = infrequentPollTask;
+            infrequentPollTask = null;
+            offlineFuture = offlinePollTask;
+            offlinePollTask = null;
+            isDisposed = true;
+            isOnline = false;
+            onlineWithError = false;
+        }
+        if (frequentFuture != null) {
+            frequentFuture.cancel(true);
+        }
+        if (infrequentFuture != null) {
+            infrequentFuture.cancel(true);
+        }
+        if (offlineFuture != null) {
+            offlineFuture.cancel(true);
         }
     }
 
@@ -736,6 +766,45 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    public void sendReboot() throws MillException {
+        Response response = null;
+        try {
+            response = apiTool.sendReboot(getHostname());
+        } catch (MillException e) {
+            if (!(e.getCause() instanceof TimeoutException)) {
+                throw e;
+            }
+        }
+        ResponseStatus responseStatus;
+        if (response != null && (responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to send reboot command to \"{}\": {}",
+                getThing().getUID(),
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOffline(ThingStatusDetail.CONFIGURATION_PENDING, "Device is rebooting");
+
+            // The devices reboots relatively quickly, so let's do a couple off one-off
+            // offline polls to set it online again quickly
+            InetAddress[] addresses = resolveOfflineAddresses();
+            if (addresses != null) {
+                scheduler.schedule(createOfflineTask(addresses), 8L, TimeUnit.SECONDS);
+                scheduler.schedule(createOfflineTask(addresses), 12L, TimeUnit.SECONDS);
+            }
+        }
+    }
+
+    protected boolean isOnline() {
+        synchronized (lock) {
+            return isOnline;
+        }
+    }
+
     protected void setOnline() {
         setOnline(null, null);
     }
@@ -747,21 +816,109 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             if (isOnline && !isError && !onlineWithError) {
                 return;
             }
+        }
+
+        int refreshInterval;
+        try {
+            refreshInterval = getRefreshInterval();
+        } catch (MillException e) {
+            logger.error(
+                "Unable to schedule polling for Mill device \"{}\" because the refresh interval is missing",
+                getThing().getUID()
+            );
+            ThingStatusDetail tsd = e.getThingStatusDetail();
+            String desc = e.getThingStatusDescription();
+            updateStatus(
+                ThingStatus.ONLINE,
+                tsd != null ? tsd : ThingStatusDetail.CONFIGURATION_ERROR,
+                desc != null ? desc : "Missing refresh interval"
+            );
+            refreshInterval = -1;
+        }
+
+        int infrequentRefreshInterval;
+        try {
+            infrequentRefreshInterval = getInfrequentRefreshInterval();
+        } catch (MillException e) {
+            logger.error(
+                "Unable to schedule infrequent polling for Mill device \"{}\" because the refresh interval is missing",
+                getThing().getUID()
+            );
+            ThingStatusDetail tsd = e.getThingStatusDetail();
+            String desc = e.getThingStatusDescription();
+            updateStatus(
+                ThingStatus.ONLINE,
+                tsd != null ? tsd : ThingStatusDetail.CONFIGURATION_ERROR,
+                desc != null ? desc : "Missing infrequent refresh interval"
+            );
+            infrequentRefreshInterval = -1;
+        }
+
+        ScheduledFuture<?> frequentFuture, infrequentFuture, offlineFuture;
+        boolean wasOnline;
+        synchronized (lock) {
+            wasOnline = isOnline;
             isOnline = true;
             onlineWithError = isError;
+            frequentFuture = frequentPollTask;
+            if (!isDisposed && refreshInterval > 0) {
+                frequentPollTask = scheduler.scheduleWithFixedDelay(
+                    createFrequentTask(),
+                    0L,
+                    refreshInterval,
+                    TimeUnit.SECONDS
+                );
+            } else {
+                frequentPollTask = null;
+            }
+            infrequentFuture = infrequentPollTask;
+            if (!isDisposed && infrequentRefreshInterval > 0) {
+                infrequentPollTask = scheduler.scheduleWithFixedDelay(
+                    createInfrequentTask(),
+                    700L,
+                    infrequentRefreshInterval * 1000L,
+                    TimeUnit.MILLISECONDS
+                );
+            } else {
+                infrequentPollTask = null;
+            }
+            offlineFuture = offlinePollTask;
+            offlinePollTask = null;
+        }
+        if (frequentFuture != null) {
+            frequentFuture.cancel(true);
+        }
+        if (infrequentFuture != null) {
+            infrequentFuture.cancel(true);
+        }
+        if (offlineFuture != null) {
+            offlineFuture.cancel(true);
         }
 
-        // Clear dynamic configuration parameters and properties
-        Map<String, String> properties = editProperties();
-        for (String property : PROPERTIES_DYNAMIC) {
-            properties.remove(property);
-        }
-        updateProperties(properties);
+        if (!wasOnline) {
+            if (refreshInterval > 0) {
+                logger.debug("Mill device \"{}\" is online, starting polling", getThing().getUID());
+            }
 
-        if (isError && statusDetail != null) {
-            updateStatus(ThingStatus.ONLINE, statusDetail, description);
-        } else {
-            updateStatus(ThingStatus.ONLINE);
+            // Clear dynamic configuration parameters and properties
+            Map<String, String> properties = editProperties();
+            for (String property : PROPERTIES_DYNAMIC) {
+                properties.remove(property);
+            }
+            updateProperties(properties);
+            Configuration configuration = editConfiguration();
+            for (String parameter : CONFIG_DYNAMIC_PARAMETERS) {
+                configuration.remove(parameter);
+            }
+            updateConfiguration(configuration);
+        }
+
+        if (refreshInterval > 0) {
+            if (isError && statusDetail != null) {
+                updateStatus(ThingStatus.ONLINE, statusDetail, description);
+            } else {
+                updateStatus(ThingStatus.ONLINE);
+            }
         }
     }
 
@@ -784,10 +941,77 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     protected void setOffline(@Nullable ThingStatusDetail statusDetail, @Nullable String description) {
         ThingStatusDetail detail = statusDetail;
         String desc = description;
+        int refreshInterval;
+        try {
+            refreshInterval = getRefreshInterval();
+        } catch (MillException e) {
+            refreshInterval = -1;
+            logger.warn(
+                "Unable to poll offline Mill device \"{}\" because the configuration is missing or invalid: {}",
+                getThing().getUID(),
+                e.getMessage()
+            );
+            if (e.getThingStatusDetail() != null) {
+                detail = e.getThingStatusDetail();
+            }
+            if (!isBlank(e.getThingStatusDescription())) {
+                desc = e.getThingStatusDescription();
+            }
+        }
+
+        InetAddress[] addresses = resolveOfflineAddresses();
+        ScheduledFuture<?> frequentFuture, infrequentFuture, offlineFuture;
         boolean wasOnline;
         synchronized (lock) {
-            wasOnline = isOnline;
+            wasOnline = isOnline || offlinePollTask == null;
             isOnline = false;
+            frequentFuture = frequentPollTask;
+            frequentPollTask = null;
+            infrequentFuture = infrequentPollTask;
+            infrequentPollTask = null;
+            offlineFuture = offlinePollTask;
+            if (
+                !isDisposed &&
+                addresses != null &&
+                refreshInterval > 0
+            ) {
+                logger.debug("Mill device \"{}\" is offline, starting offline polling", getThing().getUID());
+                offlinePollTask = scheduler.scheduleWithFixedDelay(
+                    createOfflineTask(addresses),
+                    1L,
+                    refreshInterval,
+                    TimeUnit.SECONDS
+                );
+            } else {
+                offlinePollTask = null;
+                if (logger.isDebugEnabled()) {
+                    if (isDisposed) {
+                        logger.debug(
+                            "Not starting offline polling for Mill device \"{}\" because the handler is disposed",
+                            getThing().getUID()
+                        );
+                    } else if (addresses == null) {
+                        logger.debug(
+                            "Not starting offline polling for Mill device \"{}\" because an IP address could not be resolved",
+                            getThing().getUID()
+                        );
+                    } else {
+                        logger.debug(
+                            "Not starting offline polling for Mill device \"{}\" because the refresh interval is invalid",
+                            getThing().getUID()
+                        );
+                    }
+                }
+            }
+        }
+        if (frequentFuture != null) {
+            frequentFuture.cancel(true);
+        }
+        if (infrequentFuture != null) {
+            infrequentFuture.cancel(true);
+        }
+        if (offlineFuture != null) {
+            offlineFuture.cancel(true);
         }
 
         // Set the status regardless of the previous online state, in case the "reason" changed
@@ -822,6 +1046,79 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    protected int getRefreshInterval() throws MillException {
+        Object object = getConfig().get(CONFIG_PARAM_REFRESH_INTERVAL);
+        if (!(object instanceof Number)) {
+            logger.warn("Configuration parameter refresh interval is \"{}\"", object);
+            throw new MillException(
+                "Invalid configuration: refresh interval must be a number",
+                ThingStatusDetail.CONFIGURATION_ERROR
+            );
+        }
+        int i = ((Number) object).intValue();
+        if (i <= 0) {
+            logger.warn("Configuration parameter refresh interval must be positive ({})", object);
+            throw new MillException(
+                "Invalid configuration: refresh interval must be positive",
+                ThingStatusDetail.CONFIGURATION_ERROR
+            );
+        }
+        return i;
+    }
+
+    protected int getInfrequentRefreshInterval() throws MillException {
+        Object object = getConfig().get(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL);
+        if (!(object instanceof Number)) {
+            logger.warn("Configuration parameter infrequent refresh interval is \"{}\"", object);
+            throw new MillException(
+                "Invalid configuration: infrequent refresh interval must be a number",
+                ThingStatusDetail.CONFIGURATION_ERROR
+            );
+        }
+        int i = ((Number) object).intValue();
+        if (i <= 0) {
+            logger.warn("Configuration parameter infrequent refresh interval must be positive ({})", object);
+            throw new MillException(
+                "Invalid configuration: infrequent refresh interval must be positive",
+                ThingStatusDetail.CONFIGURATION_ERROR
+            );
+        }
+        return i;
+    }
+
+    protected InetAddress @Nullable [] resolveOfflineAddresses() {
+        String hostname;
+        try {
+            hostname = getHostname();
+        } catch (MillException e) {
+            logger.warn(
+                "Unable to poll offline Mill device \"{}\" because the configuration is missing or invalid: {}",
+                getThing().getUID(),
+                e.getMessage()
+            );
+            return null;
+        }
+        InetAddress[] result = null;
+        if (isBlank(hostname)) {
+            logger.warn(
+                "Unable to poll offline Mill device \"{}\" because the hostname is blank",
+                getThing().getUID()
+            );
+        } else {
+            try {
+                result = InetAddress.getAllByName(hostname);
+            } catch (UnknownHostException e) {
+                logger.warn(
+                    "Unable to poll offline Mill device \"{}\" because the hostname ({}) is unresolvable: {}",
+                    getThing().getUID(),
+                    hostname,
+                    e.getMessage()
+                );
+            }
+        }
+        return result;
+    }
+
     @Override
     public Collection<ConfigStatusMessage> getConfigStatus() {
         return Collections.emptySet();
@@ -835,5 +1132,76 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     @Override
     public void setConfigStatusCallback(@Nullable ConfigStatusCallback configStatusCallback) {
         this.configStatusCallback = configStatusCallback;
+    }
+
+    protected Runnable createInitializeTask() {
+        return new Initializer();
+    }
+
+    protected abstract Runnable createFrequentTask();
+
+    protected abstract Runnable createInfrequentTask();
+
+    protected Runnable createOfflineTask(InetAddress[] addresses) {
+        return new PingOffline(addresses);
+    }
+
+    protected class Initializer implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                pollStatus();
+            } catch (MillException e) {
+                setOffline(e);
+            }
+        }
+    }
+
+    protected class PingOffline implements Runnable {
+
+        private final InetAddress[] addresses;
+
+        public PingOffline(InetAddress[] addresses) {
+            this.addresses = addresses;
+        }
+
+        @Override
+        public void run() {
+            for (InetAddress address : addresses) {
+                try {
+                    if (address.isReachable(1000)) {
+                        logger.debug(
+                            "Mill device \"{}\" is reachable on {}, attempting to contact API",
+                            getThing().getUID(),
+                            address.getHostAddress()
+                        );
+                        scheduler.execute(() -> {
+                            try {
+                                pollControlStatus();
+                            } catch (MillException e) {
+                                logger.debug(
+                                    "Attempt to contact API for Mill device \"{}\" failed: {}",
+                                    getThing().getUID(),
+                                    e.getMessage()
+                                );
+                            }
+                        });
+                    } else {
+                        logger.debug(
+                            "Mill device \"{}\" is not reachable on {}",
+                            getThing().getUID(),
+                            address.getHostAddress()
+                        );
+                    }
+                } catch (IOException e) {
+                    logger.warn(
+                        "An IOException occurred while pinging offline Mill device {}: {}",
+                        getThing().getLabel(),
+                        e.getMessage()
+                    );
+                }
+            }
+        }
     }
 }
