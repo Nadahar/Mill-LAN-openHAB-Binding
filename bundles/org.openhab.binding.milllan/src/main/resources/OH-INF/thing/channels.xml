@@ -38,7 +38,7 @@
 		<state readOnly="true" pattern="%.0f %unit%"/>
 	</channel-type>
 	<channel-type id="control-signal">
-		<item-type unitHint="%">Number:Dimensionless</item-type>
+		<item-type>Number:Dimensionless</item-type>
 		<label>Current Control Signal</label>
 		<description>The current control signal of the PID regulator (0-100%).</description>
 		<category>heating</category>
@@ -218,7 +218,7 @@
 		<description>The maximum heating power limit in percent (10-100%). Doesn't seem to work on all devices.</description>
 		<category>Heating</category>
 		<tags>
-			<tag>Setpoint</tag>
+			<tag>Control</tag>
 		</tags>
 		<state min="10" max="100" pattern="%.0f %%"/>
 		<autoUpdatePolicy>veto</autoUpdatePolicy>
@@ -250,6 +250,23 @@
 				<option value="OFF">Off</option>
 				<option value="SIMPLE">Simple</option>
 				<option value="ADVANCED">Advanced</option>
+			</options>
+		</state>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="oil-heater-power">
+		<item-type>Number:Dimensionless</item-type>
+		<label>Oil Heating Power</label>
+		<description>The maximum heating power in percent (40%, 60%, 100%).</description>
+		<category>Heating</category>
+		<tags>
+			<tag>Control</tag>
+		</tags>
+		<state min="40" max="100" pattern="%.0f %%">
+			<options>
+				<option value="40">40%</option>
+				<option value="60">60%</option>
+				<option value="100">100%</option>
 			</options>
 		</state>
 		<autoUpdatePolicy>veto</autoUpdatePolicy>
