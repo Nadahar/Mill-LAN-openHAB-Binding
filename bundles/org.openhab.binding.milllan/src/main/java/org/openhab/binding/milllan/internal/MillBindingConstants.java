@@ -138,6 +138,13 @@ public class MillBindingConstants {
     /** The refresh interval configuration parameter */
     public static final String CONFIG_PARAM_REFRESH_INTERVAL = "refreshInterval";
 
+    /** The infrequent refresh interval configuration parameter */
+    public static final String CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL = "infrequentRefreshInterval";
+
+    /** The {@link Set} of dynamic configuration parameters */
+    public static final Set<String> CONFIG_DYNAMIC_PARAMETERS = Set.of(
+    );
+
     private MillBindingConstants() {
         // Not to be instantiated
     }

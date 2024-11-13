@@ -538,6 +538,29 @@ public class MillAPITool {
     }
 
     /**
+     * Sends {@code POST/reboot} to the device's REST API.
+     * <p>
+     * <b>Note:</b> This method will time out if successful.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link Response} if the call fails.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response sendReboot(String hostname) throws MillException {
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/reboot",
+            null,
+            5L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
      * Sends a {@code HTTP} request using the specified parameters and returns the {@link Response}
      * or throws a {@link MillException}.
      *
