@@ -74,6 +74,10 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
     public static final String CONFIG_PARAM_HOSTNAME = "hostname";
     public static final String CONFIG_PARAM_API_KEY = "apiKey";
     public static final String CONFIG_PARAM_REFRESH_INTERVAL = "refreshInterval";
+    public static final String CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL = "infrequentRefreshInterval";
+
+    public static final Set<String> CONFIG_DYNAMIC_PARAMETERS = Set.of(
+    );
 
     private MillBindingConstants() {
         // Not to be instantiated
