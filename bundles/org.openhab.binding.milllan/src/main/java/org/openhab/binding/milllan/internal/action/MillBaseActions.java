@@ -70,4 +70,32 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
             return result;
         }
     }
+
+    protected Map<String, Object> setTimeZoneOffset(@Nullable Integer offset) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setTimeZoneOffset Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        if (offset == null) {
+            logger.warn("Call to setTimeZoneOffset Action failed because the offset was null");
+            result.put("result", "The time zone offset must be specified!");
+            return result;
+        }
+        try {
+            handlerInst.setTimeZoneOffset(offset, true);
+            result.put("result", "The time zone offset was set to " + offset + '.');
+            return result;
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setTimeZoneOffset Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute setTimeZoneOffset Action: " + e.getMessage());
+            return result;
+        }
+    }
 }

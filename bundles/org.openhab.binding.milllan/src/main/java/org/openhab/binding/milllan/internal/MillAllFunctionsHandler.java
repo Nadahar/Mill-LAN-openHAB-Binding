@@ -14,6 +14,7 @@
 package org.openhab.binding.milllan.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.milllan.internal.configuration.MillConfigDescriptionProvider;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
 import org.openhab.core.thing.Thing;
 
@@ -27,8 +28,9 @@ public class MillAllFunctionsHandler extends AbstractMillThingHandler { //TODO: 
 
     public MillAllFunctionsHandler(
         Thing thing,
+        MillConfigDescriptionProvider configDescriptionProvider,
         MillHTTPClientProvider httpClientProvider
     ) {
-        super(thing, httpClientProvider);
+        super(thing, configDescriptionProvider, httpClientProvider);
     }
 }

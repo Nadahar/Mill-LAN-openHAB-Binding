@@ -44,6 +44,7 @@ import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
 import org.openhab.binding.milllan.internal.api.response.StatusResponse;
 import org.openhab.binding.milllan.internal.api.response.TemperatureCalibrationOffsetResponse;
+import org.openhab.binding.milllan.internal.api.response.TimeZoneOffsetResponse;
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
@@ -395,6 +396,36 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             null,
             HttpMethod.POST,
             "/oil-heater-power",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public TimeZoneOffsetResponse getTimeZoneOffset(String hostname) throws MillException {
+        return request(
+            TimeZoneOffsetResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/timezone-offset",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setTimeZoneOffset(String hostname, Integer value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("timezone_offset", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/timezone-offset",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,
