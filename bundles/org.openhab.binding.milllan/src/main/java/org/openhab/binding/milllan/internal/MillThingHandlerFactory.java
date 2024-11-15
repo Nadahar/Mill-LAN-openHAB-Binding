@@ -17,6 +17,7 @@ import static org.openhab.binding.milllan.internal.MillBindingConstants.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.milllan.internal.configuration.MillConfigDescriptionProvider;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
@@ -38,14 +39,17 @@ import org.osgi.service.component.annotations.Reference;
 @Component(configurationPid = "binding.milllan", service = ThingHandlerFactory.class)
 public class MillThingHandlerFactory extends BaseThingHandlerFactory { // TODO: (Nad) JavaDocs
 
+    private final MillConfigDescriptionProvider configDescriptionProvider;
     private final MillHTTPClientProvider httpClientProvider;
 
     @Activate
     public MillThingHandlerFactory(
+        @Reference MillConfigDescriptionProvider configDescriptionProvider,
         @Reference MillHTTPClientProvider httpClientProvider,
         ComponentContext componentContext
     ) {
         super.activate(componentContext);
+        this.configDescriptionProvider = configDescriptionProvider;
         this.httpClientProvider = httpClientProvider;
     }
 
@@ -59,10 +63,10 @@ public class MillThingHandlerFactory extends BaseThingHandlerFactory { // TODO: 
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_PANEL_HEATER.equals(thingTypeUID)) {
-            return new MillPanelHeaterHandler(thing, httpClientProvider);
+            return new MillPanelHeaterHandler(thing, configDescriptionProvider, httpClientProvider);
         }
         if (THING_TYPE_ALL_FUNCTIONS.equals(thingTypeUID)) {
-            return new MillAllFunctionsHandler(thing, httpClientProvider);
+            return new MillAllFunctionsHandler(thing, configDescriptionProvider, httpClientProvider);
         }
 
         return null;

@@ -15,12 +15,18 @@ package org.openhab.binding.milllan.internal;
 
 import static org.openhab.binding.milllan.internal.MillBindingConstants.*;
 
+import java.util.Collection;
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.milllan.internal.action.MillAllActions;
 import org.openhab.binding.milllan.internal.api.TemperatureType;
+import org.openhab.binding.milllan.internal.configuration.MillConfigDescriptionProvider;
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.binding.ThingHandlerService;
 
 
 /**
@@ -32,9 +38,15 @@ public class MillAllFunctionsHandler extends AbstractMillThingHandler { //TODO: 
 
     public MillAllFunctionsHandler(
         Thing thing,
+        MillConfigDescriptionProvider configDescriptionProvider,
         MillHTTPClientProvider httpClientProvider
     ) {
-        super(thing, httpClientProvider);
+        super(thing, configDescriptionProvider, httpClientProvider);
+    }
+
+    @Override
+    public Collection<Class<? extends ThingHandlerService>> getServices() {
+        return Set.of(MillAllActions.class);
     }
 
     @Override
@@ -75,6 +87,7 @@ public class MillAllFunctionsHandler extends AbstractMillThingHandler { //TODO: 
                 pollControllerType();
                 pollPredictiveHeatingType();
                 pollOilHeaterPower();
+                pollTimeZoneOffset(true);
                 pollCommercialLock();
             } catch (MillException e) {
                 setOffline(e);

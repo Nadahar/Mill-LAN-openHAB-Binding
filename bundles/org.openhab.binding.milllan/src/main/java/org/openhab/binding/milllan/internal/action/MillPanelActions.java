@@ -16,6 +16,8 @@ package org.openhab.binding.milllan.internal.action;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
 import org.openhab.core.automation.annotation.ActionOutputs;
 import org.openhab.core.automation.annotation.RuleAction;
@@ -40,9 +42,27 @@ public class MillPanelActions extends MillBaseActions { // TODO: (Nad) Javadocs
         return super.sendReboot();
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(label = "@text/actions.milllan.set-timezone-offset.label", description = "@text/actions.milllan.set-timezone-offset.description")
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setTimeZoneOffset(
+        @Nullable @ActionInput(
+            name = "offset",
+            label = "@text/actions-input.milllan.set-timezone-offset.offset.label",
+            description = "@text/actions-input.milllan.set-timezone-offset.offset.description",
+            required = true
+        ) Integer offset
+    ) {
+        return super.setTimeZoneOffset(offset);
+    }
+
     // Methods for Rules DSL rule support
 
     public static void sendReboot(ThingActions actions) {
         ((MillPanelActions) actions).sendReboot();
+    }
+
+    public static void setTimeZoneOffset(ThingActions actions, Integer offset) {
+        ((MillPanelActions) actions).setTimeZoneOffset(offset);
     }
 }

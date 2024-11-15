@@ -38,7 +38,7 @@
 		<state readOnly="true" pattern="%.0f %unit%"/>
 	</channel-type>
 	<channel-type id="control-signal">
-		<item-type>Number:Dimensionless</item-type>
+		<item-type unitHint="%">Number:Dimensionless</item-type>
 		<label>Current Control Signal</label>
 		<description>The current control signal of the PID regulator (0-100%).</description>
 		<category>heating</category>
@@ -255,7 +255,7 @@
 		<autoUpdatePolicy>veto</autoUpdatePolicy>
 	</channel-type>
 	<channel-type id="oil-heater-power">
-		<item-type>Number:Dimensionless</item-type>
+		<item-type unitHint="%">Number:Dimensionless</item-type>
 		<label>Oil Heating Power</label>
 		<description>The maximum heating power in percent (40%, 60%, 100%).</description>
 		<category>Heating</category>
