@@ -144,8 +144,12 @@ public class MillBindingConstants {
     /** The infrequent refresh interval configuration parameter */
     public static final String CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL = "infrequentRefreshInterval";
 
+    /** The time zone offset configuration parameter */
+    public static final String CONFIG_PARAM_TIMEZONE_OFFSET = "timeZoneOffset";
+
     /** The {@link Set} of dynamic configuration parameters */
     public static final Set<String> CONFIG_DYNAMIC_PARAMETERS = Set.of(
+        CONFIG_PARAM_TIMEZONE_OFFSET
     );
 
     private MillBindingConstants() {

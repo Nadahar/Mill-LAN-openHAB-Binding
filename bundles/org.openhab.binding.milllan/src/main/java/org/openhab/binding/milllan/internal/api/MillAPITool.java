@@ -44,6 +44,7 @@ import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
 import org.openhab.binding.milllan.internal.api.response.StatusResponse;
 import org.openhab.binding.milllan.internal.api.response.TemperatureCalibrationOffsetResponse;
+import org.openhab.binding.milllan.internal.api.response.TimeZoneOffsetResponse;
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
@@ -577,6 +578,51 @@ public class MillAPITool {
             null,
             HttpMethod.POST,
             "/oil-heater-power",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/timezone-offset} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link TimeZoneOffsetResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public TimeZoneOffsetResponse getTimeZoneOffset(String hostname) throws MillException {
+        return request(
+            TimeZoneOffsetResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/timezone-offset",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/timezone-offset} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param value the time zone offset from UTC in minutes.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setTimeZoneOffset(String hostname, Integer value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("timezone_offset", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/timezone-offset",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,
