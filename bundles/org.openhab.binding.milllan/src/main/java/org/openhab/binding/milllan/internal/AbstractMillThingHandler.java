@@ -21,8 +21,10 @@ import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +107,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     protected final MillConfigDescriptionProvider configDescriptionProvider;
 
     protected final MillHTTPClientProvider httpClientProvider;
+
+    //Doc: Must be synced on itself
+    protected final Map<String, ConfigStatusMessage> configStatusMessages = new HashMap<>();
 
     /** The object used for synchronization of class fields */
     protected final Object lock = new Object();
@@ -315,6 +320,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             logger.trace("Disposing of Thing handler for {}", getThing().getUID());
         }
         configDescriptionProvider.disableDescriptions(getThing().getUID());
+        clearAllConfigParameterMessages();
         ScheduledFuture<?> frequentFuture, infrequentFuture, offlineFuture;
         synchronized (lock) {
             frequentFuture = frequentPollTask;
@@ -868,6 +874,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         int refreshInterval;
         try {
             refreshInterval = getRefreshInterval();
+            clearConfigParameterMessages(CONFIG_PARAM_REFRESH_INTERVAL);
         } catch (MillException e) {
             logger.error(
                 "Unable to schedule polling for Mill device \"{}\" because the refresh interval is missing",
@@ -886,6 +893,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         int infrequentRefreshInterval;
         try {
             infrequentRefreshInterval = getInfrequentRefreshInterval();
+            clearConfigParameterMessages(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL);
         } catch (MillException e) {
             logger.error(
                 "Unable to schedule infrequent polling for Mill device \"{}\" because the refresh interval is missing",
@@ -941,6 +949,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         if (offlineFuture != null) {
             offlineFuture.cancel(true);
         }
+        clearConfigParameterMessages(CONFIG_PARAM_HOSTNAME);
 
         if (!wasOnline) {
             if (refreshInterval > 0) {
@@ -991,12 +1000,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         int refreshInterval;
         try {
             refreshInterval = getRefreshInterval();
+            clearConfigParameterMessages(CONFIG_PARAM_REFRESH_INTERVAL);
         } catch (MillException e) {
             refreshInterval = -1;
             logger.warn(
                 "Unable to poll offline Mill device \"{}\" because the configuration is missing or invalid: {}",
                 getThing().getUID(),
                 e.getMessage()
+            );
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_REFRESH_INTERVAL)
+                .withMessageKeySuffix("invalid-parameter-ex")
+                .withArguments(e.getThingStatusDescription()).build()
             );
             if (e.getThingStatusDetail() != null) {
                 detail = e.getThingStatusDetail();
@@ -1070,6 +1085,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
         if (wasOnline) {
             configDescriptionProvider.disableDescriptions(getThing().getUID());
+            clearConfigParameterMessages(CONFIG_DYNAMIC_PARAMETERS.toArray(String[]::new));
         }
     }
 
@@ -1077,6 +1093,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         Object object = getConfig().get(CONFIG_PARAM_HOSTNAME);
         if (!(object instanceof String)) {
             logger.warn("Configuration parameter hostname is \"{}\"", object);
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_HOSTNAME).withMessageKeySuffix("invalid-parameter").withArguments(object).build()
+            );
             throw new MillException(
                 "Invalid configuration: hostname must be a string",
                 ThingStatusDetail.CONFIGURATION_ERROR
@@ -1085,6 +1104,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         String result = (String) object;
         if (isBlank(result)) {
             logger.warn("Configuration parameter hostname is blank");
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_HOSTNAME).withMessageKeySuffix("blank-hostname").build()
+            );
             throw new MillException(
                 "Invalid configuration: hostname can't be blank",
                 ThingStatusDetail.CONFIGURATION_ERROR
@@ -1097,6 +1119,10 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         Object object = getConfig().get(CONFIG_PARAM_REFRESH_INTERVAL);
         if (!(object instanceof Number)) {
             logger.warn("Configuration parameter refresh interval is \"{}\"", object);
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_REFRESH_INTERVAL).withMessageKeySuffix("invalid-parameter")
+                .withArguments(object).build()
+            );
             throw new MillException(
                 "Invalid configuration: refresh interval must be a number",
                 ThingStatusDetail.CONFIGURATION_ERROR
@@ -1105,6 +1131,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         int i = ((Number) object).intValue();
         if (i <= 0) {
             logger.warn("Configuration parameter refresh interval must be positive ({})", object);
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_REFRESH_INTERVAL).withMessageKeySuffix("illegal-refresh-interval").build()
+            );
             throw new MillException(
                 "Invalid configuration: refresh interval must be positive",
                 ThingStatusDetail.CONFIGURATION_ERROR
@@ -1117,6 +1146,10 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         Object object = getConfig().get(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL);
         if (!(object instanceof Number)) {
             logger.warn("Configuration parameter infrequent refresh interval is \"{}\"", object);
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL).withMessageKeySuffix("invalid-parameter")
+                .withArguments(object).build()
+            );
             throw new MillException(
                 "Invalid configuration: infrequent refresh interval must be a number",
                 ThingStatusDetail.CONFIGURATION_ERROR
@@ -1125,6 +1158,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         int i = ((Number) object).intValue();
         if (i <= 0) {
             logger.warn("Configuration parameter infrequent refresh interval must be positive ({})", object);
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL).withMessageKeySuffix("illegal-refresh-interval").build()
+            );
             throw new MillException(
                 "Invalid configuration: infrequent refresh interval must be positive",
                 ThingStatusDetail.CONFIGURATION_ERROR
@@ -1143,6 +1179,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                 getThing().getUID(),
                 e.getMessage()
             );
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_HOSTNAME)
+                .withMessageKeySuffix("invalid-parameter-ex")
+                .withArguments(e.getThingStatusDescription()).build()
+            );
             return null;
         }
         InetAddress[] result = null;
@@ -1151,15 +1192,22 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                 "Unable to poll offline Mill device \"{}\" because the hostname is blank",
                 getThing().getUID()
             );
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_HOSTNAME).withMessageKeySuffix("blank-hostname").build()
+            );
         } else {
             try {
                 result = InetAddress.getAllByName(hostname);
+                clearConfigParameterMessages(CONFIG_PARAM_HOSTNAME);
             } catch (UnknownHostException e) {
                 logger.warn(
                     "Unable to poll offline Mill device \"{}\" because the hostname ({}) is unresolvable: {}",
                     getThing().getUID(),
                     hostname,
                     e.getMessage()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_HOSTNAME).withMessageKeySuffix("unresolvable-hostname").build()
                 );
             }
         }
@@ -1247,6 +1295,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         "A null timezone offset value was received when attempting to set ({})",
                         newValue
                     );
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_TIMEZONE_OFFSET).withMessageKeySuffix("store-failed")
+                        .withArguments(Integer.valueOf(newValue)).build());
                 } else if (!result.equals(newValue)) {
                     logger.warn(
                         "The device returned a different timezone offset value ({}) than " +
@@ -1254,7 +1305,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         result,
                         newValue
                     );
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_TIMEZONE_OFFSET).withMessageKeySuffix("store-failed")
+                        .withArguments(Integer.valueOf(newValue)).build());
                 } else {
+                    clearConfigParameterMessages(CONFIG_PARAM_TIMEZONE_OFFSET);
                     config.put(CONFIG_PARAM_TIMEZONE_OFFSET, newValue);
                 }
             } catch (MillException e) {
@@ -1263,6 +1318,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                     getThing().getUID(),
                     e.getMessage()
                 );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_TIMEZONE_OFFSET).withMessageKeySuffix("store-failed-ex")
+                    .withArguments(e.getMessage()).build());
             }
         } else {
             config.remove(CONFIG_PARAM_TIMEZONE_OFFSET);
@@ -1279,6 +1337,26 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    protected void setConfigParameterMessage(ConfigStatusMessage statusMessage) {
+        synchronized (configStatusMessages) {
+            configStatusMessages.put(statusMessage.parameterName, statusMessage);
+        }
+    }
+
+    protected void clearConfigParameterMessages(String... parameterNames) {
+        synchronized (configStatusMessages) {
+            for (String parameterName : parameterNames) {
+                configStatusMessages.remove(parameterName);
+            }
+        }
+    }
+
+    protected void clearAllConfigParameterMessages() {
+        synchronized (configStatusMessages) {
+            configStatusMessages.clear();
+        }
+    }
+
     @Override
     public Collection<Class<? extends ThingHandlerService>> getServices() {
         return List.of(MillBaseActions.class);
@@ -1286,10 +1364,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
     @Override
     public Collection<ConfigStatusMessage> getConfigStatus() {
-        // TODO Auto-generated method stub
-//        ConfigStatusMessage.Builder.pending("parameter");
-//        return Collections.emptySet();
-        return Collections.singleton(ConfigStatusMessage.Builder.error("hostname").withMessageKeySuffix("test").build());
+        synchronized (configStatusMessages) {
+            return configStatusMessages.isEmpty() ?
+                Collections.emptyList() :
+                new ArrayList<>(configStatusMessages.values());
+        }
     }
 
     protected Set<String> getModifiedParameters(
