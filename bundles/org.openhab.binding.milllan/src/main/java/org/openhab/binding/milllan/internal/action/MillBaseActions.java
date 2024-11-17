@@ -115,4 +115,48 @@ public class MillBaseActions implements ThingActions {
             return result;
         }
     }
+
+    /**
+     * Attempts to set the {@code PID parameters} in the device and returns the result of the {@link Action}.
+     *
+     * @param kp the proportional gain factor.
+     * @param ki the integral gain factor.
+     * @param kd the derivative gain factor.
+     * @param kdFilterN the derivative filter time coefficient.
+     * @param windupLimitPct the wind-up limit for integral part from 0 to 100.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
+    public Map<String, Object> setPIDParameters(
+        @Nullable Double kp,
+        @Nullable Double ki,
+        @Nullable Double kd,
+        @Nullable Double kdFilterN,
+        @Nullable Double windupLimitPct
+    ) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setPIDParameters Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        if (kp == null || ki == null || kd == null || kdFilterN == null || windupLimitPct == null) {
+            logger.warn("Call to setPIDParameters Action failed because some parameters were null");
+            result.put("result", "All PID parameters must be specified!");
+            return result;
+        }
+        try {
+            handlerInst.setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct, true);
+            result.put("result", "The PID parameters were set.");
+            return result;
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setPIDParameters Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute setPIDParameters Action: " + e.getMessage());
+            return result;
+        }
+    }
 }

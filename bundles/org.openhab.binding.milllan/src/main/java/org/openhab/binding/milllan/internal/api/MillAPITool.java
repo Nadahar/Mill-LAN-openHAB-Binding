@@ -39,6 +39,7 @@ import org.openhab.binding.milllan.internal.api.response.GenericResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OilHeaterPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
+import org.openhab.binding.milllan.internal.api.response.PIDParametersResponse;
 import org.openhab.binding.milllan.internal.api.response.PredictiveHeatingTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
@@ -623,6 +624,68 @@ public class MillAPITool {
             null,
             HttpMethod.POST,
             "/timezone-offset",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/pid-parameters} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link PIDParametersResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public PIDParametersResponse getPIDParameters(String hostname) throws MillException {
+        return request(
+            PIDParametersResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/pid-parameters",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/pid-parameters} to the device's REST API and returns the response.
+     * <p>
+     * <b>Supported by panel heaters only</b>.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param kp the proportional gain factor.
+     * @param ki the integral gain factor.
+     * @param kd the derivative gain factor.
+     * @param kdFilterN the derivative filter time coefficient.
+     * @param windupLimitPercentage the wind-up limit for integral part from 0 to 100.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setPIDParameters(
+        String hostname,
+        Double kp,
+        Double ki,
+        Double kd,
+        Double kdFilterN,
+        Double windupLimitPercentage
+    ) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("kp", kp);
+        object.addProperty("ki", ki);
+        object.addProperty("kd", kd);
+        object.addProperty("kd_filter_N", kdFilterN);
+        object.addProperty("windup_limit_percentage", windupLimitPercentage);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/pid-parameters",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,

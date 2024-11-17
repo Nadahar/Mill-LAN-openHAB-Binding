@@ -66,6 +66,47 @@ public class MillAllActions extends MillBaseActions {
         return super.setTimeZoneOffset(offset);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(
+        label = "@text/actions.milllan.set-pid-parameters.label",
+        description = "@text/actions.milllan.set-pid-parameters.description"
+    )
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setPIDParameters(
+        @Nullable @ActionInput(
+            name = "kp",
+            label = "Kp",
+            description = "@text/actions-input.milllan.set-pid-parameters.kp.description",
+            required = true
+        ) Double kp,
+        @Nullable @ActionInput(
+            name = "ki",
+            label = "Ki",
+            description = "@text/actions-input.milllan.set-pid-parameters.ki.description",
+            required = true
+        ) Double ki,
+        @Nullable @ActionInput(
+            name = "kd",
+            label = "Kd",
+            description = "@text/actions-input.milllan.set-pid-parameters.kd.description",
+            required = true
+        ) Double kd,
+        @Nullable @ActionInput(
+            name = "kdFilterN",
+            label = "@text/actions-input.milllan.set-pid-parameters.kd-filter.label",
+            description = "@text/actions-input.milllan.set-pid-parameters.kd-filter.description",
+            required = true
+        ) Double kdFilterN,
+        @Nullable @ActionInput(
+            name = "windupLimitPct",
+            label = "@text/actions-input.milllan.set-pid-parameters.windup-limit.label",
+            description = "@text/actions-input.milllan.set-pid-parameters.windup-limit.description",
+            required = true
+        ) Double windupLimitPct
+    ) {
+        return super.setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct);
+    }
+
     // Methods for Rules DSL rule support
 
     /**
@@ -85,5 +126,26 @@ public class MillAllActions extends MillBaseActions {
      */
     public static void setTimeZoneOffset(ThingActions actions, Integer offset) {
         ((MillAllActions) actions).setTimeZoneOffset(offset);
+    }
+
+    /**
+     * Attempts to set the {@code PID parameters} in the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param kp the proportional gain factor.
+     * @param ki the integral gain factor.
+     * @param kd the derivative gain factor.
+     * @param kdFilterN the derivative filter time coefficient.
+     * @param windupLimitPct the wind-up limit for integral part from 0 to 100.
+     */
+    public static void setPIDParameters(
+        ThingActions actions,
+        Double kp,
+        Double ki,
+        Double kd,
+        Double kdFilterN,
+        Double windupLimitPct
+    ) {
+        ((MillAllActions) actions).setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct);
     }
 }
