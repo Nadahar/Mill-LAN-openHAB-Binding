@@ -5,17 +5,26 @@
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
 
 	<config-description uri="thing-type:milllan:heater">
-		<parameter name="hostname" type="text" required="true">
+		<parameter-group name="general">
+			<label>General</label>
+			<advanced>false</advanced>
+		</parameter-group>
+		<parameter-group name="pid">
+			<label>PID Controller</label>
+			<advanced>true</advanced>
+		</parameter-group>
+		
+		<parameter name="hostname" type="text" required="true" groupName="general">
 			<context>network-address</context>
 			<label>Hostname</label>
 			<description>Hostname or IP address of the device.</description>
 		</parameter>
-		<parameter name="refreshInterval" type="integer" unit="s" min="1">
+		<parameter name="refreshInterval" type="integer" unit="s" min="1" groupName="general">
 			<label>Refresh Interval</label>
 			<description>The refresh interval in seconds for polling the device for information that might change frequently.</description>
 			<default>60</default>
 		</parameter>
-		<parameter name="infrequentRefreshInterval" type="integer" unit="s" min="1">
+		<parameter name="infrequentRefreshInterval" type="integer" unit="s" min="1" groupName="general">
 			<label>Infrequent Refresh Interval</label>
 			<description>The refresh interval in seconds for polling the device for information that is unlikely to change frequently.</description>
 			<default>300</default>

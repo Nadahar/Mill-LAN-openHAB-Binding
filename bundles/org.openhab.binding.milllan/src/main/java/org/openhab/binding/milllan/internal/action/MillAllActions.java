@@ -56,6 +56,44 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
         return super.setTimeZoneOffset(offset);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(label = "@text/actions.milllan.set-pid-parameters.label", description = "@text/actions.milllan.set-pid-parameters.description")
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setPIDParameters(
+        @Nullable @ActionInput(
+            name = "kp",
+            label = "Kp",
+            description = "@text/actions-input.milllan.set-pid-parameters.kp.description",
+            required = true
+        ) Double kp,
+        @Nullable @ActionInput(
+            name = "ki",
+            label = "Ki",
+            description = "@text/actions-input.milllan.set-pid-parameters.ki.description",
+            required = true
+        ) Double ki,
+        @Nullable @ActionInput(
+            name = "kd",
+            label = "Kd",
+            description = "@text/actions-input.milllan.set-pid-parameters.kd.description",
+            required = true
+        ) Double kd,
+        @Nullable @ActionInput(
+            name = "kdFilterN",
+            label = "@text/actions-input.milllan.set-pid-parameters.kd-filter.label",
+            description = "@text/actions-input.milllan.set-pid-parameters.kd-filter.description",
+            required = true
+        ) Double kdFilterN,
+        @Nullable @ActionInput(
+            name = "windupLimitPct",
+            label = "@text/actions-input.milllan.set-pid-parameters.windup-limit.label",
+            description = "@text/actions-input.milllan.set-pid-parameters.windup-limit.description",
+            required = true
+        ) Double windupLimitPct
+    ) {
+        return super.setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct);
+    }
+
     // Methods for Rules DSL rule support
 
     public static void sendReboot(ThingActions actions) {
@@ -64,5 +102,16 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     public static void setTimeZoneOffset(ThingActions actions, Integer offset) {
         ((MillAllActions) actions).setTimeZoneOffset(offset);
+    }
+
+    public static void setPIDParameters(
+        ThingActions actions,
+        Double kp,
+        Double ki,
+        Double kd,
+        Double kdFilterN,
+        Double windupLimitPct
+    ) {
+        ((MillAllActions) actions).setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct);
     }
 }
