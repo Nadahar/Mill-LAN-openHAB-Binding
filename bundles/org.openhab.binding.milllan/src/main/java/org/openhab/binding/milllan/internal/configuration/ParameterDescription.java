@@ -37,6 +37,41 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "Time Zone Offset",
         "thing-general.config.milllan.timezone-offset.description",
         "The time zone offset from UTC in minutes."
+    ),
+    CONFIG_PARAM_PID_KP(
+        MillBindingConstants.CONFIG_PARAM_PID_KP,
+        "",
+        "Kp",
+        "thing-general.config.milllan.pid-kp.description",
+        "The PID controller's proportional gain factor K<sub>p</sub>."
+    ),
+    CONFIG_PARAM_PID_KI(
+        MillBindingConstants.CONFIG_PARAM_PID_KI,
+        "",
+        "Ki",
+        "thing-general.config.milllan.pid-ki.description",
+        "The PID controller's integral gain factor K<sub>i</sub>."
+    ),
+    CONFIG_PARAM_PID_KD(
+        MillBindingConstants.CONFIG_PARAM_PID_KD,
+        "",
+        "Kd",
+        "thing-general.config.milllan.pid-kd.description",
+        "The PID controller's derivative gain factor K<sub>d</sub>."
+    ),
+    CONFIG_PARAM_PID_KD_FILTER_N(
+        MillBindingConstants.CONFIG_PARAM_PID_KD_FILTER_N,
+        "thing-general.config.milllan.pid-kd-filter.label",
+        "Kd Filter",
+        "thing-general.config.milllan.pid-kd-filter.description",
+        "The PID controller's derivative (K<sub>d</sub>) filter time coefficient."
+    ),
+    CONFIG_PARAM_PID_WINDUP_LIMIT_PCT(
+        MillBindingConstants.CONFIG_PARAM_PID_WINDUP_LIMIT_PCT,
+        "thing-general.config.milllan.pid-kd-wind-up.label",
+        "Ki Wind-up Limit",
+        "thing-general.config.milllan.pid-kd-wind-up.description",
+        "The PID controller's wind-up limit for integral part (K<sub>i</sub>) in percent (0 to 100)."
     );
 
     private final String name;
@@ -72,6 +107,48 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
                     .withUnit("min").withMinimum(BigDecimal.valueOf(-840L))
                     .withMaximum(BigDecimal.valueOf(720L)).withStepSize(BigDecimal.valueOf(15L))
                     .withGroupName("general").withAdvanced(true).withDefault("0");
+                break;
+            case CONFIG_PARAM_PID_KP:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withStepSize(BigDecimal.valueOf(1L))
+                    .withGroupName("pid").withAdvanced(true).withDefault("70").withLabel(defaultLabel);
+
+                if (bundle == null || provider == null || locale == null) {
+                    builder.withDescription(defaultDescr);
+                } else {
+                    builder.withDescription(provider.getText(bundle, descrKey, defaultDescr, locale));
+                }
+                return builder.build();
+            case CONFIG_PARAM_PID_KI:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withStepSize(BigDecimal.valueOf(0.01))
+                    .withGroupName("pid").withAdvanced(true).withDefault("0.02").withLabel(defaultLabel);
+                if (bundle == null || provider == null || locale == null) {
+                    builder.withDescription(defaultDescr);
+                } else {
+                    builder.withDescription(provider.getText(bundle, descrKey, defaultDescr, locale));
+                }
+                return builder.build();
+            case CONFIG_PARAM_PID_KD:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withStepSize(BigDecimal.valueOf(1L))
+                    .withGroupName("pid").withAdvanced(true).withDefault("4500").withLabel(defaultLabel);
+                if (bundle == null || provider == null || locale == null) {
+                    builder.withDescription(defaultDescr);
+                } else {
+                    builder.withDescription(provider.getText(bundle, descrKey, defaultDescr, locale));
+                }
+                return builder.build();
+            case CONFIG_PARAM_PID_KD_FILTER_N:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withStepSize(BigDecimal.valueOf(1L))
+                    .withGroupName("pid").withAdvanced(true).withDefault("60");
+                break;
+            case CONFIG_PARAM_PID_WINDUP_LIMIT_PCT:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(100L))
+                    .withStepSize(BigDecimal.valueOf(1L)).withUnit("%")
+                    .withGroupName("pid").withAdvanced(true).withDefault("95");
                 break;
             default:
                 throw new IllegalStateException("Unimplemented config description parameter: " + name());

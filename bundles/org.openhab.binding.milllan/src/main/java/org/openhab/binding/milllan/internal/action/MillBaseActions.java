@@ -98,4 +98,38 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
             return result;
         }
     }
+
+    public Map<String, Object> setPIDParameters(
+        @Nullable Double kp,
+        @Nullable Double ki,
+        @Nullable Double kd,
+        @Nullable Double kdFilterN,
+        @Nullable Double windupLimitPct
+    ) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setPIDParameters Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        if (kp == null || ki == null || kd == null || kdFilterN == null || windupLimitPct == null) {
+            logger.warn("Call to setPIDParameters Action failed because some parameters were null");
+            result.put("result", "All PID parameters must be specified!");
+            return result;
+        }
+        try {
+            handlerInst.setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct, true);
+            result.put("result", "The PID parameters were set.");
+            return result;
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setPIDParameters Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute setPIDParameters Action: " + e.getMessage());
+            return result;
+        }
+    }
 }

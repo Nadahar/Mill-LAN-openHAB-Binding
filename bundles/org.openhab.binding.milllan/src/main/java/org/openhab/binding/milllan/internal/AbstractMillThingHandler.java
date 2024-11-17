@@ -57,6 +57,7 @@ import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OilHeaterPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
+import org.openhab.binding.milllan.internal.api.response.PIDParametersResponse;
 import org.openhab.binding.milllan.internal.api.response.PredictiveHeatingTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
@@ -819,6 +820,82 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    @Nullable
+    public PIDParametersResponse pollPIDParameters(boolean updateConfiguration) throws MillException {
+        PIDParametersResponse params;
+        try {
+            params = apiTool.getPIDParameters(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (e.getHttpStatus() >= 400) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Thing \"{}\" doesn't seem to support PID parameters", getThing().getUID());
+                }
+                return null;
+            }
+            throw e;
+        }
+        if (params.isComplete()) {
+            enablePIDDescriptions();
+        }
+        if (updateConfiguration) {
+            Configuration configuration = editConfiguration();
+            if (applyPIDParamsResponseToConfig(params, configuration)) {
+                updateConfiguration(configuration);
+            }
+        }
+        return params;
+    }
+
+    /**
+     * Sends the specified PID parameters to the device and immediately queries the device for the same parameters,
+     * so that the result of the operation is known.
+     *
+     * @param kp the proportional gain factor.
+     * @param ki the integral gain factor.
+     * @param kd the derivative gain factor.
+     * @param kdFilterN the derivative filter time coefficient.
+     * @param windupLimitPercentage the wind-up limit for integral part from 0 to 100.
+     * @return The resulting {@link PIDParametersResponse} from the follow-up query.
+     * @throws MillException If an error occurs during the operation.
+     */
+    @Nullable
+    public PIDParametersResponse setPIDParameters(
+        Number kp,
+        Number ki,
+        Number kd,
+        Number kdFilterN,
+        Number windupLimitPercentage,
+        boolean updateConfiguration
+    ) throws MillException {
+        Response response = apiTool.setPIDParameters(
+            getHostname(),
+            kp.doubleValue(),
+            ki.doubleValue(),
+            kd.doubleValue(),
+            kdFilterN.doubleValue(),
+            windupLimitPercentage.doubleValue()
+        );
+        PIDParametersResponse result = pollPIDParameters(updateConfiguration);
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set PID parameters: {}",
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+        return result;
+    }
+
     public void sendReboot() throws MillException {
         Response response = null;
         try {
@@ -850,6 +927,70 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                 scheduler.schedule(new PingOffline(addresses), 12L, TimeUnit.SECONDS);
             }
         }
+    }
+
+    protected void enablePIDDescriptions() {
+        configDescriptionProvider.enableDescriptions(
+            thing.getUID(),
+            CONFIG_PARAM_PID_KP,
+            CONFIG_PARAM_PID_KI,
+            CONFIG_PARAM_PID_KD,
+            CONFIG_PARAM_PID_KD_FILTER_N,
+            CONFIG_PARAM_PID_WINDUP_LIMIT_PCT
+        );
+    }
+
+    protected void disablePIDDescriptions() {
+        configDescriptionProvider.disableDescriptions(
+            thing.getUID(),
+            CONFIG_PARAM_PID_KP,
+            CONFIG_PARAM_PID_KI,
+            CONFIG_PARAM_PID_KD,
+            CONFIG_PARAM_PID_KD_FILTER_N,
+            CONFIG_PARAM_PID_WINDUP_LIMIT_PCT
+        );
+    }
+
+    protected boolean applyPIDParamsResponseToConfig(PIDParametersResponse parametersResponse, Configuration configuration) {
+        Double d;
+        Object object;
+        boolean result = false;
+        if ((d = parametersResponse.getKp()) != null) {
+            object = configuration.get(CONFIG_PARAM_PID_KP);
+            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
+                configuration.put(CONFIG_PARAM_PID_KP, BigDecimal.valueOf(d));
+                result |= true;
+            }
+        }
+        if ((d = parametersResponse.getKi()) != null) {
+            object = configuration.get(CONFIG_PARAM_PID_KI);
+            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
+                configuration.put(CONFIG_PARAM_PID_KI, BigDecimal.valueOf(d));
+                result |= true;
+            }
+        }
+        if ((d = parametersResponse.getKd()) != null) {
+            object = configuration.get(CONFIG_PARAM_PID_KD);
+            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
+                configuration.put(CONFIG_PARAM_PID_KD, BigDecimal.valueOf(d));
+                result |= true;
+            }
+        }
+        if ((d = parametersResponse.getKdFilterN()) != null) {
+            object = configuration.get(CONFIG_PARAM_PID_KD_FILTER_N);
+            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
+                configuration.put(CONFIG_PARAM_PID_KD_FILTER_N, BigDecimal.valueOf(d));
+                result |= true;
+            }
+        }
+        if ((d = parametersResponse.getWindupLimitPercentage()) != null) {
+            object = configuration.get(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT);
+            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
+                configuration.put(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, BigDecimal.valueOf(d));
+                result |= true;
+            }
+        }
+        return result;
     }
 
     protected boolean isOnline() {
@@ -1245,6 +1386,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         if (modifiedParameters.contains(CONFIG_PARAM_TIMEZONE_OFFSET)) {
             handleTimeZoneOffsetUpdate(configuration, configurationParameters, online);
         }
+        if (
+            modifiedParameters.contains(CONFIG_PARAM_PID_KP) ||
+            modifiedParameters.contains(CONFIG_PARAM_PID_KI) ||
+            modifiedParameters.contains(CONFIG_PARAM_PID_KD) ||
+            modifiedParameters.contains(CONFIG_PARAM_PID_KD_FILTER_N) ||
+            modifiedParameters.contains(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT)
+        ) {
+            handlePIDParametersUpdate(configuration, configurationParameters, online);
+        }
 
         if ((
                 modifiedParameters.contains(CONFIG_PARAM_HOSTNAME) ||
@@ -1326,6 +1476,227 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             config.remove(CONFIG_PARAM_TIMEZONE_OFFSET);
         }
         return;
+    }
+
+    protected void handlePIDParametersUpdate(
+        Configuration config,
+        Map<String, Object> newParameters,
+        boolean online
+    ) {
+        if (online) {
+            Number newKp, newKi, newKd, newKdFilterN, newWindupLimit;
+            Object object = newParameters.get(CONFIG_PARAM_PID_KP);
+            if (object instanceof Number) {
+                newKp = (Number) object;
+            } else {
+                logger.warn(
+                    "Ignoring invalid new PID Kp value {} for Thing \"{}\"",
+                    object,
+                    getThing().getUID()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_PID_KP).withMessageKeySuffix("invalid-parameter")
+                    .withArguments(object).build());
+                newKp = null;
+            }
+            object = newParameters.get(CONFIG_PARAM_PID_KI);
+            if (object instanceof Number) {
+                newKi = (Number) object;
+            } else {
+                logger.warn(
+                    "Ignoring invalid new PID Ki value {} for Thing \"{}\"",
+                    object,
+                    getThing().getUID()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_PID_KI).withMessageKeySuffix("invalid-parameter")
+                    .withArguments(object).build());
+                newKi = null;
+            }
+            object = newParameters.get(CONFIG_PARAM_PID_KD);
+            if (object instanceof Number) {
+                newKd = (Number) object;
+            } else {
+                logger.warn(
+                    "Ignoring invalid new PID Kd value {} for Thing \"{}\"",
+                    object,
+                    getThing().getUID()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_PID_KD).withMessageKeySuffix("invalid-parameter")
+                    .withArguments(object).build());
+                newKd = null;
+            }
+            object = newParameters.get(CONFIG_PARAM_PID_KD_FILTER_N);
+            if (object instanceof Number) {
+                newKdFilterN = (Number) object;
+            } else {
+                logger.warn(
+                    "Ignoring invalid new PID Kd filter value {} for Thing \"{}\"",
+                    object,
+                    getThing().getUID()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_PID_KD_FILTER_N).withMessageKeySuffix("invalid-parameter")
+                    .withArguments(object).build());
+                newKdFilterN = null;
+            }
+            object = newParameters.get(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT);
+            if (object instanceof Number) {
+                newWindupLimit = (Number) object;
+            } else {
+                logger.warn(
+                    "Ignoring invalid new PID windup limit value {} for Thing \"{}\"",
+                    object,
+                    getThing().getUID()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT).withMessageKeySuffix("invalid-parameter")
+                    .withArguments(object).build());
+                newWindupLimit = null;
+            }
+            if (newKp != null && newKi != null && newKd != null && newKdFilterN != null && newWindupLimit != null) {
+                try {
+                    PIDParametersResponse result = setPIDParameters(
+                        newKp,
+                        newKi,
+                        newKd,
+                        newKdFilterN,
+                        newWindupLimit,
+                        false
+                    );
+                    Double d;
+                    boolean setFailed = false;
+                    if (result == null || !result.isComplete()) {
+                        logger.warn("An empty or partial response was received after setting PID parameters");
+                        setConfigParameterMessage(ConfigStatusMessage.Builder
+                            .error(CONFIG_PARAM_PID_KP).withMessageKeySuffix("store-failed-pid").build());
+                        setConfigParameterMessage(ConfigStatusMessage.Builder
+                            .error(CONFIG_PARAM_PID_KI).withMessageKeySuffix("store-failed-pid").build());
+                        setConfigParameterMessage(ConfigStatusMessage.Builder
+                            .error(CONFIG_PARAM_PID_KD).withMessageKeySuffix("store-failed-pid").build());
+                        setConfigParameterMessage(ConfigStatusMessage.Builder
+                            .error(CONFIG_PARAM_PID_KD_FILTER_N).withMessageKeySuffix("store-failed-pid").build());
+                        setConfigParameterMessage(ConfigStatusMessage.Builder
+                            .error(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT)
+                            .withMessageKeySuffix("store-failed-pid").build());
+                        setFailed = true;
+                    } else {
+                        if ((d = result.getKp()) != null && d.doubleValue() != newKp.doubleValue()) {
+                            logger.warn(
+                                "The device returned a different PID Kp ({}) than what was attempted set ({})",
+                                d,
+                                newKp
+                            );
+                            setConfigParameterMessage(ConfigStatusMessage.Builder
+                                .error(CONFIG_PARAM_PID_KP).withMessageKeySuffix("store-failed")
+                                .withArguments(newKp).build());
+                            setFailed = true;
+                        }
+                        if ((d = result.getKi()) != null && d.doubleValue() != newKi.doubleValue()) {
+                            logger.warn(
+                                "The device returned a different PID Ki ({}) than what was attempted set ({})",
+                                d,
+                                newKi
+                            );
+                            setConfigParameterMessage(ConfigStatusMessage.Builder
+                                .error(CONFIG_PARAM_PID_KI).withMessageKeySuffix("store-failed")
+                                .withArguments(newKi).build());
+                            setFailed = true;
+                        }
+                        if ((d = result.getKd()) != null && d.doubleValue() != newKd.doubleValue()) {
+                            logger.warn(
+                                "The device returned a different PID Kd ({}) than what was attempted set ({})",
+                                d,
+                                newKd
+                            );
+                            setConfigParameterMessage(ConfigStatusMessage.Builder
+                                .error(CONFIG_PARAM_PID_KD).withMessageKeySuffix("store-failed")
+                                .withArguments(newKd).build());
+                            setFailed = true;
+                        }
+                        if ((d = result.getKdFilterN()) != null && d.doubleValue() != newKdFilterN.doubleValue()) {
+                            logger.warn(
+                                "The device returned a different PID Kd filter value ({}) than what was attempted set ({})",
+                                d,
+                                newKdFilterN
+                            );
+                            setConfigParameterMessage(ConfigStatusMessage.Builder
+                                .error(CONFIG_PARAM_PID_KD_FILTER_N).withMessageKeySuffix("store-failed")
+                                .withArguments(newKdFilterN).build());
+                            setFailed = true;
+                        }
+                        if (
+                            (d = result.getWindupLimitPercentage()) != null &&
+                            d.doubleValue() != newWindupLimit.doubleValue()
+                        ) {
+                            logger.warn(
+                                "The device returned a different PID windup limit ({}) than what was attempted set ({})",
+                                d,
+                                newWindupLimit
+                            );
+                            setConfigParameterMessage(ConfigStatusMessage.Builder
+                                .error(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT).withMessageKeySuffix("store-failed")
+                                .withArguments(newWindupLimit).build());
+                            setFailed = true;
+                        }
+                    }
+                    if (!setFailed) {
+                        clearConfigParameterMessages(
+                            CONFIG_PARAM_PID_KP,
+                            CONFIG_PARAM_PID_KI,
+                            CONFIG_PARAM_PID_KD,
+                            CONFIG_PARAM_PID_KD_FILTER_N,
+                            CONFIG_PARAM_PID_WINDUP_LIMIT_PCT
+                        );
+                        config.put(CONFIG_PARAM_PID_KP, newKp);
+                        config.put(CONFIG_PARAM_PID_KI, newKi);
+                        config.put(CONFIG_PARAM_PID_KD, newKd);
+                        config.put(CONFIG_PARAM_PID_KD_FILTER_N, newKdFilterN);
+                        config.put(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, newWindupLimit);
+                    }
+                } catch (MillException e) {
+                    logger.warn(
+                        "An error occurred when trying to send PID paramteres to {}: {}",
+                        getThing().getUID(),
+                        e.getMessage()
+                    );
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_PID_KP).withMessageKeySuffix("store-failed-ex")
+                        .withArguments(e.getMessage()).build());
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_PID_KI).withMessageKeySuffix("store-failed-ex")
+                        .withArguments(e.getMessage()).build());
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_PID_KD).withMessageKeySuffix("store-failed-ex")
+                        .withArguments(e.getMessage()).build());
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_PID_KD_FILTER_N).withMessageKeySuffix("store-failed-ex")
+                        .withArguments(e.getMessage()).build());
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT).withMessageKeySuffix("store-failed-ex")
+                        .withArguments(e.getMessage()).build());
+                }
+            } else {
+                logger.warn(
+                    "Failed to send PID parameters to {} because some parameters are missing or invalid",
+                    getThing().getUID()
+                );
+            }
+        } else {
+            config.remove(CONFIG_PARAM_PID_KP);
+            config.remove(CONFIG_PARAM_PID_KI);
+            config.remove(CONFIG_PARAM_PID_KD);
+            config.remove(CONFIG_PARAM_PID_KD_FILTER_N);
+            config.remove(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT);
+            clearConfigParameterMessages(
+                CONFIG_PARAM_PID_KP,
+                CONFIG_PARAM_PID_KI,
+                CONFIG_PARAM_PID_KD,
+                CONFIG_PARAM_PID_KD_FILTER_N,
+                CONFIG_PARAM_PID_WINDUP_LIMIT_PCT
+            );
+        }
     }
 
     @Override
@@ -1444,6 +1815,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                 pollPredictiveHeatingType();
 //                pollOilHeaterPower(); //TODO: (Nad) Oil only
                 pollTimeZoneOffset(true);
+                pollPIDParameters(true);
             } catch (MillException e) {
                 setOffline(e);
             }
