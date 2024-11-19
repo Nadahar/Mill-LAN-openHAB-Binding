@@ -93,9 +93,11 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
     /** The wind-up limit for the integral part from 0 to 100 */
     public static final String CONFIG_PARAM_PID_WINDUP_LIMIT_PCT = "pidWindupLimitPct";
 
+    public static final String CONFIG_PARAM_CLOUD_COMMUNICATION = "cloudCommunication";
+
     public static final Set<String> CONFIG_DYNAMIC_PARAMETERS = Set.of(
         CONFIG_PARAM_TIMEZONE_OFFSET, CONFIG_PARAM_PID_KP, CONFIG_PARAM_PID_KI, CONFIG_PARAM_PID_KD,
-        CONFIG_PARAM_PID_KD_FILTER_N, CONFIG_PARAM_PID_WINDUP_LIMIT_PCT
+        CONFIG_PARAM_PID_KD_FILTER_N, CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, CONFIG_PARAM_CLOUD_COMMUNICATION
     );
 
     private MillBindingConstants() {
