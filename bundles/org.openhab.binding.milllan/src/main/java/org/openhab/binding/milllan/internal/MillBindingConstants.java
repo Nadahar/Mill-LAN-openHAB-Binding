@@ -165,10 +165,17 @@ public class MillBindingConstants {
     /** The cloud communication configuration parameter */
     public static final String CONFIG_PARAM_CLOUD_COMMUNICATION = "cloudCommunication";
 
+    /** The hysteresis upper limit configuration parameter */
+    public static final String CONFIG_PARAM_HYSTERESIS_UPPER = "hysteresisUpper";
+
+    /** The hysteresis lower limit configuration parameter */
+    public static final String CONFIG_PARAM_HYSTERESIS_LOWER = "hysteresisLower";
+
     /** The {@link Set} of dynamic configuration parameters */
     public static final Set<String> CONFIG_DYNAMIC_PARAMETERS = Set.of(
         CONFIG_PARAM_TIMEZONE_OFFSET, CONFIG_PARAM_PID_KP, CONFIG_PARAM_PID_KI, CONFIG_PARAM_PID_KD,
-        CONFIG_PARAM_PID_KD_FILTER_N, CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, CONFIG_PARAM_CLOUD_COMMUNICATION
+        CONFIG_PARAM_PID_KD_FILTER_N, CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, CONFIG_PARAM_CLOUD_COMMUNICATION,
+        CONFIG_PARAM_HYSTERESIS_UPPER, CONFIG_PARAM_HYSTERESIS_LOWER
     );
 
     private MillBindingConstants() {

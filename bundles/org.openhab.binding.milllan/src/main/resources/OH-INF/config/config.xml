@@ -13,6 +13,11 @@
 			<label>PID Controller</label>
 			<advanced>true</advanced>
 		</parameter-group>
+		<parameter-group name="hysteresis">
+			<label>Hysteresis</label>
+			<description>Note: Device will reboot if the hysteresis parameters are changed.</description>
+			<advanced>true</advanced>
+		</parameter-group>
 		
 		<parameter name="hostname" type="text" required="true" groupName="general">
 			<context>network-address</context>

@@ -203,4 +203,49 @@ public class MillBaseActions implements ThingActions {
             return result;
         }
     }
+
+    /**
+     * Attempts to set the {@code hysteresis parameters} in the device and returns the result of the {@link Action}.
+     *
+     * @param upper the upper hysteresis limit in °C.
+     * @param lower the lower hysteresis limit in °C.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
+    public Map<String, Object> setHysteresisParameters(@Nullable Double upper, @Nullable Double lower) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setHysteresisParameters Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        if (upper == null || lower == null) {
+            logger.warn("Call to setHysteresisParameters Action failed because some parameters were null");
+            result.put("result", "All hysteresis parameters must be specified!");
+            return result;
+        }
+        try {
+            handlerInst.setHysteresisParameters(upper, lower, true);
+            result.put("result", "The hysteresis parameters were set.");
+            try {
+                handlerInst.sendReboot();
+            } catch (MillException e) {
+                logger.warn(
+                    "Failed to reboot device after setting hysteresis parameters on Thing {}: {}",
+                    handlerInst.getThing().getUID(),
+                    e.getMessage()
+                );
+                result.put("result", "Failed to execute reboot: " + e.getMessage());
+            }
+            return result;
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setHysteresisParameters Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute setHysteresisParameters Action: " + e.getMessage());
+            return result;
+        }
+    }
 }

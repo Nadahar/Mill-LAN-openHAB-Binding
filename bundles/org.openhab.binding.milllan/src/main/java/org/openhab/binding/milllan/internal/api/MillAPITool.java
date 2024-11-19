@@ -37,6 +37,7 @@ import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.GenericResponse;
+import org.openhab.binding.milllan.internal.api.response.HysteresisParametersResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OilHeaterPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
@@ -732,6 +733,55 @@ public class MillAPITool {
             null,
             HttpMethod.POST,
             "/cloud-communication",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/hysteresis-parameters} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link HysteresisParametersResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public HysteresisParametersResponse getHysteresisParameters(String hostname) throws MillException {
+        return request(
+            HysteresisParametersResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/hysteresis-parameters",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/hysteresis-parameters} to the device's REST API and returns the response.
+     * <p>
+     * <b>A device reboot is required to effectuate changes.</b>
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param upper the upper hysteresis limit in °C.
+     * @param lower the lower hysteresis limit in °C.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setHysteresisParameters(String hostname, Double upper, Double lower) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("temp_hysteresis_upper", upper);
+        object.addProperty("temp_hysteresis_lower", lower);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/hysteresis-parameters",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,
