@@ -31,6 +31,7 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.milllan.internal.MillUtil;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
+import org.openhab.binding.milllan.internal.api.response.CloudCommunicationResponse;
 import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
@@ -474,6 +475,36 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             null,
             HttpMethod.POST,
             "/pid-parameters",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public CloudCommunicationResponse getCloudCommunication(String hostname) throws MillException {
+        return request(
+            CloudCommunicationResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/cloud-communication",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setCloudCommunication(String hostname, Boolean value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("value", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/cloud-communication",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,

@@ -94,6 +94,20 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
         return super.setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(label = "@text/actions.milllan.set-cloud-communication.label", description = "@text/actions.milllan.set-cloud-communication.description")
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setCloudCommunication(
+        @Nullable @ActionInput(
+            name = "enabled",
+            label = "@text/actions-input.milllan.set-cloud-communication.enabled.label",
+            description = "@text/actions-input.milllan.set-cloud-communication.enabled.description",
+            required = true
+        ) Boolean enabled
+    ) {
+        return super.setCloudCommunication(enabled);
+    }
+
     // Methods for Rules DSL rule support
 
     public static void sendReboot(ThingActions actions) {
@@ -113,5 +127,9 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
         Double windupLimitPct
     ) {
         ((MillAllActions) actions).setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct);
+    }
+
+    public static void setCloudCommunication(ThingActions actions, Boolean enabled) {
+        ((MillAllActions) actions).setCloudCommunication(enabled);
     }
 }
