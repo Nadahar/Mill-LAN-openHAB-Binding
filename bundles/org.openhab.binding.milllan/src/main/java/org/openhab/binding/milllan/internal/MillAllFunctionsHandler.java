@@ -90,6 +90,7 @@ public class MillAllFunctionsHandler extends AbstractMillThingHandler { //TODO: 
                 pollTimeZoneOffset(true);
                 pollPIDParameters(true);
                 pollCloudCommunication(true);
+                pollHysteresisParameters(true);
                 pollCommercialLock();
             } catch (MillException e) {
                 setOffline(e);

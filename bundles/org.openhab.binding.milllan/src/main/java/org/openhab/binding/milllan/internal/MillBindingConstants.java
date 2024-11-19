@@ -95,9 +95,14 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
 
     public static final String CONFIG_PARAM_CLOUD_COMMUNICATION = "cloudCommunication";
 
+    public static final String CONFIG_PARAM_HYSTERESIS_UPPER = "hysteresisUpper";
+
+    public static final String CONFIG_PARAM_HYSTERESIS_LOWER = "hysteresisLower";
+
     public static final Set<String> CONFIG_DYNAMIC_PARAMETERS = Set.of(
         CONFIG_PARAM_TIMEZONE_OFFSET, CONFIG_PARAM_PID_KP, CONFIG_PARAM_PID_KI, CONFIG_PARAM_PID_KD,
-        CONFIG_PARAM_PID_KD_FILTER_N, CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, CONFIG_PARAM_CLOUD_COMMUNICATION
+        CONFIG_PARAM_PID_KD_FILTER_N, CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, CONFIG_PARAM_CLOUD_COMMUNICATION,
+        CONFIG_PARAM_HYSTERESIS_UPPER, CONFIG_PARAM_HYSTERESIS_LOWER
     );
 
     private MillBindingConstants() {
