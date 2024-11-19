@@ -79,6 +79,20 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "Enable Cloud Communication",
         "thing-general.config.milllan.cloud-communication.description",
         "Whether cloud communication is enabled in the device. Changing this will reboot the device."
+    ),
+    CONFIG_PARAM_HYSTERESIS_UPPER(
+        MillBindingConstants.CONFIG_PARAM_HYSTERESIS_UPPER,
+        "thing-general.config.milllan.hysteresis-upper.label",
+        "Hysteresis Upper",
+        "thing-general.config.milllan.hysteresis-upper.description",
+        "The upper limit: Set temperature + upper limit = stop heating."
+    ),
+    CONFIG_PARAM_HYSTERESIS_LOWER(
+        MillBindingConstants.CONFIG_PARAM_HYSTERESIS_LOWER,
+        "thing-general.config.milllan.hysteresis-lower.label",
+        "Hysteresis Lower",
+        "thing-general.config.milllan.hysteresis-lower.description",
+        "The lower limit: Set temperature - lower limit = start heating."
     );
 
     private final String name;
@@ -160,6 +174,18 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
             case CONFIG_PARAM_CLOUD_COMMUNICATION:
                 builder = ConfigDescriptionParameterBuilder.create(name, Type.BOOLEAN)
                     .withGroupName("general").withAdvanced(true).withDefault("false");
+                break;
+            case CONFIG_PARAM_HYSTERESIS_UPPER:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(5L))
+                    .withStepSize(BigDecimal.valueOf(0.25)).withGroupName("hysteresis")
+                    .withAdvanced(true).withDefault("1");
+                break;
+            case CONFIG_PARAM_HYSTERESIS_LOWER:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(5L))
+                    .withStepSize(BigDecimal.valueOf(0.25)).withGroupName("hysteresis")
+                    .withAdvanced(true).withDefault("0.5");
                 break;
             default:
                 throw new IllegalStateException("Unimplemented config description parameter: " + name());

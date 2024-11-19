@@ -108,6 +108,26 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
         return super.setCloudCommunication(enabled);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(label = "@text/actions.milllan.set-hysteresis-parameters.label", description = "@text/actions.milllan.set-hysteresis-parameters.description")
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setHysteresisParameters(
+        @Nullable @ActionInput(
+            name = "upper",
+            label = "@text/actions-input.milllan.set-hysteresis-parameters.upper.label",
+            description = "@text/actions-input.milllan.set-hysteresis-parameters.upper.description",
+            required = true
+        ) Double upper,
+        @Nullable @ActionInput(
+            name = "lower",
+            label = "@text/actions-input.milllan.set-hysteresis-parameters.lower.label",
+            description = "@text/actions-input.milllan.set-hysteresis-parameters.lower.description",
+            required = true
+        ) Double lower
+    ) {
+        return super.setHysteresisParameters(upper, lower);
+    }
+
     // Methods for Rules DSL rule support
 
     public static void sendReboot(ThingActions actions) {
@@ -131,5 +151,9 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     public static void setCloudCommunication(ThingActions actions, Boolean enabled) {
         ((MillAllActions) actions).setCloudCommunication(enabled);
+    }
+
+    public static void setHysteresisParameters(ThingActions actions, Double upper, Double lower) {
+        ((MillAllActions) actions).setHysteresisParameters(upper, lower);
     }
 }

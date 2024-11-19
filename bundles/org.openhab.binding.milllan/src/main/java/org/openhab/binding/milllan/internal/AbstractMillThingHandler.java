@@ -55,6 +55,7 @@ import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
+import org.openhab.binding.milllan.internal.api.response.HysteresisParametersResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OilHeaterPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
@@ -952,6 +953,80 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    @Nullable
+    public HysteresisParametersResponse pollHysteresisParameters(boolean updateConfiguration) throws MillException {
+        HysteresisParametersResponse params;
+        try {
+            params = apiTool.getHysteresisParameters(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (e.getHttpStatus() >= 400) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Thing \"{}\" doesn't seem to support hysteresis parameters", getThing().getUID());
+                }
+                return null;
+            }
+            throw e;
+        }
+        if (params.isComplete()) {
+            configDescriptionProvider.enableDescriptions(
+                thing.getUID(),
+                CONFIG_PARAM_HYSTERESIS_UPPER,
+                CONFIG_PARAM_HYSTERESIS_LOWER
+            );
+        }
+        if (updateConfiguration) {
+            Configuration configuration = editConfiguration();
+            Double d;
+            boolean changed = false;
+            if ((d = params.getUpper()) != null) {
+                Object object = configuration.get(CONFIG_PARAM_HYSTERESIS_UPPER);
+                if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
+                    configuration.put(CONFIG_PARAM_HYSTERESIS_UPPER, BigDecimal.valueOf(d));
+                    changed |= true;
+                }
+            }
+            if ((d = params.getLower()) != null) {
+                Object object = configuration.get(CONFIG_PARAM_HYSTERESIS_LOWER);
+                if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
+                    configuration.put(CONFIG_PARAM_HYSTERESIS_LOWER, BigDecimal.valueOf(d));
+                    changed |= true;
+                }
+            }
+            if (changed) {
+                updateConfiguration(configuration);
+            }
+        }
+        return params;
+    }
+
+    @Nullable
+    public HysteresisParametersResponse setHysteresisParameters(
+        Number upper,
+        Number lower,
+        boolean updateConfiguration
+    ) throws MillException {
+        Response response = apiTool.setHysteresisParameters(getHostname(), upper.doubleValue(), lower.doubleValue());
+        HysteresisParametersResponse result = pollHysteresisParameters(updateConfiguration);
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set hysteresis parameters: {}",
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+        return result;
+    }
+
     public void sendReboot() throws MillException {
         Response response = null;
         try {
@@ -1455,6 +1530,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         if (modifiedParameters.contains(CONFIG_PARAM_CLOUD_COMMUNICATION)) {
             rebootRequired |= handleCloudCommunicationUpdate(configuration, configurationParameters, online);
         }
+        if (
+            modifiedParameters.contains(CONFIG_PARAM_HYSTERESIS_UPPER) ||
+            modifiedParameters.contains(CONFIG_PARAM_HYSTERESIS_LOWER)
+        ) {
+            rebootRequired |= handleHysteresisParametersUpdate(configuration, configurationParameters, online);
+        }
 
         if ((
                 modifiedParameters.contains(CONFIG_PARAM_HOSTNAME) ||
@@ -1831,6 +1912,110 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return false;
     }
 
+    protected boolean handleHysteresisParametersUpdate(
+        Configuration config,
+        Map<String, Object> newParameters,
+        boolean online
+    ) {
+        if (online) {
+            Number newUpper, newLower;
+            Object object = newParameters.get(CONFIG_PARAM_HYSTERESIS_UPPER);
+            if (object instanceof Number) {
+                newUpper = (Number) object;
+            } else {
+                logger.warn(
+                    "Ignoring invalid new hysteresis upper value {} for Thing \"{}\"",
+                    object,
+                    getThing().getUID()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_HYSTERESIS_UPPER).withMessageKeySuffix("invalid-parameter")
+                    .withArguments(object).build());
+                newUpper = null;
+            }
+            object = newParameters.get(CONFIG_PARAM_HYSTERESIS_LOWER);
+            if (object instanceof Number) {
+                newLower = (Number) object;
+            } else {
+                logger.warn(
+                    "Ignoring invalid new hysteresis lower value {} for Thing \"{}\"",
+                    object,
+                    getThing().getUID()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_HYSTERESIS_LOWER).withMessageKeySuffix("invalid-parameter")
+                    .withArguments(object).build());
+                newLower = null;
+            }
+            if (newUpper != null && newLower != null) {
+                try {
+                    HysteresisParametersResponse result = setHysteresisParameters(newUpper, newLower, false);
+                    Double d;
+                    boolean setFailed = false;
+                    if (result == null || !result.isComplete()) {
+                        logger.warn("An empty or partial response was received after setting hysteresis parameters");
+                        setConfigParameterMessage(ConfigStatusMessage.Builder
+                            .error(CONFIG_PARAM_HYSTERESIS_UPPER).withMessageKeySuffix("store-failed-hysteresis").build());
+                        setConfigParameterMessage(ConfigStatusMessage.Builder
+                            .error(CONFIG_PARAM_HYSTERESIS_LOWER).withMessageKeySuffix("store-failed-hysteresis").build());
+                        setFailed = true;
+                    } else {
+                        if ((d = result.getUpper()) != null && d.doubleValue() != newUpper.doubleValue()) {
+                            logger.warn(
+                                "The device returned a different hysteresis upper limit ({}) than what was attempted set ({})",
+                                d,
+                                newUpper
+                            );
+                            setConfigParameterMessage(ConfigStatusMessage.Builder
+                                .error(CONFIG_PARAM_HYSTERESIS_UPPER).withMessageKeySuffix("store-failed")
+                                .withArguments(newUpper).build());
+                            setFailed = true;
+                        }
+                        if ((d = result.getLower()) != null && d.doubleValue() != newLower.doubleValue()) {
+                            logger.warn(
+                                "The device returned a different hysteresis lower limit ({}) than what was attempted set ({})",
+                                d,
+                                newLower
+                            );
+                            setConfigParameterMessage(ConfigStatusMessage.Builder
+                                .error(CONFIG_PARAM_HYSTERESIS_LOWER).withMessageKeySuffix("store-failed")
+                                .withArguments(newLower).build());
+                            setFailed = true;
+                        }
+                    }
+                    if (!setFailed) {
+                        clearConfigParameterMessages(CONFIG_PARAM_HYSTERESIS_UPPER, CONFIG_PARAM_HYSTERESIS_LOWER);
+                        config.put(CONFIG_PARAM_HYSTERESIS_UPPER, newUpper);
+                        config.put(CONFIG_PARAM_HYSTERESIS_LOWER, newLower);
+                        return true;
+                    }
+                } catch (MillException e) {
+                    logger.warn(
+                        "An error occurred when trying to send hysteresis paramteres to {}: {}",
+                        getThing().getUID(),
+                        e.getMessage()
+                    );
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_HYSTERESIS_UPPER).withMessageKeySuffix("store-failed-ex")
+                        .withArguments(e.getMessage()).build());
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_HYSTERESIS_LOWER).withMessageKeySuffix("store-failed-ex")
+                        .withArguments(e.getMessage()).build());
+                }
+            } else {
+                logger.warn(
+                    "Failed to send hysteresis parameters to {} because some parameters are missing or invalid",
+                    getThing().getUID()
+                );
+            }
+        } else {
+            config.remove(CONFIG_PARAM_HYSTERESIS_UPPER);
+            config.remove(CONFIG_PARAM_HYSTERESIS_LOWER);
+            clearConfigParameterMessages(CONFIG_PARAM_HYSTERESIS_UPPER, CONFIG_PARAM_HYSTERESIS_LOWER);
+        }
+        return false;
+    }
+
     @Override
     protected void updateConfiguration(Configuration configuration) {
         super.updateConfiguration(configuration);
@@ -1949,6 +2134,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                 pollTimeZoneOffset(true);
                 pollPIDParameters(true);
                 pollCloudCommunication(true);
+                pollHysteresisParameters(true); //TODO: (Nad) Which models?
             } catch (MillException e) {
                 setOffline(e);
             }

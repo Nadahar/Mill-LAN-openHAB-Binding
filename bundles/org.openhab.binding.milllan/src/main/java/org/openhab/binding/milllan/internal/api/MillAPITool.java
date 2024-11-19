@@ -37,6 +37,7 @@ import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.GenericResponse;
+import org.openhab.binding.milllan.internal.api.response.HysteresisParametersResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OilHeaterPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
@@ -505,6 +506,38 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             null,
             HttpMethod.POST,
             "/cloud-communication",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public HysteresisParametersResponse getHysteresisParameters(String hostname) throws MillException {
+        return request(
+            HysteresisParametersResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/hysteresis-parameters",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    //Doc: Restart required after setting
+    public Response setHysteresisParameters(String hostname, Double upper, Double lower) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("temp_hysteresis_upper", upper);
+        object.addProperty("temp_hysteresis_lower", lower);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/hysteresis-parameters",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,
