@@ -159,4 +159,48 @@ public class MillBaseActions implements ThingActions {
             return result;
         }
     }
+
+    /**
+     * Attempts to set whether {@code cloud communication} is enabled in the device and returns the
+     * result of the {@link Action}.
+     *
+     * @param enabled {@code true} to enabled cloud communication, {@code false} otherwise.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
+    public Map<String, Object> setCloudCommunication(@Nullable Boolean enabled) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setCloudCommunication Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        try {
+            handlerInst.setCloudCommunication(enabled == null ? Boolean.FALSE : enabled, true);
+            result.put(
+                "result",
+                "The cloud communicaton was " + (enabled == null || !enabled.booleanValue() ? "disabled" : "enabled") +
+                ". The device is rebooting."
+            );
+            try {
+                handlerInst.sendReboot();
+            } catch (MillException e) {
+                logger.warn(
+                    "Failed to reboot device after setting cloud communication on Thing {}: {}",
+                    handlerInst.getThing().getUID(),
+                    e.getMessage()
+                );
+                result.put("result", "Failed to execute reboot: " + e.getMessage());
+            }
+            return result;
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setCloudCommunication Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute setCloudCommunication Action: " + e.getMessage());
+            return result;
+        }
+    }
 }

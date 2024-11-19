@@ -31,6 +31,7 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.milllan.internal.MillUtil;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
+import org.openhab.binding.milllan.internal.api.response.CloudCommunicationResponse;
 import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
@@ -686,6 +687,51 @@ public class MillAPITool {
             null,
             HttpMethod.POST,
             "/pid-parameters",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/cloud-communication} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link CloudCommunicationResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public CloudCommunicationResponse getCloudCommunication(String hostname) throws MillException {
+        return request(
+            CloudCommunicationResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/cloud-communication",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/cloud-communication} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param value whether cloud communication is enabled or not.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setCloudCommunication(String hostname, Boolean value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("value", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/cloud-communication",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,

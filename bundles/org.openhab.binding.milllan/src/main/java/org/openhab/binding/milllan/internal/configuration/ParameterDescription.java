@@ -86,6 +86,15 @@ public enum ParameterDescription {
         "Ki Wind-up Limit",
         "thing-general.config.milllan.pid-kd-wind-up.description",
         "The PID controller's wind-up limit for integral part (K<sub>i</sub>) in percent (0 to 100)."
+    ),
+
+    /** The cloud communication configuration parameter */
+    CONFIG_PARAM_CLOUD_COMMUNICATION(
+        MillBindingConstants.CONFIG_PARAM_CLOUD_COMMUNICATION,
+        "thing-general.config.milllan.cloud-communication.label",
+        "Enable Cloud Communication",
+        "thing-general.config.milllan.cloud-communication.description",
+        "Whether cloud communication is enabled in the device. Changing this will reboot the device."
     );
 
     private final String name;
@@ -173,6 +182,10 @@ public enum ParameterDescription {
                     .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(100L))
                     .withStepSize(BigDecimal.valueOf(1L)).withUnit("%")
                     .withGroupName("pid").withAdvanced(true).withDefault("95");
+                break;
+            case CONFIG_PARAM_CLOUD_COMMUNICATION:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.BOOLEAN)
+                    .withGroupName("general").withAdvanced(true).withDefault("false");
                 break;
             default:
                 throw new IllegalStateException("Unimplemented config description parameter: " + name());

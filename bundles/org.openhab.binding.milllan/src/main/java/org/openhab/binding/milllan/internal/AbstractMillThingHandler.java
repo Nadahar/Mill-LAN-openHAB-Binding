@@ -49,6 +49,7 @@ import org.openhab.binding.milllan.internal.api.PredictiveHeatingType;
 import org.openhab.binding.milllan.internal.api.ResponseStatus;
 import org.openhab.binding.milllan.internal.api.TemperatureType;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
+import org.openhab.binding.milllan.internal.api.response.CloudCommunicationResponse;
 import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
@@ -1186,6 +1187,75 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     /**
+     * Retrieves the cloud communication enabled state and returns the it.
+     *
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the retrieved state.
+     * @return The retrieved state.
+     * @throws MillException If an error occurs during the operation.
+     */
+    @Nullable
+    public Boolean pollCloudCommunication(boolean updateConfiguration) throws MillException {
+        CloudCommunicationResponse enabled;
+        try {
+            enabled = apiTool.getCloudCommunication(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support cloud communication setting", getThing().getUID());
+                return null;
+            }
+            throw e;
+        }
+        Boolean b;
+        if ((b = enabled.isEnabled()) != null) {
+            Thing thing = getThing();
+            configDescriptionProvider.enableDescriptions(thing.getUID(), CONFIG_PARAM_CLOUD_COMMUNICATION);
+            if (updateConfiguration) {
+                Configuration configuration = editConfiguration();
+                Object object = configuration.get(CONFIG_PARAM_CLOUD_COMMUNICATION);
+                if (!(object instanceof Boolean) || ((Boolean) object).booleanValue() != b.booleanValue()) {
+                    configuration.put(CONFIG_PARAM_CLOUD_COMMUNICATION, b);
+                    updateConfiguration(configuration);
+                }
+            }
+        }
+        return b;
+    }
+
+    /**
+     * Sends the specified cloud communication value to the device and immediately queries the device
+     * for the same value, so that the result of the operation is known.
+     *
+     * @param enabled whether cloud communication is enabled or not.
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the new values.
+     * @return The resulting {@link Boolean} from the follow-up query.
+     * @throws MillException If an error occurs during the operation.
+     */
+    @Nullable
+    public Boolean setCloudCommunication(Boolean enabled, boolean updateConfiguration) throws MillException {
+        Response response = apiTool.setCloudCommunication(getHostname(), enabled);
+        Boolean result = pollCloudCommunication(updateConfiguration);
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set cloud communication to \"{}\": {}",
+                enabled,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+        return result;
+    }
+
+    /**
      * Instructs the device to reboot.
      * <p>
      * <b>Note:</b> This method will take some time, since a timeout must elapse before it returns.
@@ -1731,6 +1801,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         callback.validateConfigurationParameters(getThing(), configurationParameters);
 
+        boolean rebootRequired = false;
         boolean online = isOnline();
         if (modifiedParameters.contains(CONFIG_PARAM_HOSTNAME)) {
             configuration.put(CONFIG_PARAM_HOSTNAME, configurationParameters.get(CONFIG_PARAM_HOSTNAME));
@@ -1762,6 +1833,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         ) {
             handlePIDParametersUpdate(configuration, configurationParameters, online);
         }
+        if (modifiedParameters.contains(CONFIG_PARAM_CLOUD_COMMUNICATION)) {
+            rebootRequired |= handleCloudCommunicationUpdate(configuration, configurationParameters, online);
+        }
 
         if ((
                 modifiedParameters.contains(CONFIG_PARAM_HOSTNAME) ||
@@ -1779,6 +1853,19 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             // Persist new configuration and notify Thing Manager
             updateConfiguration(configuration);
             callback.configurationUpdated(getThing());
+        }
+        if (rebootRequired) {
+            scheduler.schedule(() -> {
+                try {
+                    sendReboot();
+                } catch (MillException e) {
+                    logger.warn(
+                        "Failed to reboot Thing \"{}\" after a configuration change that requires a reboot: {}",
+                        getThing().getUID(),
+                        e.getMessage()
+                    );
+                }
+            }, 1000, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -2077,6 +2164,74 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                 CONFIG_PARAM_PID_WINDUP_LIMIT_PCT
             );
         }
+    }
+
+    /**
+     * Handles the update of the current configuration with a new cloud communication state, including
+     * setting and logging error states.
+     *
+     * @param config the {@link Configuration} to update.
+     * @param newParameters the new configuration parameters to apply.
+     * @param online whether the {@link Thing} is currently online.
+     * @return {@code true} if the {@link Configuration} was updated.
+     */
+    protected boolean handleCloudCommunicationUpdate(
+        Configuration config,
+        Map<String, Object> newParameters,
+        boolean online
+    ) {
+        if (online) {
+            try {
+                Boolean newValue;
+                Object object = newParameters.get(CONFIG_PARAM_CLOUD_COMMUNICATION);
+                if (object instanceof Boolean) {
+                    newValue = (Boolean) object;
+                } else {
+                    logger.warn(
+                        "Ignoring invalid new cloud communication value {} for Thing \"{}\"",
+                        object,
+                        getThing().getUID()
+                    );
+                    return false;
+                }
+                Boolean result = setCloudCommunication(newValue, false);
+                if (result == null) {
+                    logger.warn(
+                        "A null cloud communication value was received when attempting to set ({})",
+                        newValue
+                    );
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_CLOUD_COMMUNICATION).withMessageKeySuffix("store-failed")
+                        .withArguments(newValue).build());
+                } else if (!result.equals(newValue)) {
+                    logger.warn(
+                        "The device returned a different cloud communication value ({}) than " +
+                        "what was attempted set ({})",
+                        result,
+                        newValue
+                    );
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_CLOUD_COMMUNICATION).withMessageKeySuffix("store-failed")
+                        .withArguments(newValue).build());
+                } else {
+                    clearConfigParameterMessages(CONFIG_PARAM_CLOUD_COMMUNICATION);
+                    config.put(CONFIG_PARAM_CLOUD_COMMUNICATION, newValue);
+                    return true;
+                }
+            } catch (MillException e) {
+                logger.warn(
+                    "An error occurred when trying to send cloud communication value to {}: {}",
+                    getThing().getUID(),
+                    e.getMessage()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_CLOUD_COMMUNICATION).withMessageKeySuffix("store-failed-ex")
+                    .withArguments(e.getMessage()).build());
+            }
+        } else {
+            config.remove(CONFIG_PARAM_CLOUD_COMMUNICATION);
+        }
+        return false;
     }
 
     @Override

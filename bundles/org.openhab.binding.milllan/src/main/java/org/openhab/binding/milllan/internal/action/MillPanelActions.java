@@ -103,6 +103,23 @@ public class MillPanelActions extends MillBaseActions {
         return super.setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(
+        label = "@text/actions.milllan.set-cloud-communication.label",
+        description = "@text/actions.milllan.set-cloud-communication.description"
+    )
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setCloudCommunication(
+        @Nullable @ActionInput(
+            name = "enabled",
+            label = "@text/actions-input.milllan.set-cloud-communication.enabled.label",
+            description = "@text/actions-input.milllan.set-cloud-communication.enabled.description",
+            required = true
+        ) Boolean enabled
+    ) {
+        return super.setCloudCommunication(enabled);
+    }
+
     // Methods for Rules DSL rule support
 
     /**
@@ -143,5 +160,15 @@ public class MillPanelActions extends MillBaseActions {
         Double windupLimitPct
     ) {
         ((MillPanelActions) actions).setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct);
+    }
+
+    /**
+     * Attempts to set whether {@code cloud communication} is enabled in the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param enabled {@code true} to enabled cloud communication, {@code false} otherwise.
+     */
+    public static void setCloudCommunication(ThingActions actions, Boolean enabled) {
+        ((MillPanelActions) actions).setCloudCommunication(enabled);
     }
 }
