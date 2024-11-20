@@ -108,6 +108,20 @@ public class MillPanelActions extends MillBaseActions { // TODO: (Nad) Javadocs
         return super.setCloudCommunication(enabled);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(label = "@text/actions.milllan.set-independent-temperature.label", description = "@text/actions.milllan.set-independent-temperature.description")
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setIndependentModeTemperature(
+        @Nullable @ActionInput(
+            name = "temperature",
+            label = "@text/actions-input.milllan.set-independent-temperature.temperature.label",
+            description = "@text/actions-input.milllan.set-independent-temperature.temperature.description",
+            required = true
+        ) Number temperature
+    ) {
+        return super.setIndependentModeTemperature(temperature);
+    }
+
     // Methods for Rules DSL rule support
 
     public static void sendReboot(ThingActions actions) {
@@ -131,5 +145,9 @@ public class MillPanelActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     public static void setCloudCommunication(ThingActions actions, Boolean enabled) {
         ((MillPanelActions) actions).setCloudCommunication(enabled);
+    }
+
+    public static void setIndependentModeTemperature(ThingActions actions, Double temperature) {
+        ((MillPanelActions) actions).setIndependentModeTemperature(temperature);
     }
 }

@@ -128,6 +128,20 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
         return super.setHysteresisParameters(upper, lower);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(label = "@text/actions.milllan.set-independent-temperature.label", description = "@text/actions.milllan.set-independent-temperature.description")
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setIndependentModeTemperature(
+        @Nullable @ActionInput(
+            name = "temperature",
+            label = "@text/actions-input.milllan.set-independent-temperature.temperature.label",
+            description = "@text/actions-input.milllan.set-independent-temperature.temperature.description",
+            required = true
+        ) Number temperature
+    ) {
+        return super.setIndependentModeTemperature(temperature);
+    }
+
     // Methods for Rules DSL rule support
 
     public static void sendReboot(ThingActions actions) {
@@ -155,5 +169,9 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     public static void setHysteresisParameters(ThingActions actions, Double upper, Double lower) {
         ((MillAllActions) actions).setHysteresisParameters(upper, lower);
+    }
+
+    public static void setIndependentModeTemperature(ThingActions actions, Double temperature) {
+        ((MillAllActions) actions).setIndependentModeTemperature(temperature);
     }
 }
