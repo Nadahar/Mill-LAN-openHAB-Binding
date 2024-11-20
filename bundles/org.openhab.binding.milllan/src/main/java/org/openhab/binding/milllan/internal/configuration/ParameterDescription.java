@@ -93,6 +93,20 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "Hysteresis Lower",
         "thing-general.config.milllan.hysteresis-lower.description",
         "The lower limit: Set temperature - lower limit = start heating."
+    ),
+    CONFIG_PARAM_COMMERCIAL_LOCK_MIN(
+        MillBindingConstants.CONFIG_PARAM_COMMERCIAL_LOCK_MIN,
+        "thing-general.config.milllan.commercial-lock-min.label",
+        "Commercial Lock Minimum Temperature",
+        "thing-general.config.milllan.commercial-lock-min.description",
+        "The minimum temperature that can be set while the commercial lock is active."
+    ),
+    CONFIG_PARAM_COMMERCIAL_LOCK_MAX(
+        MillBindingConstants.CONFIG_PARAM_COMMERCIAL_LOCK_MAX,
+        "thing-general.config.milllan.commercial-lock-max.label",
+        "Commercial Lock Maximum Temperature",
+        "thing-general.config.milllan.commercial-lock-max.description",
+        "The maximum temperature that can be set while the commercial lock is active."
     );
 
     private final String name;
@@ -186,6 +200,18 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
                     .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(5L))
                     .withStepSize(BigDecimal.valueOf(0.25)).withGroupName("hysteresis")
                     .withAdvanced(true).withDefault("0.5");
+                break;
+            case CONFIG_PARAM_COMMERCIAL_LOCK_MIN:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(99L))
+                    .withStepSize(BigDecimal.valueOf(0.5)).withGroupName("commercialLock")
+                    .withAdvanced(true).withDefault("21");
+                break;
+            case CONFIG_PARAM_COMMERCIAL_LOCK_MAX:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(99L))
+                    .withStepSize(BigDecimal.valueOf(0.5)).withGroupName("commercialLock")
+                    .withAdvanced(true).withDefault("23");
                 break;
             default:
                 throw new IllegalStateException("Unimplemented config description parameter: " + name());
