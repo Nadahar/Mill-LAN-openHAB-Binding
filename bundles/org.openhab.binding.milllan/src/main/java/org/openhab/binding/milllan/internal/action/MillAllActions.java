@@ -164,6 +164,23 @@ public class MillAllActions extends MillBaseActions {
         return super.setIndependentModeTemperature(temperature);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(
+        label = "@text/actions.milllan.set-custom-name.label",
+        description = "@text/actions.milllan.set-custom-name.description"
+    )
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setCustomName(
+        @Nullable @ActionInput(
+            name = "customName",
+            label = "@text/actions-input.milllan.set-custom-name.custom-name.label",
+            description = "@text/actions-input.milllan.set-custom-name.custom-name.description",
+            required = false
+        ) String customName
+    ) {
+        return super.setCustomName(customName);
+    }
+
     // Methods for Rules DSL rule support
 
     /**
@@ -237,5 +254,15 @@ public class MillAllActions extends MillBaseActions {
      */
     public static void setIndependentModeTemperature(ThingActions actions, Double temperature) {
         ((MillAllActions) actions).setIndependentModeTemperature(temperature);
+    }
+
+    /**
+     * Attempts to set the {@code custom name} of the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param customName the new custom name.
+     */
+    public static void setCustomName(ThingActions actions, String customName) {
+        ((MillAllActions) actions).setCustomName(customName);
     }
 }

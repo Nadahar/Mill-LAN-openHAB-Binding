@@ -816,6 +816,30 @@ public class MillAPITool {
     }
 
     /**
+     * Sends {@code POST/set-custom-name} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param customName the custom name to set, <b>maximum 32 bytes in {@code UTF-8}</b>.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setCustomName(String hostname, String customName) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("device_name", customName);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/set-custom-name",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
      * Sends {@code POST/reboot} to the device's REST API.
      * <p>
      * <b>Note:</b> This method will time out if successful.
