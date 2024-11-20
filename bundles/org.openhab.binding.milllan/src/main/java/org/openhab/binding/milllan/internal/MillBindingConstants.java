@@ -49,6 +49,14 @@ public class MillBindingConstants {
         THING_TYPE_ALL_FUNCTIONS
     );
 
+    // mDNS property names
+
+    /** The {@code mDNS} {@code id} property key */
+    public static final String MDNS_PROPERTY_ID = "id";
+
+    /** The {@code mDNS} {@code name} property key */
+    public static final String MDNS_PROPERTY_NAME = "name";
+
     // List of all Channel IDs
 
     /** The Ambient Temperature {@link Channel} */
