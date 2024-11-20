@@ -103,6 +103,16 @@ public class MillPanelHeaterHandler extends AbstractMillThingHandler {
                 pollPIDParameters(true);
                 pollCloudCommunication(true);
                 pollCommercialLock();
+                /*
+                 * Commercial lock functionality seems to be completely broken, at least in firmware
+                 * 0x230630. It's thus commented out here as trying to use it will only
+                 * lead to frustration. If this changes in the future, a logic that
+                 * looks at the firmware and enables it in working versions could be implemented> here.
+                 *
+                 * The disabled call is: pollCommercialLockCustomization(true);
+                 * If enabled, pollCommercialLock() can be disabled, as the commercial lock state is also
+                 * fetched in pollCommercialLockCustomization()
+                 */
             } catch (MillException e) {
                 setOffline(e);
             }

@@ -50,6 +50,7 @@ import org.openhab.binding.milllan.internal.api.ResponseStatus;
 import org.openhab.binding.milllan.internal.api.TemperatureType;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
 import org.openhab.binding.milllan.internal.api.response.CloudCommunicationResponse;
+import org.openhab.binding.milllan.internal.api.response.CommercialLockCustomizationResponse;
 import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
@@ -1415,6 +1416,103 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     /**
+     * Retrieves the commercial lock customization parameters and returns the values.
+     *
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the retrieved values.
+     * @return The resulting {@link CommercialLockCustomizationResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    @Nullable
+    public CommercialLockCustomizationResponse pollCommercialLockCustomization(
+        boolean updateConfiguration
+    ) throws MillException {
+        CommercialLockCustomizationResponse response;
+        try {
+            response = apiTool.getCommercialLockCustomization(getHostname());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support commercial lock customization", getThing().getUID());
+                return null;
+            }
+            throw e;
+        }
+
+        Boolean b = response.getEnabled();
+        if (b != null) {
+            updateState(COMMERCIAL_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
+        }
+
+        if (response.isComplete()) {
+            configDescriptionProvider.enableDescriptions(
+                thing.getUID(),
+                CONFIG_PARAM_COMMERCIAL_LOCK_MIN,
+                CONFIG_PARAM_COMMERCIAL_LOCK_MAX
+            );
+        }
+        if (updateConfiguration) {
+            Configuration configuration = editConfiguration();
+            Double d;
+            boolean changed = false;
+            if ((d = response.getMinimum()) != null) {
+                Object object = configuration.get(CONFIG_PARAM_COMMERCIAL_LOCK_MIN);
+                if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
+                    configuration.put(CONFIG_PARAM_COMMERCIAL_LOCK_MIN, BigDecimal.valueOf(d));
+                    changed |= true;
+                }
+            }
+            if ((d = response.getMaximum()) != null) {
+                Object object = configuration.get(CONFIG_PARAM_COMMERCIAL_LOCK_MAX);
+                if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
+                    configuration.put(CONFIG_PARAM_COMMERCIAL_LOCK_MAX, BigDecimal.valueOf(d));
+                    changed |= true;
+                }
+            }
+            if (changed) {
+                updateConfiguration(configuration);
+            }
+        }
+        return response;
+    }
+
+    /**
+     * Sends the specified commercial lock customization parameters to the device and immediately
+     * queries the device for the same parameters, so that the result of the operation is known.
+     *
+     * @param min the minimum set-temperature in °C.
+     * @param max the maximum set-temperature in °C.
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the new values.
+     * @return The resulting {@link HysteresisParametersResponse} from the follow-up query.
+     * @throws MillException If an error occurs during the operation.
+     */
+    @Nullable
+    public CommercialLockCustomizationResponse setCommercialLockCustomization(
+        Number min,
+        Number max,
+        boolean updateConfiguration
+    ) throws MillException {
+        Response response = apiTool.setCommercialLockCustomization(getHostname(), min.doubleValue(), max.doubleValue());
+        CommercialLockCustomizationResponse result = pollCommercialLockCustomization(updateConfiguration);
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set commercial lock parameters: {}",
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+        return result;
+    }
+
+    /**
      * Instructs the device to reboot.
      * <p>
      * <b>Note:</b> This method will take some time, since a timeout must elapse before it returns.
@@ -2001,6 +2099,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         ) {
             rebootRequired |= handleHysteresisParametersUpdate(configuration, configurationParameters, online);
         }
+        if (
+            modifiedParameters.contains(CONFIG_PARAM_COMMERCIAL_LOCK_MIN) ||
+            modifiedParameters.contains(CONFIG_PARAM_COMMERCIAL_LOCK_MAX)
+        ) {
+            handleCommercialLockParametersUpdate(configuration, configurationParameters, online);
+        }
 
         if ((
                 modifiedParameters.contains(CONFIG_PARAM_HOSTNAME) ||
@@ -2514,6 +2618,124 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             clearConfigParameterMessages(CONFIG_PARAM_HYSTERESIS_UPPER, CONFIG_PARAM_HYSTERESIS_LOWER);
         }
         return false;
+    }
+
+    /**
+     * Handles the update of the current configuration with new commercial lock parameters, including
+     * setting and logging error states.
+     *
+     * @param config the {@link Configuration} to update.
+     * @param newParameters the new configuration parameters to apply.
+     * @param online whether the {@link Thing} is currently online.
+     */
+    protected void handleCommercialLockParametersUpdate(
+        Configuration config,
+        Map<String, Object> newParameters,
+        boolean online
+    ) {
+        if (online) {
+            Number newMin, newMax;
+            Object object = newParameters.get(CONFIG_PARAM_COMMERCIAL_LOCK_MIN);
+            if (object instanceof Number) {
+                newMin = (Number) object;
+            } else {
+                logger.warn(
+                    "Ignoring invalid new commercial lock minimum temerature {} for Thing \"{}\"",
+                    object,
+                    getThing().getUID()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_COMMERCIAL_LOCK_MIN).withMessageKeySuffix("invalid-parameter")
+                    .withArguments(object).build());
+                newMin = null;
+            }
+            object = newParameters.get(CONFIG_PARAM_COMMERCIAL_LOCK_MAX);
+            if (object instanceof Number) {
+                newMax = (Number) object;
+            } else {
+                logger.warn(
+                    "Ignoring invalid new commercial lock maximum temerature {} for Thing \"{}\"",
+                    object,
+                    getThing().getUID()
+                );
+                setConfigParameterMessage(ConfigStatusMessage.Builder
+                    .error(CONFIG_PARAM_COMMERCIAL_LOCK_MAX).withMessageKeySuffix("invalid-parameter")
+                    .withArguments(object).build());
+                newMax =  null;
+            }
+            if (newMin != null && newMax != null) {
+                try {
+                    CommercialLockCustomizationResponse result = setCommercialLockCustomization(newMin, newMax, false);
+                    Double d;
+                    boolean setFailed = false;
+                    if (result == null || !result.isComplete()) {
+                        logger.warn(
+                            "An empty or partial response was received after setting commercial lock parameters"
+                        );
+                        setConfigParameterMessage(ConfigStatusMessage.Builder
+                            .error(CONFIG_PARAM_COMMERCIAL_LOCK_MIN)
+                            .withMessageKeySuffix("store-failed-commercial-lock").build());
+                        setConfigParameterMessage(ConfigStatusMessage.Builder
+                            .error(CONFIG_PARAM_COMMERCIAL_LOCK_MAX)
+                            .withMessageKeySuffix("store-failed-commercial-lock").build());
+                        setFailed = true;
+                    } else {
+                        if ((d = result.getMinimum()) != null && d.doubleValue() != newMin.doubleValue()) {
+                            logger.warn(
+                                "The device returned a different commercial lock minimum temperature ({})" +
+                                " than what was attempted set ({})",
+                                d,
+                                newMin
+                            );
+                            setConfigParameterMessage(ConfigStatusMessage.Builder
+                                .error(CONFIG_PARAM_COMMERCIAL_LOCK_MIN).withMessageKeySuffix("store-failed")
+                                .withArguments(newMin).build());
+                            setFailed = true;
+                        }
+                        if ((d = result.getMaximum()) != null && d.doubleValue() != newMax.doubleValue()) {
+                            logger.warn(
+                                "The device returned a different commercial lock maximum temperature ({})" +
+                                " than what was attempted set ({})",
+                                d,
+                                newMax
+                            );
+                            setConfigParameterMessage(ConfigStatusMessage.Builder
+                                .error(CONFIG_PARAM_COMMERCIAL_LOCK_MAX).withMessageKeySuffix("store-failed")
+                                .withArguments(newMax).build());
+                            setFailed = true;
+                        }
+                    }
+                    if (!setFailed) {
+                        clearConfigParameterMessages(
+                            CONFIG_PARAM_COMMERCIAL_LOCK_MIN, CONFIG_PARAM_COMMERCIAL_LOCK_MAX
+                        );
+                        config.put(CONFIG_PARAM_COMMERCIAL_LOCK_MIN, newMin);
+                        config.put(CONFIG_PARAM_COMMERCIAL_LOCK_MAX, newMax);
+                    }
+                } catch (MillException e) {
+                    logger.warn(
+                        "An error occurred when trying to send commercial lock paramteres to {}: {}",
+                        getThing().getUID(),
+                        e.getMessage()
+                    );
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_COMMERCIAL_LOCK_MIN).withMessageKeySuffix("store-failed-ex")
+                        .withArguments(e.getMessage()).build());
+                    setConfigParameterMessage(ConfigStatusMessage.Builder
+                        .error(CONFIG_PARAM_COMMERCIAL_LOCK_MAX).withMessageKeySuffix("store-failed-ex")
+                        .withArguments(e.getMessage()).build());
+                }
+            } else {
+                logger.warn(
+                    "Failed to send commercial lock parameters to {} because some parameters are missing or invalid",
+                    getThing().getUID()
+                );
+            }
+        } else {
+            config.remove(CONFIG_PARAM_COMMERCIAL_LOCK_MIN);
+            config.remove(CONFIG_PARAM_COMMERCIAL_LOCK_MAX);
+            clearConfigParameterMessages(CONFIG_PARAM_COMMERCIAL_LOCK_MIN, CONFIG_PARAM_COMMERCIAL_LOCK_MAX);
+        }
     }
 
     @Override
