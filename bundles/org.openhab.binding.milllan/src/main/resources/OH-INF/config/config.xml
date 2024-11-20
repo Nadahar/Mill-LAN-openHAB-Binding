@@ -18,6 +18,10 @@
 			<description>Note: Device will reboot if hysteresis parameters are changed</description>
 			<advanced>true</advanced>
 		</parameter-group>
+		<parameter-group name="commercialLock">
+			<label>Commercial Lock</label>
+			<advanced>true</advanced>
+		</parameter-group>
 		
 		<parameter name="hostname" type="text" required="true" groupName="general">
 			<context>network-address</context>

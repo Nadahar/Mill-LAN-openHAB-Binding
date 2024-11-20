@@ -32,6 +32,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.milllan.internal.MillUtil;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
 import org.openhab.binding.milllan.internal.api.response.CloudCommunicationResponse;
+import org.openhab.binding.milllan.internal.api.response.CommercialLockCustomizationResponse;
 import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
 import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
@@ -572,6 +573,54 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             null,
             HttpMethod.POST,
             "/set-custom-name",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public CommercialLockCustomizationResponse getCommercialLockCustomization(String hostname) throws MillException {
+        return request(
+            CommercialLockCustomizationResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/commercial-lock-customization",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setCommercialLockCustomization(String hostname, Double min, Double max) throws MillException {
+        CommercialLockResponse lockState = request(
+            CommercialLockResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/commercial-lock",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+        Boolean enabled = lockState.getValue();
+        if (enabled == null) {
+            enabled = Boolean.FALSE;
+        }
+
+        JsonObject object = new JsonObject();
+        object.addProperty("enabled", enabled);
+        object.addProperty("min_allowed_temp_in_commercial_lock", min);
+        object.addProperty("max_allowed_temp_in_commercial_lock", max);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/commercial-lock-customization",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,
