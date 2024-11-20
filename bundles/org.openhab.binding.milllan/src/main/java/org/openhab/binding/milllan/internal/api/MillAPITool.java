@@ -562,6 +562,23 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    // Doc: Max 32 characters custom name
+    public Response setCustomName(String hostname, String customName) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("device_name", customName);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/set-custom-name",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
     //Doc: WILL time out - response is never sent
     public Response sendReboot(String hostname) throws MillException {
         return request(

@@ -21,6 +21,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.milllan.internal.AbstractMillThingHandler;
+import org.openhab.binding.milllan.internal.MillUtil;
 import org.openhab.binding.milllan.internal.api.ResponseStatus;
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
@@ -259,6 +260,36 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
                 e.getMessage()
             );
             result.put("result", "Failed to execute setIndependentModeTemperature Action: " + e.getMessage());
+        }
+        return result;
+    }
+
+    public Map<String, Object> setCustomName(@Nullable String customName) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setCustomName Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        try {
+            ResponseStatus responseStatus = handlerInst.setCustomName(MillUtil.isBlank(customName) ? "" : customName);
+            if (responseStatus != ResponseStatus.OK) {
+                result.put("result", "Failed: " + (responseStatus == null ? "Missing response" : responseStatus.getDescription()));
+            } else {
+                if (MillUtil.isBlank(customName)) {
+                    result.put("result", "The custom device name was removed");
+                } else {
+                    result.put("result", "The custom device name was set to " + customName);
+                }
+            }
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setCustomName Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute Action: " + e.getMessage());
         }
         return result;
     }

@@ -1122,6 +1122,29 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return responseStatus;
     }
 
+    @Nullable
+    public ResponseStatus setCustomName(@Nullable String customName) throws MillException {
+        Response response = apiTool.setCustomName(getHostname(), customName == null ? "" : customName);
+        pollStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set custom name to \"{}\": {}",
+                customName,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+        return responseStatus;
+    }
+
     public void sendReboot() throws MillException {
         Response response = null;
         try {
