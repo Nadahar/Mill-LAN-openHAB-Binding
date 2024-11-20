@@ -122,6 +122,20 @@ public class MillPanelActions extends MillBaseActions { // TODO: (Nad) Javadocs
         return super.setIndependentModeTemperature(temperature);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(label = "@text/actions.milllan.set-custom-name.label", description = "@text/actions.milllan.set-custom-name.description")
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setCustomName(
+        @Nullable @ActionInput(
+            name = "customName",
+            label = "@text/actions-input.milllan.set-custom-name.custom-name.label",
+            description = "@text/actions-input.milllan.set-custom-name.custom-name.description",
+            required = true
+        ) String customName
+    ) {
+        return super.setCustomName(customName);
+    }
+
     // Methods for Rules DSL rule support
 
     public static void sendReboot(ThingActions actions) {
@@ -149,5 +163,9 @@ public class MillPanelActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     public static void setIndependentModeTemperature(ThingActions actions, Double temperature) {
         ((MillPanelActions) actions).setIndependentModeTemperature(temperature);
+    }
+
+    public static void setCustomName(ThingActions actions, String customName) {
+        ((MillPanelActions) actions).setCustomName(customName);
     }
 }
