@@ -147,6 +147,23 @@ public class MillAllActions extends MillBaseActions {
         return super.setHysteresisParameters(upper, lower);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(
+        label = "@text/actions.milllan.set-independent-temperature.label",
+        description = "@text/actions.milllan.set-independent-temperature.description"
+    )
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setIndependentModeTemperature(
+        @Nullable @ActionInput(
+            name = "temperature",
+            label = "@text/actions-input.milllan.set-independent-temperature.temperature.label",
+            description = "@text/actions-input.milllan.set-independent-temperature.temperature.description",
+            required = true
+        ) Number temperature
+    ) {
+        return super.setIndependentModeTemperature(temperature);
+    }
+
     // Methods for Rules DSL rule support
 
     /**
@@ -208,5 +225,17 @@ public class MillAllActions extends MillBaseActions {
      */
     public static void setHysteresisParameters(ThingActions actions, Double upper, Double lower) {
         ((MillAllActions) actions).setHysteresisParameters(upper, lower);
+    }
+
+    /**
+     * Attempts to set the {@code set-temperature} in "independent device" mode in the device.
+     * <p>
+     * <b>Note:</b> This command will <i>only</i> work if the device is in "independent device" mode.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param temperature the set-temperature in °C.
+     */
+    public static void setIndependentModeTemperature(ThingActions actions, Double temperature) {
+        ((MillAllActions) actions).setIndependentModeTemperature(temperature);
     }
 }

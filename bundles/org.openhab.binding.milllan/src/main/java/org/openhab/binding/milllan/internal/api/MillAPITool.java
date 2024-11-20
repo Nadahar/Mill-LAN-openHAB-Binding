@@ -790,6 +790,32 @@ public class MillAPITool {
     }
 
     /**
+     * Sends {@code POST/set-temperature-in-independent-mode-now} to the device's REST API and returns the response.
+     * <p>
+     * <b>Note:</b> Will fail is the device isn't in "Independent device" mode.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param value the target temperature in °C.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setTemperatureInIndependentMode(String hostname, BigDecimal value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("temperature", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/set-temperature-in-independent-mode-now",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
      * Sends {@code POST/reboot} to the device's REST API.
      * <p>
      * <b>Note:</b> This method will time out if successful.

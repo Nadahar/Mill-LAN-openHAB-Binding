@@ -1350,6 +1350,40 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     /**
+     * Sends the specified set-temperature value to the device and immediately
+     * queries the device for the same value, so that the result of the operation is known.
+     * <p>
+     * <b>Note:</b> This command will <i>only</i> work if the device is in "independent device" mode.
+     * If not, {@code HTTP} status 503 will be returned in the form of a {@link MillHTTPResponseException}.
+     *
+     * @param value the set-temperature in °C.
+     * @return The {@link ResponseStatus} received after sending the command.
+     * @throws MillException If an error occurs during the operation.
+     */
+    @Nullable
+    public ResponseStatus setTemperatureInIndependentMode(BigDecimal value) throws MillException {
+        Response response = apiTool.setTemperatureInIndependentMode(getHostname(), value);
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set temperature in \"independent device\" mode to \"{}\": {}",
+                value,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+        return responseStatus;
+    }
+
+    /**
      * Instructs the device to reboot.
      * <p>
      * <b>Note:</b> This method will take some time, since a timeout must elapse before it returns.

@@ -120,6 +120,23 @@ public class MillPanelActions extends MillBaseActions {
         return super.setCloudCommunication(enabled);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(
+        label = "@text/actions.milllan.set-independent-temperature.label",
+        description = "@text/actions.milllan.set-independent-temperature.description"
+    )
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setIndependentModeTemperature(
+        @Nullable @ActionInput(
+            name = "temperature",
+            label = "@text/actions-input.milllan.set-independent-temperature.temperature.label",
+            description = "@text/actions-input.milllan.set-independent-temperature.temperature.description",
+            required = true
+        ) Number temperature
+    ) {
+        return super.setIndependentModeTemperature(temperature);
+    }
+
     // Methods for Rules DSL rule support
 
     /**
@@ -170,5 +187,17 @@ public class MillPanelActions extends MillBaseActions {
      */
     public static void setCloudCommunication(ThingActions actions, Boolean enabled) {
         ((MillPanelActions) actions).setCloudCommunication(enabled);
+    }
+
+    /**
+     * Attempts to set the {@code set-temperature} in "independent device" mode in the device.
+     * <p>
+     * <b>Note:</b> This command will <i>only</i> work if the device is in "independent device" mode.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param temperature the set-temperature in °C.
+     */
+    public static void setIndependentModeTemperature(ThingActions actions, Double temperature) {
+        ((MillPanelActions) actions).setIndependentModeTemperature(temperature);
     }
 }
