@@ -39,6 +39,10 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
         THING_TYPE_ALL_FUNCTIONS
     );
 
+    // mDNS property names
+    public static final String MDNS_PROPERTY_ID = "id";
+    public static final String MDNS_PROPERTY_NAME = "name";
+
     // List of all Channel ids
     public static final String AMBIENT_TEMPERATURE = "ambient-temperature";
     public static final String RAW_AMBIENT_TEMPERATURE = "raw-ambient-temperature";
