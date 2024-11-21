@@ -22,6 +22,10 @@
 			<label>Commercial Lock</label>
 			<advanced>true</advanced>
 		</parameter-group>
+		<parameter-group name="openWindowFunction">
+			<label>Open Window Function</label>
+			<advanced>true</advanced>
+		</parameter-group>
 		
 		<parameter name="hostname" type="text" required="true" groupName="general">
 			<context>network-address</context>

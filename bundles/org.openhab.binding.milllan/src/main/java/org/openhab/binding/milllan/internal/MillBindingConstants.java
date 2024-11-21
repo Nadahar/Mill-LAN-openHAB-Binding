@@ -122,6 +122,12 @@ public class MillBindingConstants {
     /** The Oil Heater Power {@link Channel} */
     public static final String OIL_HEATER_POWER = "oil-heater-power";
 
+    /** The Open Window Active {@link Channel} */
+    public static final String OPEN_WINDOW_ACTIVE = "open-window-active";
+
+    /** The Open Window Enabled {@link Channel} */
+    public static final String OPEN_WINDOW_ENABLED = "open-window-enabled";
+
     // Property constants
 
     /** The {@code name} {@link Property} */
@@ -185,12 +191,29 @@ public class MillBindingConstants {
     /** The commercial lock maximum temperature configuration parameter */
     public static final String CONFIG_PARAM_COMMERCIAL_LOCK_MAX = "commercialLockMax";
 
+    /** The open window drop temperature threshold configuration parameter */
+    public static final String CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR = "openWindowDropTemperatureThreshold";
+
+    /** The open window drop time range configuration parameter */
+    public static final String CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE = "openWindowDropTimeRange";
+
+    /** The open window increase temperature threshold configuration parameter */
+    public static final String CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR = "openWindowIncreaseTemperatureThreshold";
+
+    /** The open window increase time range configuration parameter */
+    public static final String CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE = "openWindowIncreaseTimeRange";
+
+    /** The open window maximum time configuration parameter */
+    public static final String CONFIG_PARAM_OPEN_WINDOW_MAX_TIME = "openWindowMaxTime";
+
     /** The {@link Set} of dynamic configuration parameters */
     public static final Set<String> CONFIG_DYNAMIC_PARAMETERS = Set.of(
         CONFIG_PARAM_TIMEZONE_OFFSET, CONFIG_PARAM_PID_KP, CONFIG_PARAM_PID_KI, CONFIG_PARAM_PID_KD,
         CONFIG_PARAM_PID_KD_FILTER_N, CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, CONFIG_PARAM_CLOUD_COMMUNICATION,
         CONFIG_PARAM_HYSTERESIS_UPPER, CONFIG_PARAM_HYSTERESIS_LOWER, CONFIG_PARAM_COMMERCIAL_LOCK_MIN,
-        CONFIG_PARAM_COMMERCIAL_LOCK_MAX
+        CONFIG_PARAM_COMMERCIAL_LOCK_MAX, CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR,
+        CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE, CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR,
+        CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE, CONFIG_PARAM_OPEN_WINDOW_MAX_TIME
     );
 
     private MillBindingConstants() {

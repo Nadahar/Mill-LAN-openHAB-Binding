@@ -113,6 +113,7 @@ public class MillPanelHeaterHandler extends AbstractMillThingHandler {
                  * If enabled, pollCommercialLock() can be disabled, as the commercial lock state is also
                  * fetched in pollCommercialLockCustomization()
                  */
+                pollOpenWindowParameters(true);
             } catch (MillException e) {
                 setOffline(e);
             }

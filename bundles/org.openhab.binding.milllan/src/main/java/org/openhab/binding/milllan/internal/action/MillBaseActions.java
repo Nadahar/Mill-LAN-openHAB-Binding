@@ -361,4 +361,56 @@ public class MillBaseActions implements ThingActions {
         }
         return result;
     }
+
+    /**
+     * Attempts to set the {@code open window parameters} in the device and returns the result of the {@link Action}.
+     *
+     * @param dropTempThr the temperature drop required to trigger (activate) the open
+     *        window function in °C.
+     * @param dropTimeRange the time range for which a drop in temperature will be evaluated in seconds.
+     * @param incTempThr the temperature increase required to deactivate the open window
+     *        function in °C.
+     * @param incTimeRange the time range for which an increase in temperature will be evaluated in seconds.
+     * @param maxTime the maximum time the open window function will remain active.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
+    public Map<String, Object> setOpenWindowParameters(
+        @Nullable Double dropTempThr,
+        @Nullable Integer dropTimeRange,
+        @Nullable Double incTempThr,
+        @Nullable Integer incTimeRange,
+        @Nullable Integer maxTime
+    ) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setOpenWindowParameters Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        if (
+            dropTempThr == null ||
+            dropTimeRange == null ||
+            incTempThr == null ||
+            incTimeRange == null ||
+            maxTime == null
+        ) {
+            logger.warn("Call to setOpenWindowParameters Action failed because some parameters were null");
+            result.put("result", "All open window parameters must be specified!");
+            return result;
+        }
+        try {
+            handlerInst.setOpenWindowParameters(dropTempThr, dropTimeRange, incTempThr, incTimeRange, maxTime, true);
+            result.put("result", "The open window parameters were set.");
+            return result;
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setOpenWindowParameters Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute setOpenWindowParameters Action: " + e.getMessage());
+            return result;
+        }
+    }
 }

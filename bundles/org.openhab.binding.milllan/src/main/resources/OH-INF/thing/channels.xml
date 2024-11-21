@@ -271,4 +271,24 @@
 		</state>
 		<autoUpdatePolicy>veto</autoUpdatePolicy>
 	</channel-type>
+	<channel-type id="open-window-active">
+		<item-type>Switch</item-type>
+		<label>Open Window Active</label>
+		<description>Whether the open window function is active right now.</description>
+		<category>window</category>
+		<tags>
+			<tag>Status</tag>
+		</tags>
+		<state readOnly="true"></state>
+	</channel-type>
+	<channel-type id="open-window-enabled">
+		<item-type>Switch</item-type>
+		<label>Open Window Function</label>
+		<description>Whether the open window function is enabled.</description>
+		<category>window</category>
+		<tags>
+			<tag>Switch</tag>
+		</tags>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
 </thing:thing-descriptions>
