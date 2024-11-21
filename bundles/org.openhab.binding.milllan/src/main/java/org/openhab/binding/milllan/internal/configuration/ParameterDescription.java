@@ -107,6 +107,41 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "Commercial Lock Maximum Temperature",
         "thing-general.config.milllan.commercial-lock-max.description",
         "The maximum temperature that can be set while the commercial lock is active."
+    ),
+    CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR(
+        MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR,
+        "thing-general.config.milllan.open-window-drop-temp-thr.label",
+        "Drop Temperature Threshold",
+        "thing-general.config.milllan.open-window-drop-temp-thr.description",
+        "The temperature drop required to trigger (activate) the open window function."
+    ),
+    CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE(
+        MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE,
+        "thing-general.config.milllan.open-window-drop-time-range.label",
+        "Drop Time Range",
+        "thing-general.config.milllan.open-window-drop-time-range.description",
+        "The time range for which a drop in temperature will be evaluated."
+    ),
+    CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR(
+        MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR,
+        "thing-general.config.milllan.open-window-inc-temp-thr.label",
+        "Increase Temperature Threshold",
+        "thing-general.config.milllan.open-window-inc-temp-thr.description",
+        "The temperature increase required to deactivate the open window function."
+    ),
+    CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE(
+        MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE,
+        "thing-general.config.milllan.open-window-inc-time-range.label",
+        "Increase Time Range",
+        "thing-general.config.milllan.open-window-inc-time-range.description",
+        "The time range for which an increase in temperature will be evaluated."
+    ),
+    CONFIG_PARAM_OPEN_WINDOW_MAX_TIME(
+        MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_MAX_TIME,
+        "thing-general.config.milllan.open-window-max-time.label",
+        "Maximum Time",
+        "thing-general.config.milllan.open-window-max-time.description",
+        "The maximum time the open window function will remain active."
     );
 
     private final String name;
@@ -212,6 +247,36 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
                     .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(99L))
                     .withStepSize(BigDecimal.valueOf(0.5)).withGroupName("commercialLock")
                     .withAdvanced(true).withDefault("23");
+                break;
+            case CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(99L)).withUnit("Cel")
+                    .withStepSize(BigDecimal.valueOf(0.25)).withGroupName("openWindowFunction")
+                    .withAdvanced(true).withDefault("5");
+                break;
+            case CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.INTEGER)
+                    .withMinimum(BigDecimal.valueOf(0L)).withUnit("s")
+                    .withStepSize(BigDecimal.valueOf(1)).withGroupName("openWindowFunction")
+                    .withAdvanced(true).withDefault("900");
+                break;
+            case CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
+                    .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(99L)).withUnit("Cel")
+                    .withStepSize(BigDecimal.valueOf(0.25)).withGroupName("openWindowFunction")
+                    .withAdvanced(true).withDefault("3");
+                break;
+            case CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.INTEGER)
+                    .withMinimum(BigDecimal.valueOf(0L)).withUnit("s")
+                    .withStepSize(BigDecimal.valueOf(1)).withGroupName("openWindowFunction")
+                    .withAdvanced(true).withDefault("900");
+                break;
+            case CONFIG_PARAM_OPEN_WINDOW_MAX_TIME:
+                builder = ConfigDescriptionParameterBuilder.create(name, Type.INTEGER)
+                    .withMinimum(BigDecimal.valueOf(0L)).withUnit("s")
+                    .withStepSize(BigDecimal.valueOf(1)).withGroupName("openWindowFunction")
+                    .withAdvanced(true).withDefault("3600");
                 break;
             default:
                 throw new IllegalStateException("Unimplemented config description parameter: " + name());

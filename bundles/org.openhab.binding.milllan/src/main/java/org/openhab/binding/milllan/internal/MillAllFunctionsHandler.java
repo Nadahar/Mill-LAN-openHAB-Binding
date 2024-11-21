@@ -93,6 +93,7 @@ public class MillAllFunctionsHandler extends AbstractMillThingHandler { //TODO: 
                 pollHysteresisParameters(true);
                 pollCommercialLock();
                 pollCommercialLockCustomization(true);
+                pollOpenWindowParameters(true);
             } catch (MillException e) {
                 setOffline(e);
             }

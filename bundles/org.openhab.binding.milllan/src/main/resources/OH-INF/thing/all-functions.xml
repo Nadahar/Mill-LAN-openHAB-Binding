@@ -18,6 +18,8 @@
 			<channel typeId="control-signal" id="control-signal"/>
 			<channel typeId="lock-status" id="lock-status"/>
 			<channel typeId="open-window-status" id="open-window-status"/>
+			<channel typeId="open-window-active" id="open-window-active"/>
+			<channel typeId="open-window-enabled" id="open-window-enabled"/>
 			<channel typeId="set-temperature" id="set-temperature"/>
 			<channel typeId="connected-to-cloud" id="connected-to-cloud"/>
 			<channel typeId="operation-mode" id="operation-mode"/>

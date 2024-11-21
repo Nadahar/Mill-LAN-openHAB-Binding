@@ -30,6 +30,7 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.milllan.internal.MillUtil;
+import org.openhab.binding.milllan.internal.api.request.OpenWindowParameters;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
 import org.openhab.binding.milllan.internal.api.response.CloudCommunicationResponse;
 import org.openhab.binding.milllan.internal.api.response.CommercialLockCustomizationResponse;
@@ -41,6 +42,7 @@ import org.openhab.binding.milllan.internal.api.response.GenericResponse;
 import org.openhab.binding.milllan.internal.api.response.HysteresisParametersResponse;
 import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OilHeaterPowerResponse;
+import org.openhab.binding.milllan.internal.api.response.OpenWindowParametersResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.PIDParametersResponse;
 import org.openhab.binding.milllan.internal.api.response.PredictiveHeatingTypeResponse;
@@ -622,6 +624,34 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             HttpMethod.POST,
             "/commercial-lock-customization",
             gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    public OpenWindowParametersResponse getOpenWindowParameters(String hostname) throws MillException {
+        return request(
+            OpenWindowParametersResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/open-window",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    public Response setOpenWindowParameters(String hostname, OpenWindowParameters parameters) throws MillException {
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/open-window",
+            gson.toJson(parameters),
             1L,
             TimeUnit.SECONDS,
             false

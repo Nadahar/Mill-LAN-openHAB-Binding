@@ -293,4 +293,38 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         }
         return result;
     }
+
+    public Map<String, Object> setOpenWindowParameters(
+        @Nullable Double dropTempThr,
+        @Nullable Integer dropTimeRange,
+        @Nullable Double incTempThr,
+        @Nullable Integer incTimeRange,
+        @Nullable Integer maxTime
+    ) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setOpenWindowParameters Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        if (dropTempThr == null || dropTimeRange == null || incTempThr == null || incTimeRange == null || maxTime == null) {
+            logger.warn("Call to setOpenWindowParameters Action failed because some parameters were null");
+            result.put("result", "All open window parameters must be specified!");
+            return result;
+        }
+        try {
+            handlerInst.setOpenWindowParameters(dropTempThr, dropTimeRange, incTempThr, incTimeRange, maxTime, true);
+            result.put("result", "The open window parameters were set.");
+            return result;
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setOpenWindowParameters Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute setOpenWindowParameters Action: " + e.getMessage());
+            return result;
+        }
+    }
 }
