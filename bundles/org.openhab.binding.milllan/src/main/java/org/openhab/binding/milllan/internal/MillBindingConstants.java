@@ -65,6 +65,8 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
     public static final String CONTROLLER_TYPE = "controller-type";
     public static final String PREDICTIVE_HEATING_TYPE = "predictive-heating-type";
     public static final String OIL_HEATER_POWER = "oil-heater-power"; //TODO: (Nad) Oil only
+    public static final String OPEN_WINDOW_ACTIVE = "open-window-active";
+    public static final String OPEN_WINDOW_ENABLED = "open-window-enabled";
 
     // Propery constants
     public static final String PROPERTY_NAME = "name";
@@ -107,11 +109,23 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
 
     public static final String CONFIG_PARAM_COMMERCIAL_LOCK_MAX = "commercialLockMax";
 
+    public static final String CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR = "openWindowDropTemperatureThreshold";
+
+    public static final String CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE = "openWindowDropTimeRange";
+
+    public static final String CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR = "openWindowIncreaseTemperatureThreshold";
+
+    public static final String CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE = "openWindowIncreaseTimeRange";
+
+    public static final String CONFIG_PARAM_OPEN_WINDOW_MAX_TIME = "openWindowMaxTime";
+
     public static final Set<String> CONFIG_DYNAMIC_PARAMETERS = Set.of(
         CONFIG_PARAM_TIMEZONE_OFFSET, CONFIG_PARAM_PID_KP, CONFIG_PARAM_PID_KI, CONFIG_PARAM_PID_KD,
         CONFIG_PARAM_PID_KD_FILTER_N, CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, CONFIG_PARAM_CLOUD_COMMUNICATION,
         CONFIG_PARAM_HYSTERESIS_UPPER, CONFIG_PARAM_HYSTERESIS_LOWER, CONFIG_PARAM_COMMERCIAL_LOCK_MIN,
-        CONFIG_PARAM_COMMERCIAL_LOCK_MAX
+        CONFIG_PARAM_COMMERCIAL_LOCK_MAX, CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR,
+        CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE, CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR,
+        CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE, CONFIG_PARAM_OPEN_WINDOW_MAX_TIME
     );
 
     private MillBindingConstants() {
