@@ -362,7 +362,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollStatus() throws MillException { //TODO: (Nad) Remember to run: mvn i18n:generate-default-translations
-        StatusResponse statusResponse = apiTool.getStatus(getHostname());
+        StatusResponse statusResponse = apiTool.getStatus(getHostname(), getAPIKey());
         setOnline();
         Map<String, String> properties = editProperties();
         boolean changed = false;
@@ -411,7 +411,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollControlStatus() throws MillException {
-        ControlStatusResponse controlStatusResponse = apiTool.getControlStatus(getHostname());
+        ControlStatusResponse controlStatusResponse = apiTool.getControlStatus(getHostname(), getAPIKey());
         setOnline();
         Double d;
         if ((d = controlStatusResponse.getAmbientTemperature()) != null) {
@@ -456,7 +456,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollOperationMode() throws MillException {
-        OperationModeResponse operationModeResponse = apiTool.getOperationMode(getHostname());
+        OperationModeResponse operationModeResponse = apiTool.getOperationMode(getHostname(), getAPIKey());
         setOnline();
         OperationMode om;
         if ((om = operationModeResponse.getMode()) != null) {
@@ -471,7 +471,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             return;
         }
 
-        Response response = apiTool.setOperationMode(getHostname(), mode);
+        Response response = apiTool.setOperationMode(getHostname(), getAPIKey(), mode);
         pollControlStatus();
 
         // Set status after polling, or it will be overwritten
@@ -492,7 +492,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollTemperatureCalibrationOffset() throws MillException {
-        TemperatureCalibrationOffsetResponse calibrationOffsetResponse = apiTool.getTemperatureCalibrationOffset(getHostname());
+        TemperatureCalibrationOffsetResponse calibrationOffsetResponse = apiTool.getTemperatureCalibrationOffset(getHostname(), getAPIKey());
         setOnline();
         Double d;
         if ((d = calibrationOffsetResponse.getValue()) != null) {
@@ -501,7 +501,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void setTemperatureCalibrationOffset(BigDecimal offset) throws MillException {
-        Response response = apiTool.setTemperatureCalibrationOffset(getHostname(), offset);
+        Response response = apiTool.setTemperatureCalibrationOffset(getHostname(), getAPIKey(), offset);
         pollTemperatureCalibrationOffset();
         pollControlStatus();
 
@@ -523,7 +523,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollCommercialLock() throws MillException {
-        CommercialLockResponse commercialLockResponse = apiTool.getCommercialLock(getHostname());
+        CommercialLockResponse commercialLockResponse = apiTool.getCommercialLock(getHostname(), getAPIKey());
         setOnline();
         Boolean b;
         if ((b = commercialLockResponse.getValue()) != null) {
@@ -532,7 +532,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void setCommercialLock(Boolean value) throws MillException {
-        Response response = apiTool.setCommercialLock(getHostname(), value);
+        Response response = apiTool.setCommercialLock(getHostname(), getAPIKey(), value);
         pollCommercialLock();
         pollControlStatus();
 
@@ -554,7 +554,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollChildLock() throws MillException {
-        ChildLockResponse childLockResponse = apiTool.getChildLock(getHostname());
+        ChildLockResponse childLockResponse = apiTool.getChildLock(getHostname(), getAPIKey());
         setOnline();
         Boolean b;
         if ((b = childLockResponse.getValue()) != null) {
@@ -563,7 +563,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void setChildLock(Boolean value) throws MillException {
-        Response response = apiTool.setChildLock(getHostname(), value);
+        Response response = apiTool.setChildLock(getHostname(), getAPIKey(), value);
         pollChildLock();
         pollControlStatus();
 
@@ -585,7 +585,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollDisplayUnit() throws MillException {
-        DisplayUnitResponse displayUnitResponse = apiTool.getDisplayUnit(getHostname());
+        DisplayUnitResponse displayUnitResponse = apiTool.getDisplayUnit(getHostname(), getAPIKey());
         setOnline();
         DisplayUnit du;
         if ((du = displayUnitResponse.getDisplayUnit()) != null) {
@@ -600,7 +600,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             return;
         }
 
-        Response response = apiTool.setDisplayUnit(getHostname(), displayUnit);
+        Response response = apiTool.setDisplayUnit(getHostname(), getAPIKey(), displayUnit);
         pollDisplayUnit();
 
         // Set status after polling, or it will be overwritten
@@ -621,7 +621,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollSetTemperature(String channel, TemperatureType temperatureType) throws MillException {
-        SetTemperatureResponse setTemperatureResponse = apiTool.getSetTemperature(getHostname(), temperatureType);
+        SetTemperatureResponse setTemperatureResponse = apiTool.getSetTemperature(getHostname(), getAPIKey(), temperatureType);
         setOnline();
         BigDecimal bd;
         if ((bd = setTemperatureResponse.getSetTemperature()) != null) {
@@ -630,7 +630,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void setSetTemperature(String channel, TemperatureType temperatureType, BigDecimal value) throws MillException {
-        Response response = apiTool.setSetTemperature(getHostname(), temperatureType, value);
+        Response response = apiTool.setSetTemperature(getHostname(), getAPIKey(), temperatureType, value);
         pollSetTemperature(channel, temperatureType);
         pollControlStatus();
 
@@ -653,7 +653,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollLimitedHeatingPower() throws MillException {
-        LimitedHeatingPowerResponse heatingPowerResponse = apiTool.getLimitedHeatingPower(getHostname());
+        LimitedHeatingPowerResponse heatingPowerResponse = apiTool.getLimitedHeatingPower(getHostname(), getAPIKey());
         setOnline();
         Integer i;
         if ((i = heatingPowerResponse.getValue()) != null) {
@@ -662,7 +662,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void setLimitedHeatingPower(Integer value) throws MillException {
-        Response response = apiTool.setLimitedHeatingPower(getHostname(), value);
+        Response response = apiTool.setLimitedHeatingPower(getHostname(), getAPIKey(), value);
         pollLimitedHeatingPower();
         pollControlStatus();
 
@@ -684,7 +684,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollControllerType() throws MillException {
-        ControllerTypeResponse controllerTypeResponse = apiTool.getControllerType(getHostname());
+        ControllerTypeResponse controllerTypeResponse = apiTool.getControllerType(getHostname(), getAPIKey());
         setOnline();
         ControllerType ct;
         if ((ct = controllerTypeResponse.getControllerType()) != null) {
@@ -699,7 +699,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             return;
         }
 
-        Response response = apiTool.setControllerType(getHostname(), controllerType);
+        Response response = apiTool.setControllerType(getHostname(), getAPIKey(), controllerType);
         pollControllerType();
         pollControlStatus();
 
@@ -721,7 +721,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollPredictiveHeatingType() throws MillException {
-        PredictiveHeatingTypeResponse response = apiTool.getPredictiveHeatingType(getHostname());
+        PredictiveHeatingTypeResponse response = apiTool.getPredictiveHeatingType(getHostname(), getAPIKey());
         setOnline();
         PredictiveHeatingType pht;
         if ((pht = response.getPredictiveHeatingType()) != null) {
@@ -736,7 +736,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             return;
         }
 
-        Response response = apiTool.setPredictiveHeatingType(getHostname(), type);
+        Response response = apiTool.setPredictiveHeatingType(getHostname(), getAPIKey(), type);
         pollPredictiveHeatingType();
         pollControlStatus();
 
@@ -758,7 +758,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollOilHeaterPower() throws MillException {
-        OilHeaterPowerResponse heatingPowerResponse = apiTool.getOilHeaterPower(getHostname());
+        OilHeaterPowerResponse heatingPowerResponse = apiTool.getOilHeaterPower(getHostname(), getAPIKey());
         setOnline();
         Integer i;
         if ((i = heatingPowerResponse.getValue()) != null) {
@@ -767,7 +767,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void setOilHeaterPower(Integer value) throws MillException {
-        Response response = apiTool.setLimitedHeatingPower(getHostname(), value);
+        Response response = apiTool.setLimitedHeatingPower(getHostname(), getAPIKey(), value);
         pollOilHeaterPower();
         pollControlStatus();
 
@@ -792,7 +792,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     public Integer pollTimeZoneOffset(boolean updateConfiguration) throws MillException {
         TimeZoneOffsetResponse offset;
         try {
-            offset = apiTool.getTimeZoneOffset(getHostname());
+            offset = apiTool.getTimeZoneOffset(getHostname(), getAPIKey());
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
@@ -822,7 +822,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
     @Nullable
     public Integer setTimeZoneOffset(Integer value, boolean updateConfiguration) throws MillException {
-        Response response = apiTool.setTimeZoneOffset(getHostname(), value);
+        Response response = apiTool.setTimeZoneOffset(getHostname(), getAPIKey(), value);
         Integer result = pollTimeZoneOffset(updateConfiguration);
 
         // Set status after polling, or it will be overwritten
@@ -847,7 +847,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     public PIDParametersResponse pollPIDParameters(boolean updateConfiguration) throws MillException {
         PIDParametersResponse params;
         try {
-            params = apiTool.getPIDParameters(getHostname());
+            params = apiTool.getPIDParameters(getHostname(), getAPIKey());
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
@@ -894,6 +894,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     ) throws MillException {
         Response response = apiTool.setPIDParameters(
             getHostname(),
+            getAPIKey(),
             kp.doubleValue(),
             ki.doubleValue(),
             kd.doubleValue(),
@@ -923,7 +924,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     public Boolean pollCloudCommunication(boolean updateConfiguration) throws MillException {
         CloudCommunicationResponse enabled;
         try {
-            enabled = apiTool.getCloudCommunication(getHostname());
+            enabled = apiTool.getCloudCommunication(getHostname(), getAPIKey());
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
@@ -953,7 +954,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
     @Nullable
     public Boolean setCloudCommunication(Boolean enabled, boolean updateConfiguration) throws MillException {
-        Response response = apiTool.setCloudCommunication(getHostname(), enabled);
+        Response response = apiTool.setCloudCommunication(getHostname(), getAPIKey(), enabled);
         Boolean result = pollCloudCommunication(updateConfiguration);
 
         // Set status after polling, or it will be overwritten
@@ -978,7 +979,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     public HysteresisParametersResponse pollHysteresisParameters(boolean updateConfiguration) throws MillException {
         HysteresisParametersResponse params;
         try {
-            params = apiTool.getHysteresisParameters(getHostname());
+            params = apiTool.getHysteresisParameters(getHostname(), getAPIKey());
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
@@ -1028,7 +1029,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         Number lower,
         boolean updateConfiguration
     ) throws MillException {
-        Response response = apiTool.setHysteresisParameters(getHostname(), upper.doubleValue(), lower.doubleValue());
+        Response response = apiTool.setHysteresisParameters(getHostname(), getAPIKey(), upper.doubleValue(), lower.doubleValue());
         HysteresisParametersResponse result = pollHysteresisParameters(updateConfiguration);
 
         // Set status after polling, or it will be overwritten
@@ -1051,7 +1052,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     //Doc: Will return http status 503 if not in "independent device" mode
     @Nullable
     public ResponseStatus setTemperatureInIndependentMode(BigDecimal value) throws MillException {
-        Response response = apiTool.setTemperatureInIndependentMode(getHostname(), value);
+        Response response = apiTool.setTemperatureInIndependentMode(getHostname(), getAPIKey(), value);
         pollControlStatus();
 
         // Set status after polling, or it will be overwritten
@@ -1074,7 +1075,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
     @Nullable
     public ResponseStatus setCustomName(@Nullable String customName) throws MillException {
-        Response response = apiTool.setCustomName(getHostname(), customName == null ? "" : customName);
+        Response response = apiTool.setCustomName(getHostname(), getAPIKey(), customName == null ? "" : customName);
         pollStatus();
 
         // Set status after polling, or it will be overwritten
@@ -1099,7 +1100,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     public CommercialLockCustomizationResponse pollCommercialLockCustomization(boolean updateConfiguration) throws MillException {
         CommercialLockCustomizationResponse response;
         try {
-            response = apiTool.getCommercialLockCustomization(getHostname());
+            response = apiTool.getCommercialLockCustomization(getHostname(), getAPIKey());
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
@@ -1155,7 +1156,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         Number max,
         boolean updateConfiguration
     ) throws MillException {
-        Response response = apiTool.setCommercialLockCustomization(getHostname(), min.doubleValue(), max.doubleValue());
+        Response response = apiTool.setCommercialLockCustomization(getHostname(), getAPIKey(), min.doubleValue(), max.doubleValue());
         CommercialLockCustomizationResponse result = pollCommercialLockCustomization(updateConfiguration);
 
         // Set status after polling, or it will be overwritten
@@ -1176,7 +1177,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollOpenWindow() throws MillException {
-        OpenWindowParametersResponse params = apiTool.getOpenWindowParameters(getHostname());
+        OpenWindowParametersResponse params = apiTool.getOpenWindowParameters(getHostname(), getAPIKey());
         setOnline();
         Boolean b;
         if ((b = params.getActiveNow()) != null) {
@@ -1191,7 +1192,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         OpenWindowParameters parameters = new OpenWindowParameters();
         parameters.setEnabled(enabled);
         String hostname = getHostname();
-        OpenWindowParametersResponse current = apiTool.getOpenWindowParameters(hostname);
+        String apiKey = getAPIKey();
+        OpenWindowParametersResponse current = apiTool.getOpenWindowParameters(hostname, apiKey);
         if (!current.isComplete()) {
             throw new MillException(
                 "Received incomplete data from \"/open-window\" API call",
@@ -1216,7 +1218,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         if ((i = current.getMaxTime()) != null) {
             parameters.setMaxTime(i);
         }
-        Response response = apiTool.setOpenWindowParameters(hostname, parameters);
+        Response response = apiTool.setOpenWindowParameters(hostname, apiKey, parameters);
         pollOpenWindow();
         pollControlStatus();
 
@@ -1240,7 +1242,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     public OpenWindowParametersResponse pollOpenWindowParameters(boolean updateConfiguration) throws MillException {
         OpenWindowParametersResponse params;
         try {
-            params = apiTool.getOpenWindowParameters(getHostname());
+            params = apiTool.getOpenWindowParameters(getHostname(), getAPIKey());
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
@@ -1291,7 +1293,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             dropTimeRange.intValue()
         );
         String hostname = getHostname();
-        OpenWindowParametersResponse result = apiTool.getOpenWindowParameters(hostname);
+        String apiKey = getAPIKey();
+        OpenWindowParametersResponse result = apiTool.getOpenWindowParameters(hostname, apiKey);
         Boolean b;
         parameters.setEnabled((b = result.getEnabled()) == null ? Boolean.TRUE : b);
         parameters.setIncreaseTemperatureThreshold(increaseTemperatureThreshold instanceof Double ?
@@ -1306,7 +1309,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             (Integer) maxTime :
             maxTime.intValue()
         );
-        Response response = apiTool.setOpenWindowParameters(hostname, parameters);
+        Response response = apiTool.setOpenWindowParameters(hostname, apiKey, parameters);
         result = pollOpenWindowParameters(updateConfiguration);
         pollControlStatus();
 
@@ -1327,10 +1330,51 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    //Doc: The device API doesn't support null or blank keys, so they are forbidden
+    public void setAPIKey(String apiKey) throws MillException {
+        if (apiKey.isBlank()) {
+            throw new MillException("API key cannot be blank");
+        }
+        Response response = null;
+        try {
+            response = apiTool.setAPIKey(getHostname(), getAPIKey(), apiKey);
+        } catch (MillException e) {
+            if (!(e.getCause() instanceof TimeoutException)) {
+                throw e;
+            }
+        }
+        ResponseStatus responseStatus;
+        if (response != null && (responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set API key for \"{}\": {}",
+                getThing().getUID(),
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            // Automatically update the configuration with the new key so that communication can be reestablished
+            Configuration configuration = editConfiguration();
+            configuration.put(CONFIG_PARAM_API_KEY, apiKey);
+            updateConfiguration(configuration);
+            setOffline(ThingStatusDetail.CONFIGURATION_PENDING, "Device is rebooting");
+
+            // The devices reboots relatively quickly, so let's do a couple off one-off
+            // offline polls to set it online again quickly
+            InetAddress[] addresses = resolveOfflineAddresses();
+            if (addresses != null) {
+                scheduler.schedule(new PingOffline(addresses), 8L, TimeUnit.SECONDS);
+                scheduler.schedule(new PingOffline(addresses), 12L, TimeUnit.SECONDS);
+            }
+        }
+    }
+
     public void sendReboot() throws MillException {
         Response response = null;
         try {
-            response = apiTool.sendReboot(getHostname());
+            response = apiTool.sendReboot(getHostname(), getAPIKey());
         } catch (MillException e) {
             if (!(e.getCause() instanceof TimeoutException)) {
                 throw e;
@@ -1750,6 +1794,25 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             );
         }
         return result;
+    }
+
+    @Nullable
+    protected String getAPIKey() throws MillException {
+        Object object = getConfig().get(CONFIG_PARAM_API_KEY);
+        if (object == null) {
+            return null;
+        }
+        if (!(object instanceof String)) {
+            logger.warn("Configuration parameter apiKey is \"{}\"", object);
+            setConfigParameterMessage(ConfigStatusMessage.Builder
+                .error(CONFIG_PARAM_HOSTNAME).withMessageKeySuffix("invalid-parameter").withArguments(object).build()
+            );
+            throw new MillException(
+                "Invalid configuration: hostname must be a string",
+                ThingStatusDetail.CONFIGURATION_ERROR
+            );
+        }
+        return isBlank((String) object) ? null : (String) object;
     }
 
     protected int getRefreshInterval() throws MillException {

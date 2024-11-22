@@ -327,4 +327,42 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
             return result;
         }
     }
+
+    public Map<String, Object> setAPIKey(String apiKey, String confirm) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setAPIKey Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        if (MillUtil.isBlank(apiKey)) {
+            logger.warn("Call to setAPIKey Action failed because the API key was blank");
+            result.put("result", "Failed: The API key is blank");
+            return result;
+        }
+        String id = handlerInst.getThing().getUID().getId();
+        if (!id.equals(confirm)) {
+            logger.warn(
+                "Call to setAPIKey Action failed because the confirmation \"{}\" didn't match the required value \"{}\"",
+                confirm,
+                id
+            );
+            result.put("result", "Failed: Value \"" + confirm + "\" doesn't match \"" + id + '"');
+            return result;
+        }
+        try {
+            handlerInst.setAPIKey(apiKey);
+            result.put("result", "The device is rebooting.");
+            return result;
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setAPIKey Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute setAPIKey Action: " + e.getMessage());
+            return result;
+        }
+    }
 }

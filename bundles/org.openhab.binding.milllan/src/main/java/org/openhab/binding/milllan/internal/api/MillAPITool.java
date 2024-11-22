@@ -78,11 +78,11 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         this.httpClientProvider = httpClientProvider;
     }
 
-    public StatusResponse getStatus(String hostname) throws MillException {
+    public StatusResponse getStatus(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             StatusResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/status",
             null,
@@ -92,11 +92,11 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public ControlStatusResponse getControlStatus(String hostname) throws MillException {
+    public ControlStatusResponse getControlStatus(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             ControlStatusResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/control-status",
             null,
@@ -106,11 +106,11 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public OperationModeResponse getOperationMode(String hostname) throws MillException {
+    public OperationModeResponse getOperationMode(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             OperationModeResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/operation-mode",
             null,
@@ -120,13 +120,13 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setOperationMode(String hostname, OperationMode mode) throws MillException {
+    public Response setOperationMode(String hostname, @Nullable String apiKey, OperationMode mode) throws MillException {
         JsonObject object = new JsonObject();
         object.add("mode", gson.toJsonTree(mode));
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/operation-mode",
             gson.toJson(object),
@@ -136,318 +136,318 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public TemperatureCalibrationOffsetResponse getTemperatureCalibrationOffset(String hostname) throws MillException {
+    public TemperatureCalibrationOffsetResponse getTemperatureCalibrationOffset(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             TemperatureCalibrationOffsetResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/temperature-calibration-offset",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setTemperatureCalibrationOffset(String hostname, BigDecimal offset) throws MillException {
+    public Response setTemperatureCalibrationOffset(String hostname, @Nullable String apiKey, BigDecimal offset) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("value", offset);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/temperature-calibration-offset",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public CommercialLockResponse getCommercialLock(String hostname) throws MillException {
+    public CommercialLockResponse getCommercialLock(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             CommercialLockResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/commercial-lock",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setCommercialLock(String hostname, Boolean value) throws MillException {
+    public Response setCommercialLock(String hostname, @Nullable String apiKey, Boolean value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("value", value);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/commercial-lock",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public ChildLockResponse getChildLock(String hostname) throws MillException {
+    public ChildLockResponse getChildLock(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             ChildLockResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/child-lock",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setChildLock(String hostname, Boolean value) throws MillException {
+    public Response setChildLock(String hostname, @Nullable String apiKey, Boolean value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("value", value);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/child-lock",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public DisplayUnitResponse getDisplayUnit(String hostname) throws MillException {
+    public DisplayUnitResponse getDisplayUnit(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             DisplayUnitResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/display-unit",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setDisplayUnit(String hostname, DisplayUnit displayUnit) throws MillException {
+    public Response setDisplayUnit(String hostname, @Nullable String apiKey, DisplayUnit displayUnit) throws MillException {
         JsonObject object = new JsonObject();
         object.add("value", gson.toJsonTree(displayUnit));
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/display-unit",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public SetTemperatureResponse getSetTemperature(String hostname, TemperatureType temperatureType) throws MillException {
+    public SetTemperatureResponse getSetTemperature(String hostname, @Nullable String apiKey, TemperatureType temperatureType) throws MillException {
         JsonObject object = new JsonObject();
         object.add("type", gson.toJsonTree(temperatureType));
         return request(
             SetTemperatureResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/set-temperature",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setSetTemperature(String hostname, TemperatureType temperatureType, BigDecimal value) throws MillException {
+    public Response setSetTemperature(String hostname, @Nullable String apiKey, TemperatureType temperatureType, BigDecimal value) throws MillException {
         JsonObject object = new JsonObject();
         object.add("type", gson.toJsonTree(temperatureType));
         object.addProperty("value", value);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/set-temperature",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public LimitedHeatingPowerResponse getLimitedHeatingPower(String hostname) throws MillException {
+    public LimitedHeatingPowerResponse getLimitedHeatingPower(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             LimitedHeatingPowerResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/limited-heating-power",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setLimitedHeatingPower(String hostname, Integer value) throws MillException {
+    public Response setLimitedHeatingPower(String hostname, @Nullable String apiKey, Integer value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("limited_heating_power", value);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/limited-heating-power",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public ControllerTypeResponse getControllerType(String hostname) throws MillException {
+    public ControllerTypeResponse getControllerType(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             ControllerTypeResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/controller-type",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setControllerType(String hostname, ControllerType controllerType) throws MillException {
+    public Response setControllerType(String hostname, @Nullable String apiKey, ControllerType controllerType) throws MillException {
         JsonObject object = new JsonObject();
         object.add("regulator_type", gson.toJsonTree(controllerType));
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/controller-type",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public PredictiveHeatingTypeResponse getPredictiveHeatingType(String hostname) throws MillException {
+    public PredictiveHeatingTypeResponse getPredictiveHeatingType(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             PredictiveHeatingTypeResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/predictive-heating-type",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setPredictiveHeatingType(String hostname, PredictiveHeatingType type) throws MillException {
+    public Response setPredictiveHeatingType(String hostname, @Nullable String apiKey, PredictiveHeatingType type) throws MillException {
         JsonObject object = new JsonObject();
         object.add("predictive_heating_type", gson.toJsonTree(type));
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/predictive-heating-type",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public OilHeaterPowerResponse getOilHeaterPower(String hostname) throws MillException {
+    public OilHeaterPowerResponse getOilHeaterPower(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             OilHeaterPowerResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/oil-heater-power",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setOilHeaterPower(String hostname, Integer value) throws MillException {
+    public Response setOilHeaterPower(String hostname, @Nullable String apiKey, Integer value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("heating_level_percentage", value);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/oil-heater-power",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public TimeZoneOffsetResponse getTimeZoneOffset(String hostname) throws MillException {
+    public TimeZoneOffsetResponse getTimeZoneOffset(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             TimeZoneOffsetResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/timezone-offset",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setTimeZoneOffset(String hostname, Integer value) throws MillException {
+    public Response setTimeZoneOffset(String hostname, @Nullable String apiKey, Integer value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("timezone_offset", value);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/timezone-offset",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public PIDParametersResponse getPIDParameters(String hostname) throws MillException {
+    public PIDParametersResponse getPIDParameters(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             PIDParametersResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/pid-parameters",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
@@ -457,6 +457,7 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
      * Sets the PID parameters for panel heaters.
      *
      * @param hostname the host to contact.
+     * @param apiKey the API key or {@code null}.
      * @param kp the proportional gain factor.
      * @param ki the integral gain factor.
      * @param kd the derivative gain factor.
@@ -465,8 +466,7 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
      * @return The resulting {@link Response}.
      * @throws MillException If an error occurs during the operation.
      */
-    public Response setPIDParameters(String hostname, Double kp, Double ki, Double kd, Double kdFilterN, Double windupLimitPercentage) throws MillException {
-
+    public Response setPIDParameters(String hostname, @Nullable String apiKey, Double kp, Double ki, Double kd, Double kdFilterN, Double windupLimitPercentage) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("kp", kp);
         object.addProperty("ki", ki);
@@ -476,135 +476,135 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/pid-parameters",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public CloudCommunicationResponse getCloudCommunication(String hostname) throws MillException {
+    public CloudCommunicationResponse getCloudCommunication(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             CloudCommunicationResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/cloud-communication",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setCloudCommunication(String hostname, Boolean value) throws MillException {
+    public Response setCloudCommunication(String hostname, @Nullable String apiKey, Boolean value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("value", value);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/cloud-communication",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public HysteresisParametersResponse getHysteresisParameters(String hostname) throws MillException {
+    public HysteresisParametersResponse getHysteresisParameters(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             HysteresisParametersResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/hysteresis-parameters",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
     //Doc: Restart required after setting
-    public Response setHysteresisParameters(String hostname, Double upper, Double lower) throws MillException {
+    public Response setHysteresisParameters(String hostname, @Nullable String apiKey, Double upper, Double lower) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("temp_hysteresis_upper", upper);
         object.addProperty("temp_hysteresis_lower", lower);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/hysteresis-parameters",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
     //Doc: Will fail unless the device is in "Independent device" mode
-    public Response setTemperatureInIndependentMode(String hostname, BigDecimal value) throws MillException {
+    public Response setTemperatureInIndependentMode(String hostname, @Nullable String apiKey, BigDecimal value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("temperature", value);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/set-temperature-in-independent-mode-now",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
     // Doc: Max 32 characters custom name
-    public Response setCustomName(String hostname, String customName) throws MillException {
+    public Response setCustomName(String hostname, @Nullable String apiKey, String customName) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("device_name", customName);
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/set-custom-name",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public CommercialLockCustomizationResponse getCommercialLockCustomization(String hostname) throws MillException {
+    public CommercialLockCustomizationResponse getCommercialLockCustomization(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             CommercialLockCustomizationResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/commercial-lock-customization",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setCommercialLockCustomization(String hostname, Double min, Double max) throws MillException {
+    public Response setCommercialLockCustomization(String hostname, @Nullable String apiKey, Double min, Double max) throws MillException {
         CommercialLockResponse lockState = request(
             CommercialLockResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/commercial-lock",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
@@ -620,50 +620,72 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/commercial-lock-customization",
             gson.toJson(object),
-            1L,
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
-    public OpenWindowParametersResponse getOpenWindowParameters(String hostname) throws MillException {
+    public OpenWindowParametersResponse getOpenWindowParameters(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             OpenWindowParametersResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.GET,
             "/open-window",
             null,
-            1L,
+            5L,
             TimeUnit.SECONDS,
             true
         );
     }
 
-    public Response setOpenWindowParameters(String hostname, OpenWindowParameters parameters) throws MillException {
+    public Response setOpenWindowParameters(String hostname, @Nullable String apiKey, OpenWindowParameters parameters) throws MillException {
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/open-window",
             gson.toJson(parameters),
-            1L,
+            5L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    //Doc: BE CAREFULL!!! To reset the API key a factory reset is required.
+    //Doc: At most most 63 characters
+    //Doc: Will time out if successful
+    public Response setAPIKey(String hostname, @Nullable String apiKey, String newAPIKey) throws MillException {
+        if (newAPIKey.getBytes(StandardCharsets.UTF_8).length > 63) {
+            throw new MillException("Illegal API-ley - maximum length is 63 bytes");
+        }
+        JsonObject object = new JsonObject();
+        object.addProperty("api_key", newAPIKey);
+        return request(
+            GenericResponse.class,
+            hostname,
+            apiKey,
+            HttpMethod.POST,
+            "/set-api-key",
+            gson.toJson(object),
+            5L,
             TimeUnit.SECONDS,
             false
         );
     }
 
     //Doc: WILL time out - response is never sent
-    public Response sendReboot(String hostname) throws MillException {
+    public Response sendReboot(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             GenericResponse.class,
             hostname,
-            null,
+            apiKey,
             HttpMethod.POST,
             "/reboot",
             null,
