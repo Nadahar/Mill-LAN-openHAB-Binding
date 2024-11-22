@@ -174,6 +174,26 @@ public class MillPanelActions extends MillBaseActions { // TODO: (Nad) Javadocs
         return super.setOpenWindowParameters(dropTempThr, dropTimeRange, incTempThr, incTimeRange, maxTime);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(label = "@text/actions.milllan.set-api-key.label", description = "@text/actions.milllan.set-api-key.description")
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setAPIKey(
+        @ActionInput(
+            name = "apiKey",
+            label = "@text/actions-input.milllan.set-api-key.key.label",
+            description = "@text/actions-input.milllan.set-api-key.key.description",
+            required = true
+        ) String apiKey,
+        @ActionInput(
+            name = "confirm",
+            label = "@text/actions-input.milllan.set-api-key.confirm.label",
+            description = "@text/actions-input.milllan.set-api-key.confirm.description",
+            required = true
+        ) String confirm
+    ) {
+        return super.setAPIKey(apiKey, confirm);
+    }
+
     // Methods for Rules DSL rule support
 
     public static void sendReboot(ThingActions actions) {
@@ -216,5 +236,9 @@ public class MillPanelActions extends MillBaseActions { // TODO: (Nad) Javadocs
         Integer maxTime
     ) {
         ((MillPanelActions) actions).setOpenWindowParameters(dropTempThr, dropTimeRange, incTempThr, incTimeRange, maxTime);
+    }
+
+    public static void setAPIKey(ThingActions actions, String apiKey, String confirm) {
+        ((MillPanelActions) actions).setAPIKey(apiKey, confirm);
     }
 }

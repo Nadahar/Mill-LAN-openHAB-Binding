@@ -32,6 +32,12 @@
 			<label>Hostname</label>
 			<description>Hostname or IP address of the device.</description>
 		</parameter>
+		<parameter name="apiKey" type="text" groupName="general">
+			<context>password</context>
+			<label>API Key</label>
+			<description>The API key if one has been configured in the device.</description>
+			<verify>true</verify>
+		</parameter>
 		<parameter name="refreshInterval" type="integer" unit="s" min="1" groupName="general">
 			<label>Refresh Interval</label>
 			<description>The refresh interval in seconds for polling the device for information that might change frequently.</description>
