@@ -2860,6 +2860,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         this.configStatusCallback = configStatusCallback;
     }
 
+    protected Runnable createInitializeTask() {
+        return new Initializer();
+    }
+
+    protected abstract Runnable createFrequentTask();
+
+    protected abstract Runnable createInfrequentTask();
+
+    protected abstract Runnable createOfflineTask(InetAddress[] addresses);
+
     protected class Initializer implements Runnable {
 
         @Override
@@ -2872,7 +2882,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
-    protected class PollFrequent implements Runnable {
+    protected class PollFrequent implements Runnable { //TODO: (Nad) Remove these
 
         @Override
         public void run() {
