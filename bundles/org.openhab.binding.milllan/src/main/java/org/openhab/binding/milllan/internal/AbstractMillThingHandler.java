@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -39,7 +38,6 @@ import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.milllan.internal.action.MillBaseActions;
 import org.openhab.binding.milllan.internal.api.ControllerType;
 import org.openhab.binding.milllan.internal.api.DisplayUnit;
 import org.openhab.binding.milllan.internal.api.LockStatus;
@@ -2816,9 +2814,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     @Override
-    public Collection<Class<? extends ThingHandlerService>> getServices() {
-        return List.of(MillBaseActions.class);
-    }
+    public abstract Collection<Class<? extends ThingHandlerService>> getServices();
 
     @Override
     public Collection<ConfigStatusMessage> getConfigStatus() {
@@ -2868,7 +2864,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
     protected abstract Runnable createInfrequentTask();
 
-    protected abstract Runnable createOfflineTask(InetAddress[] addresses);
+    protected Runnable createOfflineTask(InetAddress[] addresses) {
+        return new PingOffline(addresses);
+    }
 
     protected class Initializer implements Runnable {
 
@@ -2882,7 +2880,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
-    protected class PollFrequent implements Runnable { //TODO: (Nad) Remove these
+    protected class PollFrequent implements Runnable { //TODO: (Nad) Remove this
 
         @Override
         public void run() {
@@ -2898,7 +2896,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
-    protected class PollInfrequent implements Runnable {
+    protected class PollInfrequent implements Runnable { //TODO: (Nad) Remove this
 
         @Override
         public void run() {
