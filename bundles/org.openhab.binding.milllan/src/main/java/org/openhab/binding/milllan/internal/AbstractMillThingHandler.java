@@ -38,6 +38,7 @@ import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.milllan.internal.api.ControllerType;
 import org.openhab.binding.milllan.internal.api.DisplayUnit;
 import org.openhab.binding.milllan.internal.api.LockStatus;
@@ -326,7 +327,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             isDisposed = false;
         }
         updateStatus(ThingStatus.UNKNOWN);
-        scheduler.execute(new Initializer());
+        scheduler.execute(createInitializeTask());
     }
 
     @Override
@@ -454,8 +455,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollOperationMode() throws MillException {
-        OperationModeResponse operationModeResponse = apiTool.getOperationMode(getHostname(), getAPIKey());
-        setOnline();
+        OperationModeResponse operationModeResponse;
+        try {
+            operationModeResponse = apiTool.getOperationMode(getHostname(), getAPIKey());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support operation mode", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
         OperationMode om;
         if ((om = operationModeResponse.getMode()) != null) {
             updateState(OPERATION_MODE, new StringType(om.name()));
@@ -521,8 +532,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollCommercialLock() throws MillException {
-        CommercialLockResponse commercialLockResponse = apiTool.getCommercialLock(getHostname(), getAPIKey());
-        setOnline();
+        CommercialLockResponse commercialLockResponse;
+        try {
+            commercialLockResponse = apiTool.getCommercialLock(getHostname(), getAPIKey());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support commercial lock", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
         Boolean b;
         if ((b = commercialLockResponse.getValue()) != null) {
             updateState(COMMERCIAL_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
@@ -552,8 +573,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollChildLock() throws MillException {
-        ChildLockResponse childLockResponse = apiTool.getChildLock(getHostname(), getAPIKey());
-        setOnline();
+        ChildLockResponse childLockResponse;
+        try {
+            childLockResponse = apiTool.getChildLock(getHostname(), getAPIKey());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support child lock", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
         Boolean b;
         if ((b = childLockResponse.getValue()) != null) {
             updateState(CHILD_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
@@ -583,8 +614,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollDisplayUnit() throws MillException {
-        DisplayUnitResponse displayUnitResponse = apiTool.getDisplayUnit(getHostname(), getAPIKey());
-        setOnline();
+        DisplayUnitResponse displayUnitResponse;
+        try {
+            displayUnitResponse = apiTool.getDisplayUnit(getHostname(), getAPIKey());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support display unit", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
         DisplayUnit du;
         if ((du = displayUnitResponse.getDisplayUnit()) != null) {
             updateState(DISPLAY_UNIT, new StringType(du.name()));
@@ -651,8 +692,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollLimitedHeatingPower() throws MillException {
-        LimitedHeatingPowerResponse heatingPowerResponse = apiTool.getLimitedHeatingPower(getHostname(), getAPIKey());
-        setOnline();
+        LimitedHeatingPowerResponse heatingPowerResponse;
+        try {
+            heatingPowerResponse = apiTool.getLimitedHeatingPower(getHostname(), getAPIKey());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support limited heating power", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
         Integer i;
         if ((i = heatingPowerResponse.getValue()) != null) {
             updateState(LIMITED_HEATING_POWER, new PercentType(i.intValue()));
@@ -682,8 +733,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollControllerType() throws MillException {
-        ControllerTypeResponse controllerTypeResponse = apiTool.getControllerType(getHostname(), getAPIKey());
-        setOnline();
+        ControllerTypeResponse controllerTypeResponse;
+        try {
+            controllerTypeResponse = apiTool.getControllerType(getHostname(), getAPIKey());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support controller type", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
         ControllerType ct;
         if ((ct = controllerTypeResponse.getControllerType()) != null) {
             updateState(CONTROLLER_TYPE, new StringType(ct.name()));
@@ -719,8 +780,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollPredictiveHeatingType() throws MillException {
-        PredictiveHeatingTypeResponse response = apiTool.getPredictiveHeatingType(getHostname(), getAPIKey());
-        setOnline();
+        PredictiveHeatingTypeResponse response;
+        try {
+            response = apiTool.getPredictiveHeatingType(getHostname(), getAPIKey());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support predictive heating type", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
         PredictiveHeatingType pht;
         if ((pht = response.getPredictiveHeatingType()) != null) {
             updateState(PREDICTIVE_HEATING_TYPE, new StringType(pht.name()));
@@ -756,8 +827,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     public void pollOilHeaterPower() throws MillException {
-        OilHeaterPowerResponse heatingPowerResponse = apiTool.getOilHeaterPower(getHostname(), getAPIKey());
-        setOnline();
+        OilHeaterPowerResponse heatingPowerResponse;
+        try {
+            heatingPowerResponse = apiTool.getOilHeaterPower(getHostname(), getAPIKey());
+            setOnline();
+        } catch (MillHTTPResponseException e) {
+            // API function not implemented
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support oil heater power", getThing().getUID());
+                return;
+            }
+            throw e;
+        }
         Integer i;
         if ((i = heatingPowerResponse.getValue()) != null) {
             updateState(OIL_HEATER_POWER, new PercentType(i.intValue()));
@@ -794,10 +875,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
-            if (e.getHttpStatus() >= 400) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Thing \"{}\" doesn't seem to support timezone offset", getThing().getUID());
-                }
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support timezone offset", getThing().getUID());
                 return null;
             }
             throw e;
@@ -849,10 +928,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
-            if (e.getHttpStatus() >= 400) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Thing \"{}\" doesn't seem to support PID parameters", getThing().getUID());
-                }
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support PID parameters", getThing().getUID());
                 return null;
             }
             throw e;
@@ -926,10 +1003,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
-            if (e.getHttpStatus() >= 400) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Thing \"{}\" doesn't seem to support cloud communication setting", getThing().getUID());
-                }
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support cloud communication setting", getThing().getUID());
                 return null;
             }
             throw e;
@@ -981,10 +1056,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
-            if (e.getHttpStatus() >= 400) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Thing \"{}\" doesn't seem to support hysteresis parameters", getThing().getUID());
-                }
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support hysteresis parameters", getThing().getUID());
                 return null;
             }
             throw e;
@@ -1102,10 +1175,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
-            if (e.getHttpStatus() >= 400) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Thing \"{}\" doesn't seem to support commercial lock customization", getThing().getUID());
-                }
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support commercial lock customization", getThing().getUID());
                 return null;
             }
             throw e;
@@ -1244,10 +1315,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             setOnline();
         } catch (MillHTTPResponseException e) {
             // API function not implemented
-            if (e.getHttpStatus() >= 400) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Thing \"{}\" doesn't seem to support open window parameters", getThing().getUID());
-                }
+            if (HttpStatus.isClientError(e.getHttpStatus())) {
+                logger.warn("Thing \"{}\" doesn't seem to support open window parameters", getThing().getUID());
                 return null;
             }
             throw e;
@@ -1363,8 +1432,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             // offline polls to set it online again quickly
             InetAddress[] addresses = resolveOfflineAddresses();
             if (addresses != null) {
-                scheduler.schedule(new PingOffline(addresses), 8L, TimeUnit.SECONDS);
-                scheduler.schedule(new PingOffline(addresses), 12L, TimeUnit.SECONDS);
+                scheduler.schedule(createOfflineTask(addresses), 8L, TimeUnit.SECONDS);
+                scheduler.schedule(createOfflineTask(addresses), 12L, TimeUnit.SECONDS);
             }
         }
     }
@@ -1396,8 +1465,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             // offline polls to set it online again quickly
             InetAddress[] addresses = resolveOfflineAddresses();
             if (addresses != null) {
-                scheduler.schedule(new PingOffline(addresses), 8L, TimeUnit.SECONDS);
-                scheduler.schedule(new PingOffline(addresses), 12L, TimeUnit.SECONDS);
+                scheduler.schedule(createOfflineTask(addresses), 8L, TimeUnit.SECONDS);
+                scheduler.schedule(createOfflineTask(addresses), 12L, TimeUnit.SECONDS);
             }
         }
     }
@@ -1597,7 +1666,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             frequentFuture = frequentPollTask;
             if (!isDisposed && refreshInterval > 0) {
                 frequentPollTask = scheduler.scheduleWithFixedDelay(
-                    new PollFrequent(),
+                    createFrequentTask(),
                     0L,
                     refreshInterval,
                     TimeUnit.SECONDS
@@ -1608,7 +1677,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             infrequentFuture = infrequentPollTask;
             if (!isDisposed && infrequentRefreshInterval > 0) {
                 infrequentPollTask = scheduler.scheduleWithFixedDelay(
-                    new PollInfrequent(),
+                    createInfrequentTask(),
                     700L,
                     infrequentRefreshInterval * 1000L,
                     TimeUnit.MILLISECONDS
@@ -1718,7 +1787,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             ) {
                 logger.debug("Mill device \"{}\" is offline, starting offline polling", getThing().getUID());
                 offlinePollTask = scheduler.scheduleWithFixedDelay(
-                    new PingOffline(addresses),
+                    createOfflineTask(addresses),
                     1L,
                     refreshInterval,
                     TimeUnit.SECONDS

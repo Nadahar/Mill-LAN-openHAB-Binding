@@ -27,8 +27,6 @@ import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.binding.ThingHandlerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -46,8 +44,6 @@ public class MillPanelHeaterHandler extends AbstractMillThingHandler { //TODO: (
         super(thing, configDescriptionProvider, httpClientProvider);
     }
 
-    private final Logger logger = LoggerFactory.getLogger(MillPanelHeaterHandler.class);
-
     @Override
     public Collection<Class<? extends ThingHandlerService>> getServices() {
         return Set.of(MillPanelActions.class);
@@ -63,7 +59,7 @@ public class MillPanelHeaterHandler extends AbstractMillThingHandler { //TODO: (
         return new PollInfrequent();
     }
 
-    protected class PollFrequent implements Runnable { //TODO: (Nad) Remove these
+    protected class PollFrequent implements Runnable {
 
         @Override
         public void run() {

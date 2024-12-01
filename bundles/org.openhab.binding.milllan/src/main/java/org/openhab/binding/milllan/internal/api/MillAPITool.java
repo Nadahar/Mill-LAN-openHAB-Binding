@@ -752,7 +752,16 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             logger.debug("{}", sb.toString());
         }
         ContentResponse response = httpClientProvider.send(uri, method, headers, is, contentType, timeout, timeUnit);
-        if (!HttpStatus.isSuccess(response.getStatus())) {
+        int httpStatus;
+        if (HttpStatus.isClientError(httpStatus = response.getStatus())) {
+            throw new MillHTTPResponseException(
+                httpStatus + " - " + HttpStatus.getMessage(httpStatus) + ": " + uri.getPath(),
+                httpStatus,
+                ThingStatusDetail.COMMUNICATION_ERROR
+            );
+
+        }
+        if (!HttpStatus.isSuccess(httpStatus)) {
             throw new MillHTTPResponseException(
                 response.getStatus(),
                 ThingStatusDetail.COMMUNICATION_ERROR

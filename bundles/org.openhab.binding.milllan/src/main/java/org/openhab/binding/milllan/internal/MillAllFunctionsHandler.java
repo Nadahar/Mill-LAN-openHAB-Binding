@@ -13,10 +13,20 @@
  */
 package org.openhab.binding.milllan.internal;
 
+import static org.openhab.binding.milllan.internal.MillBindingConstants.*;
+
+import java.util.Collection;
+import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.milllan.internal.action.MillAllActions;
+import org.openhab.binding.milllan.internal.api.TemperatureType;
 import org.openhab.binding.milllan.internal.configuration.MillConfigDescriptionProvider;
+import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.http.MillHTTPClientProvider;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.binding.ThingHandlerService;
 
 
 /**
@@ -32,5 +42,61 @@ public class MillAllFunctionsHandler extends AbstractMillThingHandler { //TODO: 
         MillHTTPClientProvider httpClientProvider
     ) {
         super(thing, configDescriptionProvider, httpClientProvider);
+    }
+
+    @Override
+    public Collection<Class<? extends ThingHandlerService>> getServices() {
+        return Set.of(MillAllActions.class);
+    }
+
+    @Override
+    protected @NonNull Runnable createFrequentTask() {
+        return new PollFrequent();
+    }
+
+    @Override
+    protected @NonNull Runnable createInfrequentTask() {
+        return new PollInfrequent();
+    }
+
+    protected class PollFrequent implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                pollControlStatus();
+                pollSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
+                pollSetTemperature(COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
+                pollSetTemperature(SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
+                pollSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
+            } catch (MillException e) {
+                setOffline(e);
+            }
+        }
+    }
+
+    protected class PollInfrequent implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                pollStatus();
+                pollTemperatureCalibrationOffset();
+                pollDisplayUnit();
+                pollLimitedHeatingPower();
+                pollControllerType();
+                pollPredictiveHeatingType();
+                pollOilHeaterPower();
+                pollTimeZoneOffset(true);
+                pollPIDParameters(true);
+                pollCloudCommunication(true);
+                pollHysteresisParameters(true);
+                pollCommercialLock();
+                pollCommercialLockCustomization(true);
+                pollOpenWindowParameters(true);
+            } catch (MillException e) {
+                setOffline(e);
+            }
+        }
     }
 }
