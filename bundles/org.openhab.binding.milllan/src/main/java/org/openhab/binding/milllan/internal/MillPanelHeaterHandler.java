@@ -86,11 +86,9 @@ public class MillPanelHeaterHandler extends AbstractMillThingHandler { //TODO: (
                 pollLimitedHeatingPower();
                 pollControllerType();
                 pollPredictiveHeatingType();
-//                pollOilHeaterPower(); //TODO: (Nad) Oil only
                 pollTimeZoneOffset(true);
                 pollPIDParameters(true);
                 pollCloudCommunication(true);
-                pollHysteresisParameters(true); //TODO: (Nad) Which models?
                 pollCommercialLock();
                 /*
                  * Commercial lock functionality seems to be completely broken, at least in firmware
@@ -102,7 +100,7 @@ public class MillPanelHeaterHandler extends AbstractMillThingHandler { //TODO: (
                  * If enabled, pollCommercialLock() can be disabled, as the commercial lock state is also
                  * fetched in pollCommercialLockCustomization()
                  */
-                pollOpenWindowParameters(true); //TODO: (Nad) Which models?
+                pollOpenWindowParameters(true);
             } catch (MillException e) {
                 setOffline(e);
             }

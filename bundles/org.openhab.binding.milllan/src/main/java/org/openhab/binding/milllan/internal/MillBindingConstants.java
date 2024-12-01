@@ -70,7 +70,7 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
     public static final String LIMITED_HEATING_POWER = "limited-heating-power";
     public static final String CONTROLLER_TYPE = "controller-type";
     public static final String PREDICTIVE_HEATING_TYPE = "predictive-heating-type";
-    public static final String OIL_HEATER_POWER = "oil-heater-power"; //TODO: (Nad) Oil only
+    public static final String OIL_HEATER_POWER = "oil-heater-power";
     public static final String OPEN_WINDOW_ACTIVE = "open-window-active";
     public static final String OPEN_WINDOW_ENABLED = "open-window-enabled";
 

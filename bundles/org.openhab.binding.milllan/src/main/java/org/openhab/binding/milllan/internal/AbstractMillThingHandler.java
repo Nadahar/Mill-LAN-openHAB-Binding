@@ -2949,56 +2949,6 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
-    protected class PollFrequent implements Runnable { //TODO: (Nad) Remove this
-
-        @Override
-        public void run() {
-            try {
-                pollControlStatus();
-                pollSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
-                pollSetTemperature(COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
-                pollSetTemperature(SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
-                pollSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
-            } catch (MillException e) {
-                setOffline(e);
-            }
-        }
-    }
-
-    protected class PollInfrequent implements Runnable { //TODO: (Nad) Remove this
-
-        @Override
-        public void run() {
-            try {
-                pollStatus();
-                pollTemperatureCalibrationOffset();
-                pollDisplayUnit();
-                pollLimitedHeatingPower();
-                pollControllerType();
-                pollPredictiveHeatingType();
-//                pollOilHeaterPower(); //TODO: (Nad) Oil only
-                pollTimeZoneOffset(true);
-                pollPIDParameters(true);
-                pollCloudCommunication(true);
-                pollHysteresisParameters(true); //TODO: (Nad) Which models?
-                pollCommercialLock();
-                /*
-                 * Commercial lock functionality seems to be completely broken, at least in firmware
-                 * 0x230630. It's thus commented out here as trying to use it will only
-                 * lead to frustration. If this changes in the future, a logic that
-                 * looks at the firmware and enables it in working versions could be implemented> here.
-                 *
-                 * The disabled call is: pollCommercialLockCustomization(true);
-                 * If enabled, pollCommercialLock() can be disabled, as the commercial lock state is also
-                 * fetched in pollCommercialLockCustomization()
-                 */
-                pollOpenWindowParameters(true); //TODO: (Nad) Which models?
-            } catch (MillException e) {
-                setOffline(e);
-            }
-        }
-    }
-
     protected class PingOffline implements Runnable {
 
         private final InetAddress[] addresses;
