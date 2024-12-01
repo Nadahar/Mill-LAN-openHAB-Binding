@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="milllan"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- All functions thing type -->
+	<thing-type id="oil-heater">
+
+		<label>Mill Oil Heater</label>
+		<description>A Mill oil heater.</description>
+		<category>radiator</category>
+
+		<channels>
+			<channel typeId="ambient-temperature" id="ambient-temperature"/>
+			<channel typeId="raw-ambient-temperature" id="raw-ambient-temperature"/>
+			<channel typeId="current-power" id="current-power"/>
+			<channel typeId="lock-status" id="lock-status"/>
+			<channel typeId="open-window-status" id="open-window-status"/>
+			<channel typeId="open-window-active" id="open-window-active"/>
+			<channel typeId="open-window-enabled" id="open-window-enabled"/>
+			<channel typeId="set-temperature" id="set-temperature"/>
+			<channel typeId="connected-to-cloud" id="connected-to-cloud"/>
+			<channel typeId="operation-mode" id="operation-mode"/>
+			<channel typeId="temperature-calibration-offset" id="temperature-calibration-offset"/>
+			<channel typeId="commercial-lock" id="commercial-lock"/>
+			<channel typeId="child-lock" id="child-lock"/>
+			<channel typeId="display-unit" id="display-unit"/>
+			<channel typeId="normal-set-temperature" id="normal-set-temperature"/>
+			<channel typeId="comfort-set-temperature" id="comfort-set-temperature"/>
+			<channel typeId="sleep-set-temperature" id="sleep-set-temperature"/>
+			<channel typeId="away-set-temperature" id="away-set-temperature"/>
+			<channel typeId="predictive-heating-type" id="predictive-heating-type"></channel>
+			<channel typeId="oil-heater-power" id="oil-heater-power"/>
+		</channels>
+
+		<properties>
+			<property name="vendor">Mill</property>
+		</properties>
+		<representation-property>macAddress</representation-property>
+
+		<config-description-ref uri="thing-type:milllan:heater"/>
+	</thing-type>
+
+</thing:thing-descriptions>

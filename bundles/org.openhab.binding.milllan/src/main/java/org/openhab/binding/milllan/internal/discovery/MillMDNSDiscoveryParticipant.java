@@ -51,7 +51,10 @@ public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant { 
     private static final String SERVICE_TYPE = "_mill._tcp.local.";
 
     public static final Set<ThingTypeUID> DISCOVERABLE_THING_TYPES_UIDS = Set.of(
-        THING_TYPE_PANEL_HEATER
+        THING_TYPE_PANEL_HEATER,
+        THING_TYPE_CONVECTION_HEATER,
+        THING_TYPE_OIL_HEATER,
+        THING_TYPE_WIFI_SOCKET
     );
 
     private final Logger logger = LoggerFactory.getLogger(MillMDNSDiscoveryParticipant.class);
