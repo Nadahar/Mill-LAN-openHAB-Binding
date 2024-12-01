@@ -65,6 +65,15 @@ public class MillThingHandlerFactory extends BaseThingHandlerFactory { // TODO: 
         if (THING_TYPE_PANEL_HEATER.equals(thingTypeUID)) {
             return new MillPanelHeaterHandler(thing, configDescriptionProvider, httpClientProvider);
         }
+        if (THING_TYPE_CONVECTION_HEATER.equals(thingTypeUID)) {
+            return new MillConvectionHeaterHandler(thing, configDescriptionProvider, httpClientProvider);
+        }
+        if (THING_TYPE_OIL_HEATER.equals(thingTypeUID)) {
+            return new MillConvectionHeaterHandler(thing, configDescriptionProvider, httpClientProvider);
+        }
+        if (THING_TYPE_WIFI_SOCKET.equals(thingTypeUID)) {
+            return new MillWiFiSocketHandler(thing, configDescriptionProvider, httpClientProvider);
+        }
         if (THING_TYPE_ALL_FUNCTIONS.equals(thingTypeUID)) {
             return new MillAllFunctionsHandler(thing, configDescriptionProvider, httpClientProvider);
         }

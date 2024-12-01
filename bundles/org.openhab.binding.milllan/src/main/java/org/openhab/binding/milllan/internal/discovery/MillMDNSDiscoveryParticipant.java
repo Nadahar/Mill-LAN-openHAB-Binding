@@ -50,6 +50,13 @@ public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant { 
 
     private static final String SERVICE_TYPE = "_mill._tcp.local.";
 
+    public static final Set<ThingTypeUID> DISCOVERABLE_THING_TYPES_UIDS = Set.of(
+        THING_TYPE_PANEL_HEATER,
+        THING_TYPE_CONVECTION_HEATER,
+        THING_TYPE_OIL_HEATER,
+        THING_TYPE_WIFI_SOCKET
+    );
+
     private final Logger logger = LoggerFactory.getLogger(MillMDNSDiscoveryParticipant.class);
 
     private final Bundle bundle;
@@ -71,7 +78,7 @@ public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant { 
 
     @Override
     public Set<ThingTypeUID> getSupportedThingTypeUIDs() {
-        return SUPPORTED_THING_TYPES_UIDS;
+        return DISCOVERABLE_THING_TYPES_UIDS;
     }
 
     @Override
@@ -111,18 +118,19 @@ public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant { 
          * id = "mill_modular_<MAC ADDRESS WITHOUT SEPARATORS> - name = "Panel Heater Modular"
          */
         String id = service.getPropertyString(MDNS_PROPERTY_ID);
-        if (id != null && id.startsWith("mill_modular_")) {
-            String name = service.getPropertyString(MDNS_PROPERTY_NAME);
-            if (name != null && name.toLowerCase(Locale.ROOT).contains("panel heater")) {
-                return new ThingUID(THING_TYPE_PANEL_HEATER, id.substring(13));
-            } else {
-                logger.warn(
-                    "Mill LAN discovered an unrecognized Mill device. The details should be reported to the binding " +
-                    "developer so that it can be recognized in the future. id=\"{}\", name=\"{}\"",
-                    id,
-                    name
-                );
-            }
+        String name = service.getPropertyString(MDNS_PROPERTY_NAME);
+        if (name != null) {
+            name = name.toLowerCase(Locale.ROOT);
+        }
+        if (id != null && id.startsWith("mill_modular_") && name != null && name.contains("panel heater")) {
+            return new ThingUID(THING_TYPE_PANEL_HEATER, id.substring(13));
+        } else {
+            logger.warn(
+                "Mill LAN discovered an unrecognized Mill device. The details should be reported to the binding " +
+                "developer so that it can be recognized in the future. id=\"{}\", name=\"{}\"",
+                id,
+                name
+            );
         }
         return null;
     }

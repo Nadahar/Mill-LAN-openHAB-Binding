@@ -32,10 +32,16 @@ public class MillBindingConstants { // TODO: (Nad) JAvaDocs
 
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_PANEL_HEATER = new ThingTypeUID(BINDING_ID, "panel-heater");
+    public static final ThingTypeUID THING_TYPE_CONVECTION_HEATER = new ThingTypeUID(BINDING_ID, "convection-heater");
+    public static final ThingTypeUID THING_TYPE_OIL_HEATER = new ThingTypeUID(BINDING_ID, "oil-heater");
+    public static final ThingTypeUID THING_TYPE_WIFI_SOCKET = new ThingTypeUID(BINDING_ID, "wifi-socket");
     public static final ThingTypeUID THING_TYPE_ALL_FUNCTIONS = new ThingTypeUID(BINDING_ID, "all-functions");
 
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(
         THING_TYPE_PANEL_HEATER,
+        THING_TYPE_CONVECTION_HEATER,
+        THING_TYPE_OIL_HEATER,
+        THING_TYPE_WIFI_SOCKET,
         THING_TYPE_ALL_FUNCTIONS
     );
 
