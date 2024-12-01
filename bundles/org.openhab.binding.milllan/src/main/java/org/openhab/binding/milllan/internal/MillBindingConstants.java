@@ -40,12 +40,24 @@ public class MillBindingConstants {
     /** The {@code Panel Heater} {@link ThingTypeUID} */
     public static final ThingTypeUID THING_TYPE_PANEL_HEATER = new ThingTypeUID(BINDING_ID, "panel-heater");
 
+    /** The {@code Convection Heater} {@link ThingTypeUID} */
+    public static final ThingTypeUID THING_TYPE_CONVECTION_HEATER = new ThingTypeUID(BINDING_ID, "convection-heater");
+
+    /** The {@code Oil Heater} {@link ThingTypeUID} */
+    public static final ThingTypeUID THING_TYPE_OIL_HEATER = new ThingTypeUID(BINDING_ID, "oil-heater");
+
+    /** The {@code Wi-Fi Socket} {@link ThingTypeUID} */
+    public static final ThingTypeUID THING_TYPE_WIFI_SOCKET = new ThingTypeUID(BINDING_ID, "wifi-socket");
+
     /** The {@code All Functions} {@link ThingTypeUID} */
     public static final ThingTypeUID THING_TYPE_ALL_FUNCTIONS = new ThingTypeUID(BINDING_ID, "all-functions");
 
     /** The {@link Set} of supported {@link ThingType}s */
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(
         THING_TYPE_PANEL_HEATER,
+        THING_TYPE_CONVECTION_HEATER,
+        THING_TYPE_OIL_HEATER,
+        THING_TYPE_WIFI_SOCKET,
         THING_TYPE_ALL_FUNCTIONS
     );
 
