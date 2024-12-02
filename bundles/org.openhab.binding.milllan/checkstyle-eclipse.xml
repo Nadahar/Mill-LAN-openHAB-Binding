@@ -147,4 +147,8 @@
   <module name="NewlineAtEndOfFile">
     <property name="severity" value="error"/>
   </module>
+  <module name="LineLength">
+    <property name="severity" value="warning"/>
+    <property name="max" value="120"/>
+  </module>
 </module>
