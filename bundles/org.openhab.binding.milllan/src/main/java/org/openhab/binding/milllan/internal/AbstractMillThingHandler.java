@@ -920,6 +920,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    /**
+     * Polls the device for PID parameters.
+     *
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the fetched values.
+     * @return The resulting {@link PIDParametersResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public PIDParametersResponse pollPIDParameters(boolean updateConfiguration) throws MillException {
         PIDParametersResponse params;
@@ -955,6 +962,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
      * @param kd the derivative gain factor.
      * @param kdFilterN the derivative filter time coefficient.
      * @param windupLimitPercentage the wind-up limit for integral part from 0 to 100.
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the new values.
      * @return The resulting {@link PIDParametersResponse} from the follow-up query.
      * @throws MillException If an error occurs during the operation.
      */

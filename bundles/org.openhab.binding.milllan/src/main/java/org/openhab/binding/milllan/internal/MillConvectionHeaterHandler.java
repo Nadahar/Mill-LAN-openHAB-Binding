@@ -18,7 +18,6 @@ import static org.openhab.binding.milllan.internal.MillBindingConstants.*;
 import java.util.Collection;
 import java.util.Set;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.milllan.internal.action.MillConvectionActions;
 import org.openhab.binding.milllan.internal.api.TemperatureType;
@@ -30,12 +29,20 @@ import org.openhab.core.thing.binding.ThingHandlerService;
 
 
 /**
+ * The Thing handler for the {@code Convection Heater} thing type.
  *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class MillConvectionHeaterHandler extends AbstractMillThingHandler { //TODO: (Nad) JavaDocs
+public class MillConvectionHeaterHandler extends AbstractMillThingHandler {
 
+    /**
+     * Creates a new instance using the specified parameters.
+     *
+     * @param thing the {@link Thing} for which to create a handler.
+     * @param configDescriptionProvider the {@link MillConfigDescriptionProvider} to use.
+     * @param httpClientProvider the {@link MillHTTPClientProvider} to use.
+     */
     public MillConvectionHeaterHandler(
         Thing thing,
         MillConfigDescriptionProvider configDescriptionProvider,
@@ -50,15 +57,18 @@ public class MillConvectionHeaterHandler extends AbstractMillThingHandler { //TO
     }
 
     @Override
-    protected @NonNull Runnable createFrequentTask() {
+    protected Runnable createFrequentTask() {
         return new PollFrequent();
     }
 
     @Override
-    protected @NonNull Runnable createInfrequentTask() {
+    protected Runnable createInfrequentTask() {
         return new PollInfrequent();
     }
 
+    /**
+     * The {@link Runnable} used for frequent polls.
+     */
     protected class PollFrequent implements Runnable {
 
         @Override
@@ -75,6 +85,9 @@ public class MillConvectionHeaterHandler extends AbstractMillThingHandler { //TO
         }
     }
 
+    /**
+     * The {@link Runnable} used for infrequent polls.
+     */
     protected class PollInfrequent implements Runnable {
 
         @Override
