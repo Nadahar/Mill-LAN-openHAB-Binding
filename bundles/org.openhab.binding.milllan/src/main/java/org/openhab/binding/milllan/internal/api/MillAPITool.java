@@ -65,19 +65,34 @@ import com.google.gson.JsonParseException;
 
 
 /**
+ * This class contains the actual calls to the device REST API.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class MillAPITool { // TODO: (Nad) JavaDocs
+public class MillAPITool {
 
     private final Logger logger = LoggerFactory.getLogger(MillAPITool.class);
     private final MillHTTPClientProvider httpClientProvider;
     private final Gson gson = new GsonBuilder().create();
 
+    /**
+     * Creates a new instance.
+     *
+     * @param httpClientProvider the {@link MillHTTPClientProvider} to use.
+     */
     public MillAPITool(MillHTTPClientProvider httpClientProvider) {
         this.httpClientProvider = httpClientProvider;
     }
 
+    /**
+     * Sends {@code GET/status} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link StatusResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public StatusResponse getStatus(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             StatusResponse.class,
@@ -92,6 +107,14 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code GET/control-status} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link ControlStatusResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public ControlStatusResponse getControlStatus(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             ControlStatusResponse.class,
@@ -106,6 +129,14 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code GET/operation-mode} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link OperationModeResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public OperationModeResponse getOperationMode(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             OperationModeResponse.class,
@@ -120,7 +151,20 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setOperationMode(String hostname, @Nullable String apiKey, OperationMode mode) throws MillException {
+    /**
+     * Sends {@code POST/operation-mode} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param mode the {@link OperationMode}.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setOperationMode(
+        String hostname,
+        @Nullable String apiKey,
+        OperationMode mode
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.add("mode", gson.toJsonTree(mode));
         return request(
@@ -136,7 +180,18 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public TemperatureCalibrationOffsetResponse getTemperatureCalibrationOffset(String hostname, @Nullable String apiKey) throws MillException {
+    /**
+     * Sends {@code GET/temperature-calibration-offset} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link TemperatureCalibrationOffsetResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public TemperatureCalibrationOffsetResponse getTemperatureCalibrationOffset(
+        String hostname,
+        @Nullable String apiKey
+    ) throws MillException {
         return request(
             TemperatureCalibrationOffsetResponse.class,
             hostname,
@@ -150,7 +205,20 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setTemperatureCalibrationOffset(String hostname, @Nullable String apiKey, BigDecimal offset) throws MillException {
+    /**
+     * Sends {@code POST/temperature-calibration-offset} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param offset the temperature offset in °C.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setTemperatureCalibrationOffset(
+        String hostname,
+        @Nullable String apiKey,
+        BigDecimal offset
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("value", offset);
         return request(
@@ -166,6 +234,14 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code GET/commercial-lock} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link CommercialLockResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public CommercialLockResponse getCommercialLock(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             CommercialLockResponse.class,
@@ -180,6 +256,15 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code POST/commercial-lock} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param value whether the commercial lock should be enabled or not.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public Response setCommercialLock(String hostname, @Nullable String apiKey, Boolean value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("value", value);
@@ -196,6 +281,14 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code GET/child-lock} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link ChildLockResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public ChildLockResponse getChildLock(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             ChildLockResponse.class,
@@ -210,6 +303,15 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code POST/child-lock} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param value whether the child lock should be enabled or not.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public Response setChildLock(String hostname, @Nullable String apiKey, Boolean value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("value", value);
@@ -226,6 +328,14 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code GET/display-unit} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link DisplayUnitResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public DisplayUnitResponse getDisplayUnit(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             DisplayUnitResponse.class,
@@ -240,7 +350,20 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setDisplayUnit(String hostname, @Nullable String apiKey, DisplayUnit displayUnit) throws MillException {
+    /**
+     * Sends {@code POST/display-unit} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param displayUnit the {@link DisplayUnit}.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setDisplayUnit(
+        String hostname,
+        @Nullable String apiKey,
+        DisplayUnit displayUnit
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.add("value", gson.toJsonTree(displayUnit));
         return request(
@@ -256,7 +379,20 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public SetTemperatureResponse getSetTemperature(String hostname, @Nullable String apiKey, TemperatureType temperatureType) throws MillException {
+    /**
+     * Sends {@code GET/set-temperature} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param temperatureType the {@link TemperatureType} whose set-temperature to get.
+     * @return The resulting {@link SetTemperatureResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public SetTemperatureResponse getSetTemperature(
+        String hostname,
+        @Nullable String apiKey,
+        TemperatureType temperatureType
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.add("type", gson.toJsonTree(temperatureType));
         return request(
@@ -272,7 +408,22 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setSetTemperature(String hostname, @Nullable String apiKey, TemperatureType temperatureType, BigDecimal value) throws MillException {
+    /**
+     * Sends {@code POST/set-temperature} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param temperatureType the {@link TemperatureType} for which to set the target temperature.
+     * @param value the target temperature in °C.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setSetTemperature(
+        String hostname,
+        @Nullable String apiKey,
+        TemperatureType temperatureType,
+        BigDecimal value
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.add("type", gson.toJsonTree(temperatureType));
         object.addProperty("value", value);
@@ -289,7 +440,18 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public LimitedHeatingPowerResponse getLimitedHeatingPower(String hostname, @Nullable String apiKey) throws MillException {
+    /**
+     * Sends {@code GET/limited-heating-power} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link LimitedHeatingPowerResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public LimitedHeatingPowerResponse getLimitedHeatingPower(
+        String hostname,
+        @Nullable String apiKey
+    ) throws MillException {
         return request(
             LimitedHeatingPowerResponse.class,
             hostname,
@@ -303,7 +465,22 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setLimitedHeatingPower(String hostname, @Nullable String apiKey, Integer value) throws MillException {
+    /**
+     * Sends {@code POST/limited-heating-power} to the device's REST API and returns the response.
+     * <p>
+     * <b>Note:</b> Has no effect on the actual output power of tested devices
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param value the maximum heating power in percentage.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setLimitedHeatingPower(
+        String hostname,
+        @Nullable String apiKey,
+        Integer value
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("limited_heating_power", value);
         return request(
@@ -319,6 +496,14 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code GET/controller-type} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link ControllerTypeResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public ControllerTypeResponse getControllerType(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             ControllerTypeResponse.class,
@@ -333,7 +518,20 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setControllerType(String hostname, @Nullable String apiKey, ControllerType controllerType) throws MillException {
+    /**
+     * Sends {@code POST/controller-type} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param controllerType the {@link ControllerType}.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setControllerType(
+        String hostname, @Nullable
+        String apiKey,
+        ControllerType controllerType
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.add("regulator_type", gson.toJsonTree(controllerType));
         return request(
@@ -349,7 +547,18 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public PredictiveHeatingTypeResponse getPredictiveHeatingType(String hostname, @Nullable String apiKey) throws MillException {
+    /**
+     * Sends {@code GET/predictive-heating-type} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link PredictiveHeatingTypeResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public PredictiveHeatingTypeResponse getPredictiveHeatingType(
+        String hostname,
+        @Nullable String apiKey
+    ) throws MillException {
         return request(
             PredictiveHeatingTypeResponse.class,
             hostname,
@@ -363,7 +572,20 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setPredictiveHeatingType(String hostname, @Nullable String apiKey, PredictiveHeatingType type) throws MillException {
+    /**
+     * Sends {@code POST/predictive-heating-type} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param type the {@link PredictiveHeatingType}.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setPredictiveHeatingType(
+        String hostname,
+        @Nullable String apiKey,
+        PredictiveHeatingType type
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.add("predictive_heating_type", gson.toJsonTree(type));
         return request(
@@ -379,6 +601,14 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code GET/oil-heater-power} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link OilHeaterPowerResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public OilHeaterPowerResponse getOilHeaterPower(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             OilHeaterPowerResponse.class,
@@ -393,6 +623,15 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code POST/oil-heating-power} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param value heating power in percentage (40%, 60% or 100%).
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public Response setOilHeaterPower(String hostname, @Nullable String apiKey, Integer value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("heating_level_percentage", value);
@@ -409,6 +648,14 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code GET/timezone-offset} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link TimeZoneOffsetResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public TimeZoneOffsetResponse getTimeZoneOffset(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             TimeZoneOffsetResponse.class,
@@ -423,6 +670,15 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code POST/timezone-offset} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param value the time zone offset from UTC in minutes.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public Response setTimeZoneOffset(String hostname, @Nullable String apiKey, Integer value) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("timezone_offset", value);
@@ -439,6 +695,14 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends {@code GET/pid-parameters} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link PIDParametersResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public PIDParametersResponse getPIDParameters(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             PIDParametersResponse.class,
@@ -454,9 +718,11 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
     }
 
     /**
-     * Sets the PID parameters for panel heaters.
+     * Sends {@code POST/pid-parameters} to the device's REST API and returns the response.
+     * <p>
+     * <b>Supported by panel heaters only</b>.
      *
-     * @param hostname the host to contact.
+     * @param hostname the hostname or IP address to contact.
      * @param apiKey the API key or {@code null}.
      * @param kp the proportional gain factor.
      * @param ki the integral gain factor.
@@ -466,7 +732,15 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
      * @return The resulting {@link Response}.
      * @throws MillException If an error occurs during the operation.
      */
-    public Response setPIDParameters(String hostname, @Nullable String apiKey, Double kp, Double ki, Double kd, Double kdFilterN, Double windupLimitPercentage) throws MillException {
+    public Response setPIDParameters(
+        String hostname,
+        @Nullable String apiKey,
+        Double kp,
+        Double ki,
+        Double kd,
+        Double kdFilterN,
+        Double windupLimitPercentage
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("kp", kp);
         object.addProperty("ki", ki);
@@ -486,7 +760,18 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public CloudCommunicationResponse getCloudCommunication(String hostname, @Nullable String apiKey) throws MillException {
+    /**
+     * Sends {@code GET/cloud-communication} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link CloudCommunicationResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public CloudCommunicationResponse getCloudCommunication(
+        String hostname,
+        @Nullable String apiKey
+    ) throws MillException {
         return request(
             CloudCommunicationResponse.class,
             hostname,
@@ -500,7 +785,20 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setCloudCommunication(String hostname, @Nullable String apiKey, Boolean value) throws MillException {
+    /**
+     * Sends {@code POST/cloud-communication} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param value whether cloud communication is enabled or not.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setCloudCommunication(
+        String hostname,
+        @Nullable String apiKey,
+        Boolean value
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("value", value);
         return request(
@@ -516,7 +814,18 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public HysteresisParametersResponse getHysteresisParameters(String hostname, @Nullable String apiKey) throws MillException {
+    /**
+     * Sends {@code GET/hysteresis-parameters} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link HysteresisParametersResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public HysteresisParametersResponse getHysteresisParameters(
+        String hostname,
+        @Nullable String apiKey
+    ) throws MillException {
         return request(
             HysteresisParametersResponse.class,
             hostname,
@@ -530,8 +839,24 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    //Doc: Restart required after setting
-    public Response setHysteresisParameters(String hostname, @Nullable String apiKey, Double upper, Double lower) throws MillException {
+    /**
+     * Sends {@code POST/hysteresis-parameters} to the device's REST API and returns the response.
+     * <p>
+     * <b>A device reboot is required to effectuate changes.</b>
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param upper the upper hysteresis limit in °C.
+     * @param lower the lower hysteresis limit in °C.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setHysteresisParameters(
+        String hostname,
+        @Nullable String apiKey,
+        Double upper,
+        Double lower
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("temp_hysteresis_upper", upper);
         object.addProperty("temp_hysteresis_lower", lower);
@@ -548,8 +873,22 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    //Doc: Will fail unless the device is in "Independent device" mode
-    public Response setTemperatureInIndependentMode(String hostname, @Nullable String apiKey, BigDecimal value) throws MillException {
+    /**
+     * Sends {@code POST/set-temperature-in-independent-mode-now} to the device's REST API and returns the response.
+     * <p>
+     * <b>Note:</b> Will fail is the device isn't in "Independent device" mode.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param value the target temperature in °C.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setTemperatureInIndependentMode(
+        String hostname,
+        @Nullable String apiKey,
+        BigDecimal value
+    ) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("temperature", value);
         return request(
@@ -565,7 +904,15 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    // Doc: Max 32 characters custom name
+    /**
+     * Sends {@code POST/set-custom-name} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param customName the custom name to set, <b>maximum 32 bytes in {@code UTF-8}</b>.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public Response setCustomName(String hostname, @Nullable String apiKey, String customName) throws MillException {
         JsonObject object = new JsonObject();
         object.addProperty("device_name", customName);
@@ -582,7 +929,18 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public CommercialLockCustomizationResponse getCommercialLockCustomization(String hostname, @Nullable String apiKey) throws MillException {
+    /**
+     * Sends {@code GET/commercial-lock-customization} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link CommercialLockCustomizationResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public CommercialLockCustomizationResponse getCommercialLockCustomization(
+        String hostname,
+        @Nullable String apiKey
+    ) throws MillException {
         return request(
             CommercialLockCustomizationResponse.class,
             hostname,
@@ -596,7 +954,22 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setCommercialLockCustomization(String hostname, @Nullable String apiKey, Double min, Double max) throws MillException {
+    /**
+     * Sends {@code POST/commercial-lock} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param min the minimum set-temperature in °C.
+     * @param max the maximum set-temperature in °C.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setCommercialLockCustomization(
+        String hostname,
+        @Nullable String apiKey,
+        Double min,
+        Double max
+    ) throws MillException {
         CommercialLockResponse lockState = request(
             CommercialLockResponse.class,
             hostname,
@@ -630,7 +1003,18 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public OpenWindowParametersResponse getOpenWindowParameters(String hostname, @Nullable String apiKey) throws MillException {
+    /**
+     * Sends {@code GET/open-window} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @return The resulting {@link OpenWindowParametersResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public OpenWindowParametersResponse getOpenWindowParameters(
+        String hostname,
+        @Nullable String apiKey
+    ) throws MillException {
         return request(
             OpenWindowParametersResponse.class,
             hostname,
@@ -644,7 +1028,20 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    public Response setOpenWindowParameters(String hostname, @Nullable String apiKey, OpenWindowParameters parameters) throws MillException {
+    /**
+     * Sends {@code POST/open-window} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param parameters the {@link OpenWindowParameters}.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setOpenWindowParameters(
+        String hostname,
+        @Nullable String apiKey,
+        OpenWindowParameters parameters
+    ) throws MillException {
         return request(
             GenericResponse.class,
             hostname,
@@ -658,9 +1055,20 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    //Doc: BE CAREFULL!!! To reset the API key a factory reset is required.
-    //Doc: At most most 63 characters
-    //Doc: Will time out if successful
+    /**
+     * Sends {@code POST/set-api-key} to the device's REST API and returns the response.
+     * <p>
+     * <b>WARNING: Setting an API key will switch the device to {@code HTTPS}, and the key cannot be removed
+     * (only changed). To restore {@code HTTP} and/or remove the API key, a factory reset is required</b>.
+     * <p>
+     * <b>Note:</b> This method will time out if successful.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the existing API key or {@code null}.
+     * @param newAPIKey the new API key to set, <b>maximum 63 bytes {@code UTF-8} encoded</b>.
+     * @return The resulting {@link Response} if the call fails.
+     * @throws MillException If an error occurs during the operation.
+     */
     public Response setAPIKey(String hostname, @Nullable String apiKey, String newAPIKey) throws MillException {
         if (newAPIKey.getBytes(StandardCharsets.UTF_8).length > 63) {
             throw new MillException("Illegal API-ley - maximum length is 63 bytes");
@@ -680,7 +1088,16 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
-    //Doc: WILL time out - response is never sent
+    /**
+     * Sends {@code POST/reboot} to the device's REST API.
+     * <p>
+     * <b>Note:</b> This method will time out if successful.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the existing API key or {@code null}.
+     * @return The resulting {@link Response} if the call fails.
+     * @throws MillException If an error occurs during the operation.
+     */
     public Response sendReboot(String hostname, @Nullable String apiKey) throws MillException {
         return request(
             GenericResponse.class,
@@ -695,6 +1112,25 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         );
     }
 
+    /**
+     * Sends a {@code HTTP} request using the specified parameters and returns the {@link Response}
+     * or throws a {@link MillException}.
+     *
+     * @param <T> the {@link Response} class.
+     * @param clazz the class type to deserialize the response to.
+     * @param hostname the hostname or IP address to contact.
+     * @param apiKey the API key or {@code null}.
+     * @param method the {@link HttpMethod} to use.
+     * @param path the URI path to use.
+     * @param content the request body or {@code null}.
+     * @param timeout the timeout value.
+     * @param timeUnit the timeout {@link TimeUnit}.
+     * @param throwOnAPIStatus if {@code true}, an exception is thrown if the returned API {@code status}
+     *                         field is anything but "ok".
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     * @throws MillHTTPResponseException If the returned {@code HTTP status} doesn't indicate success.
+     */
     public <T extends Response> T request(
         Class<T> clazz,
         String hostname,
@@ -725,6 +1161,24 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
         return request(clazz, uri, method, headers, content, timeout, timeUnit, true);
     }
 
+    /**
+     * Sends a {@code HTTP} request using the specified parameters and returns the {@link Response}
+     * or throws a {@link MillException}.
+     *
+     * @param <T> the {@link Response} class.
+     * @param clazz the class type to deserialize the response to.
+     * @param uri the request {@link URI}.
+     * @param method the {@link HttpMethod} to use.
+     * @param headers a {@link Map} of {@code HTTP} headers or {@code null}.
+     * @param content the request body or {@code null}.
+     * @param timeout the timeout value.
+     * @param timeUnit the timeout {@link TimeUnit}.
+     * @param throwOnAPIStatus if {@code true}, an exception is thrown if the returned API {@code status}
+     *                         field is anything but "ok".
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     * @throws MillHTTPResponseException If the returned {@code HTTP status} doesn't indicate success.
+     */
     public <T extends Response> T request(
         Class<T> clazz,
         URI uri,
@@ -747,7 +1201,8 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             StringBuilder sb = new StringBuilder("Sending HTTP ")
                 .append(method).append(" request to \"").append(uri).append('"');
             if (content != null) {
-                sb.append(" with Content=\"").append(content).append("\", ContentType=\"").append(contentType).append('"');
+                sb.append(" with Content=\"").append(content)
+                    .append("\", ContentType=\"").append(contentType).append('"');
             }
             logger.debug("{}", sb.toString());
         }
@@ -785,7 +1240,8 @@ public class MillAPITool { // TODO: (Nad) JavaDocs
             StringBuilder sb = new StringBuilder("Received HTTP response ").append(response.getStatus())
                 .append(" from \"").append(uri.getHost()).append('"');
             if (MillUtil.isNotBlank(responseBody)) {
-                sb.append(" with Content=\"").append(responseBody).append("\", ContentType=\"").append(response.getMediaType()).append('"');
+                sb.append(" with Content=\"").append(responseBody)
+                    .append("\", ContentType=\"").append(response.getMediaType()).append('"');
             }
             logger.debug("{}", sb.toString());
         }

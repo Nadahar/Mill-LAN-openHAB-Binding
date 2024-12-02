@@ -37,11 +37,18 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(configurationPid = "binding.milllan", service = ThingHandlerFactory.class)
-public class MillThingHandlerFactory extends BaseThingHandlerFactory { // TODO: (Nad) JavaDocs
+public class MillThingHandlerFactory extends BaseThingHandlerFactory {
 
     private final MillConfigDescriptionProvider configDescriptionProvider;
     private final MillHTTPClientProvider httpClientProvider;
 
+    /**
+     * Creates a new instance using the specified parameters.
+     *
+     * @param configDescriptionProvider the {@link MillConfigDescriptionProvider} to use.
+     * @param httpClientProvider the {@link MillHTTPClientProvider} to use.
+     * @param componentContext the {@link ComponentContext}.
+     */
     @Activate
     public MillThingHandlerFactory(
         @Reference MillConfigDescriptionProvider configDescriptionProvider,
