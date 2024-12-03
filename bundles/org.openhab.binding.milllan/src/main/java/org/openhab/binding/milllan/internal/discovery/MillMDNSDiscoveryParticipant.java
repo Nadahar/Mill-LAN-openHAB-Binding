@@ -27,11 +27,13 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.mdns.MDNSDiscoveryParticipant;
+import org.openhab.core.config.discovery.mdns.internal.MDNSDiscoveryService;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.type.ThingType;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -42,14 +44,18 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * This {@link MDNSDiscoveryParticipant} registers with the {@link MDNSDiscoveryService} and
+ * handles the discovery of supported devices via mDNS.
+ *
  * @author Nadahar - Initial contribution
  */
 @Component(configurationPid = "discovery.milllan")
 @NonNullByDefault
-public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant { // TODO: (Nad) JavaDocs
+public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant {
 
     private static final String SERVICE_TYPE = "_mill._tcp.local.";
 
+    /** The {@link Set} of discoverable {@link ThingType}s */
     public static final Set<ThingTypeUID> DISCOVERABLE_THING_TYPES_UIDS = Set.of(
         THING_TYPE_PANEL_HEATER,
         THING_TYPE_CONVECTION_HEATER,
@@ -65,6 +71,13 @@ public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant { 
 
     private final LocaleProvider localeProvider;
 
+    /**
+     * Creates a new instance using the specified parameters.
+     *
+     * @param componentContext the {@link ComponentContext}.
+     * @param i18nProvider the {@link TranslationProvider}.
+     * @param localeProvider the {@link LocaleProvider}.
+     */
     @Activate
     public MillMDNSDiscoveryParticipant(
         ComponentContext componentContext,
@@ -135,6 +148,12 @@ public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant { 
         return null;
     }
 
+    /**
+     * Tries to find a reachable IP address among the supplied addresses.
+     *
+     * @param addresses the array of {@link InetAddress}es to look through.
+     * @return The resulting IP address or an empty {@link String} if none were supplied.
+     */
     protected String resolveIPAddress(InetAddress[] addresses) {
         for (InetAddress address : addresses) {
             try {
@@ -148,6 +167,13 @@ public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant { 
         return addresses.length > 0 ? addresses[0].getHostAddress() : "";
     }
 
+    /**
+     * Formats the MAC address found in the {@code id} field of the {@link ServiceInfo} in the same way
+     * that it is formatted when returned by the device's API, to make the two comparable.
+     *
+     * @param unformatted the unformatted MAC address.
+     * @return The formatted MAC address.
+     */
     protected String formatMACAddress(String unformatted) {
         char[] c = unformatted.toUpperCase(Locale.ROOT).toCharArray();
         StringBuilder sb = new StringBuilder(17);

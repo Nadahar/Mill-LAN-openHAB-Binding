@@ -16,44 +16,84 @@ package org.openhab.binding.milllan.internal.exception;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.http.HttpStatus;
+import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatusDetail;
 
 
 /**
+ * A {@link MillException} implementation that also carries a {@code HTTP} status.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class MillHTTPResponseException extends MillException { // TODO: (Nad) JavaDocs
+public class MillHTTPResponseException extends MillException {
 
     private static final long serialVersionUID = 1L;
 
     private final int httpStatus;
 
+    /**
+     * Creates a new instance with the specified {@code HTTP} status.
+     *
+     * @param httpStatus the {@code HTTP} status to use.
+     */
     public MillHTTPResponseException(int httpStatus) {
         super(httpStatus + " - " + HttpStatus.getMessage(httpStatus));
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param message the message to use.
+     * @param httpStatus the {@code HTTP} status to use.
+     */
     public MillHTTPResponseException(@Nullable String message, int httpStatus) {
         super(message);
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param cause the {@link Throwable} that caused this {@link Exception}.
+     */
     public MillHTTPResponseException(int httpStatus, @Nullable Throwable cause) {
         super(httpStatus + " - " + HttpStatus.getMessage(httpStatus), cause);
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param message the message to use.
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param cause the {@link Throwable} that caused this {@link Exception}.
+     */
     public MillHTTPResponseException(@Nullable String message, int httpStatus, @Nullable Throwable cause) {
         super(message, cause);
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param thingStatusDetail the {@link ThingStatusDetail} to use.
+     */
     public MillHTTPResponseException(int httpStatus, @Nullable ThingStatusDetail thingStatusDetail) {
         super(httpStatus + " - " + HttpStatus.getMessage(httpStatus), thingStatusDetail);
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param message the message to use.
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param thingStatusDetail the {@link ThingStatusDetail} to use.
+     */
     public MillHTTPResponseException(
         @Nullable String message,
         int httpStatus,
@@ -63,6 +103,13 @@ public class MillHTTPResponseException extends MillException { // TODO: (Nad) Ja
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param thingStatusDetail the {@link ThingStatusDetail} to use.
+     * @param cause the {@link Throwable} that caused this {@link Exception}.
+     */
     public MillHTTPResponseException(
         int httpStatus,
         @Nullable ThingStatusDetail thingStatusDetail,
@@ -72,6 +119,14 @@ public class MillHTTPResponseException extends MillException { // TODO: (Nad) Ja
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param message the message to use.
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param thingStatusDetail the {@link ThingStatusDetail} to use.
+     * @param cause the {@link Throwable} that caused this {@link Exception}.
+     */
     public MillHTTPResponseException(
         @Nullable String message,
         int httpStatus,
@@ -82,6 +137,13 @@ public class MillHTTPResponseException extends MillException { // TODO: (Nad) Ja
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param thingStatusDetail the {@link ThingStatusDetail} to use.
+     * @param thingStatusDescription the {@link Thing} status description to use.
+     */
     public MillHTTPResponseException(
         int httpStatus,
         @Nullable ThingStatusDetail thingStatusDetail,
@@ -91,6 +153,14 @@ public class MillHTTPResponseException extends MillException { // TODO: (Nad) Ja
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param message the message to use.
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param thingStatusDetail the {@link ThingStatusDetail} to use.
+     * @param thingStatusDescription the {@link Thing} status description to use.
+     */
     public MillHTTPResponseException(
         @Nullable String message,
         int httpStatus,
@@ -101,6 +171,14 @@ public class MillHTTPResponseException extends MillException { // TODO: (Nad) Ja
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param thingStatusDetail the {@link ThingStatusDetail} to use.
+     * @param thingStatusDescription the {@link Thing} status description to use.
+     * @param cause the {@link Throwable} that caused this {@link Exception}.
+     */
     public MillHTTPResponseException(
         int httpStatus,
         @Nullable ThingStatusDetail thingStatusDetail,
@@ -116,6 +194,15 @@ public class MillHTTPResponseException extends MillException { // TODO: (Nad) Ja
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * Creates a new instance with the specified details.
+     *
+     * @param message the message to use.
+     * @param httpStatus the {@code HTTP} status to use.
+     * @param thingStatusDetail the {@link ThingStatusDetail} to use.
+     * @param thingStatusDescription the {@link Thing} status description to use.
+     * @param cause the {@link Throwable} that caused this {@link Exception}.
+     */
     public MillHTTPResponseException(
         @Nullable String message,
         int httpStatus,
@@ -127,6 +214,9 @@ public class MillHTTPResponseException extends MillException { // TODO: (Nad) Ja
         this.httpStatus = httpStatus;
     }
 
+    /**
+     * @return The {@code HTTP} status.
+     */
     public int getHttpStatus() {
         return httpStatus;
     }
