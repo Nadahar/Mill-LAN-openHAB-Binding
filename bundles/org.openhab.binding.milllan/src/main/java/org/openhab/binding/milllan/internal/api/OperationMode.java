@@ -21,30 +21,43 @@ import com.google.gson.annotations.SerializedName;
 
 
 /**
+ * This enum represents the device API's {@code EOprationMode}.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public enum OperationMode { // TODO: (Nad) JavaDocs
+public enum OperationMode {
 
+    /**
+     * The device is in off mode, it is not possible to send any comands to the device. The device doesn't
+     * follow neither weekly program nor it is in independent mode, nor in control individually mode.
+     */
     @SerializedName("Off")
     OFF(
         "The device is in off mode, it is not possible to send any comands to the device. " +
         "The device doesn't follow neither weekly program nor it is in independent mode, " +
-        "nor in control individually."
+        "nor in control individually mode."
     ),
 
+    /**
+     * The device follows the weekly program, changing temperature by display buttons changes the
+     * temperature of the current temperature mode.
+     */
     @SerializedName("Weekly program")
     WEEKLY_PROGRAM(
         "The device follows the weekly program, changing temperature by display buttons changes " +
         "the temperature of the current temperature mode."
     ),
 
+    /** The device follows the single set value, with timers enabled. */
     @SerializedName("Independent device")
     INDEPENDENT_DEVICE("The device follows the single set value, with timers enabled."),
 
+    /** The device follows the single set value, without any timers or weekly program. */
     @SerializedName("Control individually")
     CONTROL_INDIVIDUALLY("The device follows the single set value, without any timers or weekly program."),
 
+    /** Invalid mode */
     @SerializedName("Invalid")
     INVALID("Invalid mode");
 
@@ -54,10 +67,19 @@ public enum OperationMode { // TODO: (Nad) JavaDocs
         this.description = description;
     }
 
+    /**
+     * @return The human-readable name/description.
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Tries to look up a {@link OperationMode} that matches the specified string.
+     *
+     * @param value the {@link String} to match.
+     * @return The corresponding {@link OperationMode} or {@code null}.
+     */
     @Nullable
     public static OperationMode typeOf(@Nullable String value) {
         if (value == null || MillUtil.isBlank(value)) {

@@ -23,11 +23,14 @@ import com.google.gson.annotations.SerializedName;
 
 
 /**
+ * This enum represents the options used by the {@code /display-unit} endpoints.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public enum DisplayUnit { // TODO: (Nad) JavaDocs
+public enum DisplayUnit {
 
+    /** Celcius */
     @SerializedName("Celsius")
     CELSIUS("Celsius"),
 
@@ -41,10 +44,19 @@ public enum DisplayUnit { // TODO: (Nad) JavaDocs
         this.description = description;
     }
 
+    /**
+     * @return The human-readable name/description.
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Tries to look up a {@link DisplayUnit} that matches the specified string.
+     *
+     * @param value the {@link String} to match.
+     * @return The corresponding {@link DisplayUnit} or {@code null}.
+     */
     @Nullable
     public static DisplayUnit typeOf(@Nullable String value) {
         if (value == null || MillUtil.isBlank(value)) {

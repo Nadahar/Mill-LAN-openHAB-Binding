@@ -23,17 +23,22 @@ import com.google.gson.annotations.SerializedName;
 
 
 /**
+ * This enum represents the options used by the {@code /controller-type} endpoints.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public enum ControllerType { // TODO: (Nad) JavaDocs
+public enum ControllerType {
 
+    /** PID */
     @SerializedName("pid")
     PID("PID"),
 
+    /** Hysteresis or slow PID */
     @SerializedName("hysteresis_or_slow_pid")
     SLOW_PID("Slow PID"),
 
+    /** Unknown */
     @SerializedName("unknown")
     UNKNOWN("Unknown");
 
@@ -43,10 +48,19 @@ public enum ControllerType { // TODO: (Nad) JavaDocs
         this.description = description;
     }
 
+    /**
+     * @return The human-readable name/description.
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Tries to look up a {@link ControllerType} that matches the specified string.
+     *
+     * @param value the {@link String} to match.
+     * @return The corresponding {@link ControllerType} or {@code null}.
+     */
     @Nullable
     public static ControllerType typeOf(@Nullable String value) {
         if (value == null || MillUtil.isBlank(value)) {

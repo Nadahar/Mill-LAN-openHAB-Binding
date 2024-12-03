@@ -19,24 +19,32 @@ import com.google.gson.annotations.SerializedName;
 
 
 /**
+ * This enum represents the device API's {@code HTTP Response Status}.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public enum ResponseStatus { // TODO: (Nad) JavaDocs
+public enum ResponseStatus {
+
+    /** The request was successful */
     @SerializedName("ok")
     OK("The request was successful"),
 
+    /** The request body is incorrect or the parameters are invalid */
     @SerializedName("Failed to parse message body")
     PARSE_FAILED("The request body is incorrect or the parameters are invalid"),
 
+    /** There was a problem with the processing request */
     @SerializedName("Failed to execute the request")
     REQUEST_FAILED("There was a problem with the processing request"),
 
+    /** The length of the request body is too long */
     @SerializedName("Length of request body too long")
     TOO_LONG("The length of the request body is too long"),
 
+    /** There was a problem when creating the response */
     @SerializedName("Failed to create response body")
-    RESPONSE_FAILED("there was a problem with the processing respone");
+    RESPONSE_FAILED("There was a problem when creating the response");
 
     private final String description;
 
@@ -44,6 +52,9 @@ public enum ResponseStatus { // TODO: (Nad) JavaDocs
         this.description = description;
     }
 
+    /**
+     * @return The human-readable name/description.
+     */
     public String getDescription() {
         return description;
     }

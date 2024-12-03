@@ -19,23 +19,28 @@ import com.google.gson.annotations.SerializedName;
 
 
 /**
+ * This enum represents the device API's {@code EOpenWindowStatus}.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public enum OpenWindowStatus { // TODO: (Nad) JavaDocs
+public enum OpenWindowStatus {
 
+    /** Open Window functionality is disabled */
     @SerializedName("Disabled not active now")
-    DISABLED("Open Window functionality is disabled.", false),
+    DISABLED("Open Window functionality is disabled", false),
 
+    /** Open Window functionality is active, and the window is detected as open, so the heater is not heating */
     @SerializedName("Enabled active now")
     ENABLED_ACTIVE(
-        "Open Window functionality is active, and the window is detected as open, so the heater is not heating.",
+        "Open Window functionality is active, and the window is detected as open, so the heater is not heating",
         true
     ),
 
+    /** Open Window functionality is active, but the window is not detected as open, so the heater operates normally */
     @SerializedName("Enabled not active now")
     ENABLED_INACTIVE(
-        "Open Window functionality is active, but the window is not detected as open, so the heater operates normally.",
+        "Open Window functionality is active, but the window is not detected as open, so the heater operates normally",
         true
     );
 
@@ -48,10 +53,16 @@ public enum OpenWindowStatus { // TODO: (Nad) JavaDocs
         this.enabled = enabled;
     }
 
+    /**
+     * @return The human-readable name/description.
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * @return {@code true} if this {@link OpenWindowStatus} means that the open window function is enabled.
+     */
     public boolean isEnabled() {
         return enabled;
     }

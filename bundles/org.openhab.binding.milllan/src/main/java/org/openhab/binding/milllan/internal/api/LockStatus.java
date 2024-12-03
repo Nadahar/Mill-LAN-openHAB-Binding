@@ -19,18 +19,24 @@ import com.google.gson.annotations.SerializedName;
 
 
 /**
+ * This enum represents the device API's {@code ELockStatus}.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public enum LockStatus { // TODO: (Nad) JavaDocs
+public enum LockStatus {
+
+    /** All buttons are active */
     @SerializedName("No lock")
-    NO_LOCK("All buttons are active."),
+    NO_LOCK("All buttons are active"),
 
+    /** The buttons on the device are not active */
     @SerializedName("Child lock")
-    CHILD_LOCK("The buttons on the device are not active."),
+    CHILD_LOCK("The buttons on the device are not active"),
 
+    /** The buttons on the device have limited functionality */
     @SerializedName("Commercial lock")
-    COMMERCIAL_LOCK("The buttons on the device have limited functionality.");
+    COMMERCIAL_LOCK("The buttons on the device have limited functionality");
 
     private final String description;
 
@@ -38,6 +44,9 @@ public enum LockStatus { // TODO: (Nad) JavaDocs
         this.description = description;
     }
 
+    /**
+     * @return The human-readable name/description.
+     */
     public String getDescription() {
         return description;
     }

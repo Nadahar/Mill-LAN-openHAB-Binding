@@ -19,28 +19,36 @@ import com.google.gson.annotations.SerializedName;
 
 
 /**
+ * This enum represents the device API's {@code ETemperatureType}.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public enum TemperatureType { // TODO: (Nad) JavaDocs
+public enum TemperatureType {
 
+    /** The set-temperature is fixed at zero */
     @SerializedName("Off")
-    OFF("The set-temperature is fixed at zero."),
+    OFF("The set-temperature is fixed at zero"),
 
+    /** The set-temperature used for "Independent device" mode and timers */
     @SerializedName("Normal")
-    NORMAL("The set-temperature used for \"Independent device\" and timers."),
+    NORMAL("The set-temperature used for \"Independent device\" mode and timers"),
 
+    /** The set-temperature used in "Comfort" mode" */
     @SerializedName("Comfort")
-    COMFORT("The set-temperature used in \"Comfort\" mode."),
+    COMFORT("The set-temperature used in \"Comfort\" mode"),
 
+    /** The set-temperature used in "Sleep" mode */
     @SerializedName("Sleep")
-    SLEEP("The set-temperature used in \"Sleep\" mode."),
+    SLEEP("The set-temperature used in \"Sleep\" mode"),
 
+    /** The set-temperature used in "Away" mode */
     @SerializedName("Away")
-    AWAY("The set-temperature used in \"Away\" mode."),
+    AWAY("The set-temperature used in \"Away\" mode"),
 
+    /** The device always heats */
     @SerializedName("AlwaysHeating")
-    ALWAYS_HEATING("The device always heats.");
+    ALWAYS_HEATING("The device always heats");
 
     private final String description;
 
@@ -48,6 +56,9 @@ public enum TemperatureType { // TODO: (Nad) JavaDocs
         this.description = description;
     }
 
+    /**
+     * @return The human-readable name/description.
+     */
     public String getDescription() {
         return description;
     }

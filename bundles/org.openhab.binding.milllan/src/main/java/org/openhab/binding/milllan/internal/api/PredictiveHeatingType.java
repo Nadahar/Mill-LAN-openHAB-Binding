@@ -23,24 +23,35 @@ import com.google.gson.annotations.SerializedName;
 
 
 /**
+ * This enum represents the device API's {@code EPredictiveHeatingType}.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public enum PredictiveHeatingType { // TODO: (Nad) JavaDocs
+public enum PredictiveHeatingType {
 
+    /** No predictive heating. The temperature will be change exactly with the weekly program timer. */
     @SerializedName("Off")
     OFF("No predictive heating. The temperature will be change exactly with the weekly program timer."),
 
+    /**
+     * Simple predictive heating. The temperature will be change before the timer, with a fixed time
+     * for each Celsius degree.
+     */
     @SerializedName("Simple")
     SIMPLE(
         "Simple predictive heating. The temperature will be change before the timer, with a fixed time " +
         "for each Celsius degree."
     ),
 
+    /**
+     * Advanced predictive heating. The temperature will be change before the timer, with a time based
+     * on the current room model. Model is estimated while running.
+     */
     @SerializedName("Advanced")
     ADVANCED(
         "Advanced predictive heating. The temperature will be change before the timer, with a time based " +
-        "on the current room model. Model is estimated while running.d."
+        "on the current room model. Model is estimated while running."
     );
 
     private final String description;
@@ -49,10 +60,19 @@ public enum PredictiveHeatingType { // TODO: (Nad) JavaDocs
         this.description = description;
     }
 
+    /**
+     * @return The human-readable name/description.
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Tries to look up a {@link PredictiveHeatingType} that matches the specified string.
+     *
+     * @param value the {@link String} to match.
+     * @return The corresponding {@link PredictiveHeatingType} or {@code null}.
+     */
     @Nullable
     public static PredictiveHeatingType typeOf(@Nullable String value) {
         if (value == null || MillUtil.isBlank(value)) {
