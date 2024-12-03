@@ -29,18 +29,20 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class DisplayUnitResponse implements Response { // TODO: (Nad) JavaDocs
+public class DisplayUnitResponse implements Response {
 
-    /**
-     * The display unit.
-     */
+    /** The display unit */
     @Nullable
     @SerializedName("value")
     private DisplayUnit displayUnit;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The {@link DisplayUnit}.
+     */
     @Nullable
     public DisplayUnit getDisplayUnit() {
         return displayUnit;

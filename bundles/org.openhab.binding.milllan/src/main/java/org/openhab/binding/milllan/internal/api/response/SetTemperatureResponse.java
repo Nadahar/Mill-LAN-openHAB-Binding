@@ -27,17 +27,19 @@ import org.openhab.binding.milllan.internal.api.ResponseStatus;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class SetTemperatureResponse implements Response { // TODO: (Nad) JavaDocs
+public class SetTemperatureResponse implements Response {
 
-    /**
-     * The set-temperature unit.
-     */
+    /** The set-temperature in °C */
     @Nullable
     private BigDecimal value;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The set-temperature in °C.
+     */
     @Nullable
     public BigDecimal getSetTemperature() {
         return value;

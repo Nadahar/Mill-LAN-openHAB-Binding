@@ -26,17 +26,19 @@ import org.openhab.binding.milllan.internal.api.ResponseStatus;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class TemperatureCalibrationOffsetResponse implements Response { // TODO: (Nad) JavaDocs
+public class TemperatureCalibrationOffsetResponse implements Response {
 
-    /**
-     * The temperature calibration offset.
-     */
+    /** The temperature calibration offset */
     @Nullable
     private Double value;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The temperature calibration offset.
+     */
     @Nullable
     public Double getValue() {
         return value;

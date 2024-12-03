@@ -22,22 +22,24 @@ import org.openhab.binding.milllan.internal.api.ResponseStatus;
 
 
 /**
- * This class is used for deserializing JSON response objects from the "control-status" API call.
+ * This class is used for deserializing JSON response objects from the "operation-mode" API call.
  *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class OperationModeResponse implements Response { // TODO: (Nad) JavaDocs
+public class OperationModeResponse implements Response {
 
-    /**
-     * The current mode of operation.
-     */
+    /** The current mode of operation */
     @Nullable
     private OperationMode mode;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The {@link OperationMode}.
+     */
     @Nullable
     public OperationMode getMode() {
         return mode;

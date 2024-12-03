@@ -29,23 +29,23 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class OpenWindowParametersResponse extends OpenWindowParameters implements Response { // TODO: (Nad) JavaDocs
+public class OpenWindowParametersResponse extends OpenWindowParameters implements Response {
 
-    /** {@code true} if the open-window function is active now */
+    /** Whether if the open-window function is active now */
     @Nullable
     @SerializedName("active_now")
     protected Boolean activeNow;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     protected ResponseStatus status;
 
+    /**
+     * @return {@code true} if the open-window function is active now.
+     */
     @Nullable
     public Boolean getActiveNow() {
         return activeNow;
-    }
-
-    public void setActiveNow(Boolean activeNow) {
-        this.activeNow = activeNow;
     }
 
     @Nullable
@@ -54,6 +54,9 @@ public class OpenWindowParametersResponse extends OpenWindowParameters implement
         return status;
     }
 
+    /**
+     * @return {@code true} if all fields are non-{@code null}.
+     */
     @Override
     public boolean isComplete() {
         return activeNow != null && super.isComplete();

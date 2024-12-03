@@ -29,15 +29,20 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class PredictiveHeatingTypeResponse implements Response { // TODO: (Nad) JavaDocs
+public class PredictiveHeatingTypeResponse implements Response {
 
+    /** The predictive heating type */
     @SerializedName("predictive_heating_type")
     @Nullable
     private PredictiveHeatingType predictiveHeatingType;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The {@link PredictiveHeatingType}.
+     */
     @Nullable
     public PredictiveHeatingType getPredictiveHeatingType() {
         return predictiveHeatingType;

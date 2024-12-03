@@ -28,16 +28,20 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class CloudCommunicationResponse implements Response { // TODO: (Nad) JavaDocs
+public class CloudCommunicationResponse implements Response {
 
     /** Whether cloud communication is enabled */
     @Nullable
     @SerializedName("value")
     private Boolean enabled;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return {@code true} if cloud communication is enabled.
+     */
     @Nullable
     public Boolean isEnabled() {
         return enabled;

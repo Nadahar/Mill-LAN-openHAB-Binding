@@ -19,11 +19,16 @@ import org.openhab.binding.milllan.internal.api.ResponseStatus;
 
 
 /**
+ * An interface for all implementations used for deserializing JSON response objects from device API calls.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public interface Response { // TODO: (Nad) JavaDocs
+public interface Response {
 
+    /**
+     * @return The device API's {@code HTTP Response Status}.
+     */
     @Nullable
     public ResponseStatus getStatus();
 }

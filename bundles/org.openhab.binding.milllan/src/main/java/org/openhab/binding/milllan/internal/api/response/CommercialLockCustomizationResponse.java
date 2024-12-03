@@ -28,32 +28,45 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class CommercialLockCustomizationResponse implements Response { // TODO: (Nad) JavaDocs
+public class CommercialLockCustomizationResponse implements Response {
 
+    /** Whether commercial-lock is enabled */
     @Nullable
     private Boolean enabled;
 
+    /** The minimum allowed temperature */
     @Nullable
     @SerializedName("min_allowed_temp_in_commercial_lock")
     private Double min;
 
+    /** The maximum allowed temperature */
     @Nullable
     @SerializedName("max_allowed_temp_in_commercial_lock")
     private Double max;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return {@code true} if commercial-lock is enabled.
+     */
     @Nullable
     public Boolean getEnabled() {
         return enabled;
     }
 
+    /**
+     * @return The minimum allowed temperature.
+     */
     @Nullable
     public Double getMinimum() {
         return min;
     }
 
+    /**
+     * @return The maximum allowed temperature.
+     */
     @Nullable
     public Double getMaximum() {
         return max;
@@ -65,6 +78,9 @@ public class CommercialLockCustomizationResponse implements Response { // TODO: 
         return status;
     }
 
+    /**
+     * @return {@code true} if all fields are non-{@code null}.
+     */
     public boolean isComplete() {
         return enabled != null && min != null && max != null;
     }
@@ -86,8 +102,8 @@ public class CommercialLockCustomizationResponse implements Response { // TODO: 
             return false;
         }
         CommercialLockCustomizationResponse other = (CommercialLockCustomizationResponse) obj;
-        return Objects.equals(enabled, other.enabled) && Objects.equals(max, other.max)
-                && Objects.equals(min, other.min) && status == other.status;
+        return Objects.equals(enabled, other.enabled) && Objects.equals(max, other.max) &&
+                Objects.equals(min, other.min) && status == other.status;
     }
 
     @Override

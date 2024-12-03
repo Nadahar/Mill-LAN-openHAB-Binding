@@ -28,7 +28,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class PIDParametersResponse implements Response { // TODO: (Nad) JavaDocs
+public class PIDParametersResponse implements Response {
 
     /** The proportional gain factor */
     @Nullable
@@ -52,29 +52,45 @@ public class PIDParametersResponse implements Response { // TODO: (Nad) JavaDocs
     @SerializedName("windup_limit_percentage")
     private Double windupLimitPercentage;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The proportional gain factor.
+     */
     @Nullable
     public Double getKp() {
         return kp;
     }
 
+    /**
+     * @return The integral gain factor.
+     */
     @Nullable
     public Double getKi() {
         return ki;
     }
 
+    /**
+     * @return The derivative gain factor.
+     */
     @Nullable
     public Double getKd() {
         return kd;
     }
 
+    /**
+     * @return The derivative filter time coefficient.
+     */
     @Nullable
     public Double getKdFilterN() {
         return kdFilterN;
     }
 
+    /**
+     * @return The wind-up limit for integral part from 0 to 100.
+     */
     @Nullable
     public Double getWindupLimitPercentage() {
         return windupLimitPercentage;
@@ -86,6 +102,9 @@ public class PIDParametersResponse implements Response { // TODO: (Nad) JavaDocs
         return status;
     }
 
+    /**
+     * @return {@code true} if all fields are non-{@code null}.
+     */
     public boolean isComplete() {
         return kp != null && ki != null && kd != null && kdFilterN != null && windupLimitPercentage != null;
     }
@@ -107,9 +126,9 @@ public class PIDParametersResponse implements Response { // TODO: (Nad) JavaDocs
             return false;
         }
         PIDParametersResponse other = (PIDParametersResponse) obj;
-        return Objects.equals(kd, other.kd) && Objects.equals(kdFilterN, other.kdFilterN)
-                && Objects.equals(ki, other.ki) && Objects.equals(kp, other.kp) && status == other.status
-                && Objects.equals(windupLimitPercentage, other.windupLimitPercentage);
+        return Objects.equals(kd, other.kd) && Objects.equals(kdFilterN, other.kdFilterN) &&
+            Objects.equals(ki, other.ki) && Objects.equals(kp, other.kp) && status == other.status &&
+            Objects.equals(windupLimitPercentage, other.windupLimitPercentage);
     }
 
     @Override

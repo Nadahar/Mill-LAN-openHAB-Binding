@@ -28,49 +28,70 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class StatusResponse implements Response { // TODO: (Nad) JavaDocs
+public class StatusResponse implements Response {
 
+    /** The device name */
     @Nullable
     private String name;
 
+    /** The custom (user controlled) name */
     @SerializedName("custom_name")
     @Nullable
     private String customName;
 
+    /** The firmware version */
     @Nullable
     private String version;
 
+    /** The operation key (can contain error codes) */
     @SerializedName("operation_key")
     @Nullable
     private String operationKey;
 
+    /** The device MAC address */
     @SerializedName("mac_address")
     @Nullable
     private String macAddress;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The device name.
+     */
     @Nullable
     public String getName() {
         return name;
     }
 
+    /**
+     * @return The custom (user controlled) name.
+     */
     @Nullable
     public String getCustomName() {
         return customName;
     }
 
+    /**
+     * @return The firmware version.
+     */
     @Nullable
     public String getVersion() {
         return version;
     }
 
+    /**
+     * @return The operation key (can contain error codes).
+     */
     @Nullable
     public String getOperationKey() {
         return operationKey;
     }
 
+    /**
+     * @return The device MAC address.
+     */
     @Nullable
     public String getMacAddress() {
         return macAddress;
@@ -99,9 +120,9 @@ public class StatusResponse implements Response { // TODO: (Nad) JavaDocs
             return false;
         }
         StatusResponse other = (StatusResponse) obj;
-        return Objects.equals(customName, other.customName) && Objects.equals(macAddress, other.macAddress)
-                && Objects.equals(name, other.name) && Objects.equals(operationKey, other.operationKey)
-                && status == other.status && Objects.equals(version, other.version);
+        return Objects.equals(customName, other.customName) && Objects.equals(macAddress, other.macAddress) &&
+            Objects.equals(name, other.name) && Objects.equals(operationKey, other.operationKey) &&
+            status == other.status && Objects.equals(version, other.version);
     }
 
     @Override

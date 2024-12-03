@@ -17,6 +17,7 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.milllan.internal.api.ControllerType;
 import org.openhab.binding.milllan.internal.api.ResponseStatus;
 
 import com.google.gson.annotations.SerializedName;
@@ -28,34 +29,49 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class HysteresisParametersResponse implements Response { // TODO: (Nad) JavaDocs
+public class HysteresisParametersResponse implements Response {
 
+    /** The upper limit in °C: Set temperature + upper limit = stop heating */
     @Nullable
     @SerializedName("temp_hysteresis_upper")
     private Double upper;
 
+    /** The lower limit in °C: Set temperature - lower limit = start heating */
     @Nullable
     @SerializedName("temp_hysteresis_lower")
     private Double lower;
 
-    //Doc: Probably should be ControllerType, but it's unclear exactly which devices support hysteresis and another mode
+    /**
+     * It is unclear what this field is supposed to do - if it correlates to {@link ControllerType}
+     * in some way or if it always is "hysteresis".
+     */
     @Nullable
     @SerializedName("regulator_type")
     private String regulatorType;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The upper limit in °C: Set temperature + upper limit = stop heating.
+     */
     @Nullable
     public Double getUpper() {
         return upper;
     }
 
+    /**
+     * @return The lower limit in °C: Set temperature - lower limit = start heating.
+     */
     @Nullable
     public Double getLower() {
         return lower;
     }
 
+    /**
+     * @return A "regulator type" string whose meaning is unknown. See {@link #regulatorType}.
+     */
     @Nullable
     public String getRegulatorType() {
         return regulatorType;
@@ -67,6 +83,9 @@ public class HysteresisParametersResponse implements Response { // TODO: (Nad) J
         return status;
     }
 
+    /**
+     * @return {@code true} if all fields are non-{@code null}.
+     */
     public boolean isComplete() {
         return upper != null && lower != null;
     }
@@ -88,8 +107,9 @@ public class HysteresisParametersResponse implements Response { // TODO: (Nad) J
             return false;
         }
         HysteresisParametersResponse other = (HysteresisParametersResponse) obj;
-        return Objects.equals(lower, other.lower) && Objects.equals(regulatorType, other.regulatorType)
-                && status == other.status && Objects.equals(upper, other.upper);
+        return Objects.equals(lower, other.lower) &&
+            Objects.equals(regulatorType, other.regulatorType) &&
+            status == other.status && Objects.equals(upper, other.upper);
     }
 
     @Override

@@ -26,8 +26,9 @@ import org.openhab.binding.milllan.internal.api.ResponseStatus;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class GenericResponse implements Response { // TODO: (Nad) JavaDocs
+public class GenericResponse implements Response {
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 

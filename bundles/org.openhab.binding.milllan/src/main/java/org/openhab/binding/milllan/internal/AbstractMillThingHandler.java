@@ -480,7 +480,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             updateState(RAW_AMBIENT_TEMPERATURE, new QuantityType<>(d, SIUnits.CELSIUS));
         }
         LockStatus ls;
-        if ((ls = controlStatusResponse.getLockActive()) != null) {
+        if ((ls = controlStatusResponse.getLockStatus()) != null) {
             updateState(LOCK_STATUS, new StringType(ls.name()));
             updateState(CHILD_LOCK, ls == LockStatus.CHILD_LOCK ? OnOffType.ON : OnOffType.OFF);
         }

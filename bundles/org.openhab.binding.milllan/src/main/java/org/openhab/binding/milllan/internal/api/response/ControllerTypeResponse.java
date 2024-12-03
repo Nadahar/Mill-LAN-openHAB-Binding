@@ -29,7 +29,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class ControllerTypeResponse implements Response { // TODO: (Nad) JavaDocs
+public class ControllerTypeResponse implements Response {
 
     /**
      * The controller type.
@@ -38,9 +38,13 @@ public class ControllerTypeResponse implements Response { // TODO: (Nad) JavaDoc
     @SerializedName("regulator_type")
     private ControllerType controllerType;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The {@link ControllerType}.
+     */
     @Nullable
     public ControllerType getControllerType() {
         return controllerType;

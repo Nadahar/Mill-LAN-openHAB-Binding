@@ -28,18 +28,20 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class TimeZoneOffsetResponse implements Response { // TODO: (Nad) JavaDocs
+public class TimeZoneOffsetResponse implements Response {
 
-    /**
-     * The time zone offset in minutes.
-     */
+    /** The time zone offset from UTC in minutes */
     @Nullable
     @SerializedName("timezone_offset")
     private Integer offset;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The time zone offset from UTC in minutes.
+     */
     @Nullable
     public Integer getOffset() {
         return offset;

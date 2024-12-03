@@ -26,17 +26,19 @@ import org.openhab.binding.milllan.internal.api.ResponseStatus;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class ChildLockResponse implements Response { // TODO: (Nad) JavaDocs
+public class ChildLockResponse implements Response {
 
-    /**
-     * The child-lock status.
-     */
+    /** The child-lock status */
     @Nullable
     private Boolean value;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The child-lock status.
+     */
     @Nullable
     public Boolean getValue() {
         return value;

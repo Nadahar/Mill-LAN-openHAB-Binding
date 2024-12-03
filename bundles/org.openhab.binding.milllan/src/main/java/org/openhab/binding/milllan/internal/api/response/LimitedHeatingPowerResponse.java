@@ -28,18 +28,20 @@ import com.google.gson.annotations.SerializedName;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class LimitedHeatingPowerResponse implements Response { // TODO: (Nad) JavaDocs
+public class LimitedHeatingPowerResponse implements Response {
 
-    /**
-     * The limited heating power percentage value.
-     */
+    /** The limited heating power percentage value */
     @Nullable
     @SerializedName("limited_heating_power")
     private Integer value;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The limited heating power percentage value.
+     */
     @Nullable
     public Integer getValue() {
         return value;

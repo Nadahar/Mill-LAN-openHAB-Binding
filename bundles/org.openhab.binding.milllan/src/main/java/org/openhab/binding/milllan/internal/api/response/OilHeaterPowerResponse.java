@@ -26,17 +26,19 @@ import org.openhab.binding.milllan.internal.api.ResponseStatus;
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class OilHeaterPowerResponse implements Response { // TODO: (Nad) JavaDocs
+public class OilHeaterPowerResponse implements Response {
 
-    /**
-     * The limited heating power percentage value.
-     */
+    /** The limited heating power percentage value */
     @Nullable
     private Integer value;
 
+    /** The device API's {@code HTTP Response Status} */
     @Nullable
     private ResponseStatus status;
 
+    /**
+     * @return The limited heating power percentage value.
+     */
     @Nullable
     public Integer getValue() {
         return value;
