@@ -61,8 +61,9 @@ public class MillBaseActions implements ThingActions {
     }
 
     /**
-     * Sends a {@code reboot} command to the device and returns the result of the {@link Action}.
-     * @return The result.
+     * Attempts to send a {@code reboot} command to the device and returns the result of the {@link Action}.
+     *
+     * @return The resulting {@link ActionOutput} {@link Map}.
      */
     protected Map<String, Object> sendReboot() {
         Map<String, Object> result = new HashMap<>();
@@ -91,7 +92,7 @@ public class MillBaseActions implements ThingActions {
      * Attempts to set the {@code time zone offset} in the device and returns the result of the {@link Action}.
      *
      * @param offset the offset from UTC in minutes.
-     * @return The result.
+     * @return The resulting {@link ActionOutput} {@link Map}.
      */
     protected Map<String, Object> setTimeZoneOffset(@Nullable Integer offset) {
         Map<String, Object> result = new HashMap<>();
@@ -129,7 +130,7 @@ public class MillBaseActions implements ThingActions {
      * @param kd the derivative gain factor.
      * @param kdFilterN the derivative filter time coefficient.
      * @param windupLimitPct the wind-up limit for integral part from 0 to 100.
-     * @return The result.
+     * @return The resulting {@link ActionOutput} {@link Map}.
      */
     public Map<String, Object> setPIDParameters(
         @Nullable Double kp,
@@ -170,7 +171,7 @@ public class MillBaseActions implements ThingActions {
      * result of the {@link Action}.
      *
      * @param enabled {@code true} to enabled cloud communication, {@code false} otherwise.
-     * @return The result;
+     * @return The resulting {@link ActionOutput} {@link Map}.
      */
     public Map<String, Object> setCloudCommunication(@Nullable Boolean enabled) {
         Map<String, Object> result = new HashMap<>();
@@ -210,7 +211,7 @@ public class MillBaseActions implements ThingActions {
     }
 
     /**
-     * Sets the hysteresis parameters.
+     * Attempts to set the {@code hysteresis parameters} in the device and returns the result of the {@link Action}.
      *
      * @param upper the upper hysteresis limit in °C.
      * @param lower the lower hysteresis limit in °C.
@@ -255,7 +256,8 @@ public class MillBaseActions implements ThingActions {
     }
 
     /**
-     * Sets the set-temperature in "independent device" mode.
+     * Attempts to set the {@code set-temperature} in "independent device" mode in the device and
+     * returns the result of the {@link Action}.
      * <p>
      * <b>Note:</b> This command will <i>only</i> work if the device is in "independent device" mode.
      *
@@ -323,7 +325,7 @@ public class MillBaseActions implements ThingActions {
     }
 
     /**
-     * Sets the custom name of the device.
+     * Attempts to set the {@code custom name} of the device and returns the result of the {@link Action}.
      *
      * @param customName the new custom name.
      * @return The resulting {@link ActionOutput} {@link Map}.
@@ -362,7 +364,7 @@ public class MillBaseActions implements ThingActions {
     }
 
     /**
-     * Sets the open window parameters.
+     * Attempts to set the {@code open window parameters} in the device and returns the result of the {@link Action}.
      *
      * @param dropTempThr the temperature drop required to trigger (activate) the open
      *        window function in °C.
@@ -414,7 +416,7 @@ public class MillBaseActions implements ThingActions {
     }
 
     /**
-     * Sets a new API key in the device.
+     * Attempts to set a new {@code API key} in the device and returns the result of the {@link Action}.
      * <p>
      * <b>WARNING: Setting an API key will switch the device to {@code HTTPS}, and the key cannot be removed
      * (only changed). To restore {@code HTTP} and/or remove the API key, a factory reset is required</b>.

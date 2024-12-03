@@ -17,34 +17,45 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.Action;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
 import org.openhab.core.automation.annotation.ActionOutputs;
 import org.openhab.core.automation.annotation.RuleAction;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.thing.binding.ThingActionsScope;
+import org.openhab.core.thing.type.ThingType;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
 
 /**
+ * This class annotates the {@link Action}s for the "all functions" {@link ThingType}.
+ *
  * @author Nadahar - Initial contribution
  */
 @Component(scope = ServiceScope.PROTOTYPE, service = MillAllActions.class)
 @ThingActionsScope(name = "milllanall")
 @NonNullByDefault
-public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
+public class MillAllActions extends MillBaseActions {
 
     @Override
     @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
-    @RuleAction(label = "@text/actions.milllan.send-reboot.label", description = "@text/actions.milllan.send-reboot.description")
+    @RuleAction(
+        label = "@text/actions.milllan.send-reboot.label",
+        description = "@text/actions.milllan.send-reboot.description"
+    )
     public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> sendReboot() {
         return super.sendReboot();
     }
 
     @Override
     @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
-    @RuleAction(label = "@text/actions.milllan.set-timezone-offset.label", description = "@text/actions.milllan.set-timezone-offset.description")
+    @RuleAction(
+        label = "@text/actions.milllan.set-timezone-offset.label",
+        description = "@text/actions.milllan.set-timezone-offset.description"
+    )
     public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setTimeZoneOffset(
         @Nullable @ActionInput(
             name = "offset",
@@ -58,7 +69,10 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     @Override
     @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
-    @RuleAction(label = "@text/actions.milllan.set-pid-parameters.label", description = "@text/actions.milllan.set-pid-parameters.description")
+    @RuleAction(
+        label = "@text/actions.milllan.set-pid-parameters.label",
+        description = "@text/actions.milllan.set-pid-parameters.description"
+    )
     public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setPIDParameters(
         @Nullable @ActionInput(
             name = "kp",
@@ -96,7 +110,10 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     @Override
     @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
-    @RuleAction(label = "@text/actions.milllan.set-cloud-communication.label", description = "@text/actions.milllan.set-cloud-communication.description")
+    @RuleAction(
+        label = "@text/actions.milllan.set-cloud-communication.label",
+        description = "@text/actions.milllan.set-cloud-communication.description"
+    )
     public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setCloudCommunication(
         @Nullable @ActionInput(
             name = "enabled",
@@ -110,7 +127,10 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     @Override
     @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
-    @RuleAction(label = "@text/actions.milllan.set-hysteresis-parameters.label", description = "@text/actions.milllan.set-hysteresis-parameters.description")
+    @RuleAction(
+        label = "@text/actions.milllan.set-hysteresis-parameters.label",
+        description = "@text/actions.milllan.set-hysteresis-parameters.description"
+    )
     public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setHysteresisParameters(
         @Nullable @ActionInput(
             name = "upper",
@@ -130,7 +150,10 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     @Override
     @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
-    @RuleAction(label = "@text/actions.milllan.set-independent-temperature.label", description = "@text/actions.milllan.set-independent-temperature.description")
+    @RuleAction(
+        label = "@text/actions.milllan.set-independent-temperature.label",
+        description = "@text/actions.milllan.set-independent-temperature.description"
+    )
     public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setIndependentModeTemperature(
         @Nullable @ActionInput(
             name = "temperature",
@@ -144,7 +167,10 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     @Override
     @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
-    @RuleAction(label = "@text/actions.milllan.set-custom-name.label", description = "@text/actions.milllan.set-custom-name.description")
+    @RuleAction(
+        label = "@text/actions.milllan.set-custom-name.label",
+        description = "@text/actions.milllan.set-custom-name.description"
+    )
     public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setCustomName(
         @Nullable @ActionInput(
             name = "customName",
@@ -158,7 +184,10 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     @Override
     @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
-    @RuleAction(label = "@text/actions.milllan.set-open-window-parameters.label", description = "@text/actions.milllan.set-open-window-parameters.description")
+    @RuleAction(
+        label = "@text/actions.milllan.set-open-window-parameters.label",
+        description = "@text/actions.milllan.set-open-window-parameters.description"
+    )
     public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setOpenWindowParameters(
         @Nullable @ActionInput(
             name = "dropTempThr",
@@ -196,7 +225,10 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     @Override
     @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
-    @RuleAction(label = "@text/actions.milllan.set-api-key.label", description = "@text/actions.milllan.set-api-key.description")
+    @RuleAction(
+        label = "@text/actions.milllan.set-api-key.label",
+        description = "@text/actions.milllan.set-api-key.description"
+    )
     public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setAPIKey(
         @ActionInput(
             name = "apiKey",
@@ -216,14 +248,35 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
 
     // Methods for Rules DSL rule support
 
+    /**
+     * Attempts to send a {@code reboot} command to the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     */
     public static void sendReboot(ThingActions actions) {
         ((MillAllActions) actions).sendReboot();
     }
 
+    /**
+     * Attempts to set the {@code time zone offset} in the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param offset the offset from UTC in minutes.
+     */
     public static void setTimeZoneOffset(ThingActions actions, Integer offset) {
         ((MillAllActions) actions).setTimeZoneOffset(offset);
     }
 
+    /**
+     * Attempts to set the {@code PID parameters} in the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param kp the proportional gain factor.
+     * @param ki the integral gain factor.
+     * @param kd the derivative gain factor.
+     * @param kdFilterN the derivative filter time coefficient.
+     * @param windupLimitPct the wind-up limit for integral part from 0 to 100.
+     */
     public static void setPIDParameters(
         ThingActions actions,
         Double kp,
@@ -235,22 +288,61 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
         ((MillAllActions) actions).setPIDParameters(kp, ki, kd, kdFilterN, windupLimitPct);
     }
 
+    /**
+     * Attempts to set whether {@code cloud communication} is enabled in the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param enabled {@code true} to enabled cloud communication, {@code false} otherwise.
+     */
     public static void setCloudCommunication(ThingActions actions, Boolean enabled) {
         ((MillAllActions) actions).setCloudCommunication(enabled);
     }
 
+    /**
+     * Attempts to set the {@code hysteresis parameters} in the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param upper the upper hysteresis limit in °C.
+     * @param lower the lower hysteresis limit in °C.
+     */
     public static void setHysteresisParameters(ThingActions actions, Double upper, Double lower) {
         ((MillAllActions) actions).setHysteresisParameters(upper, lower);
     }
 
+    /**
+     * Attempts to set the {@code set-temperature} in "independent device" mode in the device.
+     * <p>
+     * <b>Note:</b> This command will <i>only</i> work if the device is in "independent device" mode.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param temperature the set-temperature in °C.
+     */
     public static void setIndependentModeTemperature(ThingActions actions, Double temperature) {
         ((MillAllActions) actions).setIndependentModeTemperature(temperature);
     }
 
+    /**
+     * Attempts to set the {@code custom name} of the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param customName the new custom name.
+     */
     public static void setCustomName(ThingActions actions, String customName) {
         ((MillAllActions) actions).setCustomName(customName);
     }
 
+    /**
+     * Attempts to set the {@code open window parameters} in the device.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param dropTempThr the temperature drop required to trigger (activate) the open
+     *        window function in °C.
+     * @param dropTimeRange the time range for which a drop in temperature will be evaluated in seconds.
+     * @param incTempThr the temperature increase required to deactivate the open window
+     *        function in °C.
+     * @param incTimeRange the time range for which an increase in temperature will be evaluated in seconds.
+     * @param maxTime the maximum time the open window function will remain active.
+     */
     public static void setOpenWindowParameters(
         ThingActions actions,
         Double dropTempThr,
@@ -259,9 +351,27 @@ public class MillAllActions extends MillBaseActions { // TODO: (Nad) Javadocs
         Integer incTimeRange,
         Integer maxTime
     ) {
-        ((MillAllActions) actions).setOpenWindowParameters(dropTempThr, dropTimeRange, incTempThr, incTimeRange, maxTime);
+        ((MillAllActions) actions).setOpenWindowParameters(
+            dropTempThr,
+            dropTimeRange,
+            incTempThr,
+            incTimeRange,
+            maxTime
+        );
     }
 
+    /**
+     * Attempts to set a new {@code API key} in the device.
+     * <p>
+     * <b>WARNING: Setting an API key will switch the device to {@code HTTPS}, and the key cannot be removed
+     * (only changed). To restore {@code HTTP} and/or remove the API key, a factory reset is required</b>.
+     * <p>
+     * <b>Note:</b> This method will take some time, since a timeout must elapse before it returns.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param apiKey the new API key.
+     * @param confirm the confirmation code that must match the last section of the {@link ThingUID}.
+     */
     public static void setAPIKey(ThingActions actions, String apiKey, String confirm) {
         ((MillAllActions) actions).setAPIKey(apiKey, confirm);
     }
