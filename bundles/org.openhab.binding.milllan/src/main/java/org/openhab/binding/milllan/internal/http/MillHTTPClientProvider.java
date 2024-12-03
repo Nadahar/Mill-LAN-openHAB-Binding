@@ -42,36 +42,60 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * This class manages the {@link HttpClient}.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
 @Component(service = {MillHTTPClientProvider.class})
-public class MillHTTPClientProvider { // TODO: (Nad) JavaDocs
+public class MillHTTPClientProvider {
 
     private final Logger logger = LoggerFactory.getLogger(MillHTTPClientProvider.class);
 
     private final HttpClient httpClient;
 
+    /**
+     * Creates a new instance and creates and starts a new {@link HttpClient}.
+     *
+     * @param httpClientFactory the {@link HttpClientFactory} to use.
+     * @throws IllegalStateException If the {@link HttpClient} fails to start.
+     */
     @Activate
     public MillHTTPClientProvider(@Reference HttpClientFactory httpClientFactory) {
         this.httpClient = httpClientFactory.createHttpClient("mill-lan-binding", new Client.Client(true));
         try {
             httpClient.start();
         } catch (Exception e) {
-            logger.warn("Failed to start http client: {}", e.getMessage());
+            logger.error("Failed to start HTTP client: {}", e.getMessage());
             throw new IllegalStateException("Could not create HttpClient", e);
         }
     }
 
+    /**
+     * Stops the {@link HttpClient}.
+     */
     @Deactivate
     public void deactivate() {
         try {
             httpClient.stop();
         } catch (Exception e) {
-            logger.warn("Failed to stop Mill LAN http client: {}", e.getMessage());
+            logger.warn("Failed to stop Mill LAN HTTP client: {}", e.getMessage());
         }
     }
 
+    /**
+     * Sends a {@code HTTP} request using the specified parameters and returns the response.
+     *
+     * @param uri the {@link URI} to contact.
+     * @param method the {@link HttpMethod} to use.
+     * @param headers the {@code HTTP} headers or {@code null}.
+     * @param content the body content or {@code null}.
+     * @param contentType the {@code Content-Type}. Ignored if {@code content} is {@code null}.
+     * @param timeout the timeout value.
+     * @param timeUnit the timeout {@link TimeUnit}.
+     * @return The resulting {@link ContentResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     public ContentResponse send(
         URI uri,
         HttpMethod method,
