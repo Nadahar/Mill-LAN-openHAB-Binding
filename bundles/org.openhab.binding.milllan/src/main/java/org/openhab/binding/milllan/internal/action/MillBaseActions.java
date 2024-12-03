@@ -25,6 +25,9 @@ import org.openhab.binding.milllan.internal.MillUtil;
 import org.openhab.binding.milllan.internal.api.ResponseStatus;
 import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
+import org.openhab.core.automation.Action;
+import org.openhab.core.automation.annotation.ActionOutput;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.slf4j.Logger;
@@ -32,13 +35,17 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * The common {@link Action} class for this binding where the actual implementation
+ * of the {@link Action}s is.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
+public class MillBaseActions implements ThingActions {
 
     private final Logger logger = LoggerFactory.getLogger(MillBaseActions.class);
 
+    /** The {@link ThingHandler} instance */
     @Nullable
     protected AbstractMillThingHandler thingHandler;
 
@@ -53,6 +60,10 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         return thingHandler;
     }
 
+    /**
+     * Sends a {@code reboot} command to the device and returns the result of the {@link Action}.
+     * @return The result.
+     */
     protected Map<String, Object> sendReboot() {
         Map<String, Object> result = new HashMap<>();
         AbstractMillThingHandler handlerInst = thingHandler;
@@ -76,6 +87,12 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         }
     }
 
+    /**
+     * Attempts to set the {@code time zone offset} in the device and returns the result of the {@link Action}.
+     *
+     * @param offset the offset from UTC in minutes.
+     * @return The result.
+     */
     protected Map<String, Object> setTimeZoneOffset(@Nullable Integer offset) {
         Map<String, Object> result = new HashMap<>();
         AbstractMillThingHandler handlerInst = thingHandler;
@@ -104,6 +121,16 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         }
     }
 
+    /**
+     * Attempts to set the {@code PID parameters} in the device and returns the result of the {@link Action}.
+     *
+     * @param kp the proportional gain factor.
+     * @param ki the integral gain factor.
+     * @param kd the derivative gain factor.
+     * @param kdFilterN the derivative filter time coefficient.
+     * @param windupLimitPct the wind-up limit for integral part from 0 to 100.
+     * @return The result.
+     */
     public Map<String, Object> setPIDParameters(
         @Nullable Double kp,
         @Nullable Double ki,
@@ -138,6 +165,13 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         }
     }
 
+    /**
+     * Attempts to set whether {@code cloud communication} is enabled in the device and returns the
+     * result of the {@link Action}.
+     *
+     * @param enabled {@code true} to enabled cloud communication, {@code false} otherwise.
+     * @return The result;
+     */
     public Map<String, Object> setCloudCommunication(@Nullable Boolean enabled) {
         Map<String, Object> result = new HashMap<>();
         AbstractMillThingHandler handlerInst = thingHandler;
@@ -148,7 +182,11 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         }
         try {
             handlerInst.setCloudCommunication(enabled == null ? Boolean.FALSE : enabled, true);
-            result.put("result", "The cloud communicaton was " + (enabled == null || !enabled.booleanValue() ? "disabled" : "enabled") + ". The device is rebooting.");
+            result.put(
+                "result",
+                "The cloud communicaton was " + (enabled == null || !enabled.booleanValue() ? "disabled" : "enabled") +
+                ". The device is rebooting."
+            );
             try {
                 handlerInst.sendReboot();
             } catch (MillException e) {
@@ -171,6 +209,13 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         }
     }
 
+    /**
+     * Sets the hysteresis parameters.
+     *
+     * @param upper the upper hysteresis limit in °C.
+     * @param lower the lower hysteresis limit in °C.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
     public Map<String, Object> setHysteresisParameters(@Nullable Double upper, @Nullable Double lower) {
         Map<String, Object> result = new HashMap<>();
         AbstractMillThingHandler handlerInst = thingHandler;
@@ -209,6 +254,14 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         }
     }
 
+    /**
+     * Sets the set-temperature in "independent device" mode.
+     * <p>
+     * <b>Note:</b> This command will <i>only</i> work if the device is in "independent device" mode.
+     *
+     * @param temperature the set-temperature in °C.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
     public Map<String, Object> setIndependentModeTemperature(@Nullable Number temperature) {
         Map<String, Object> result = new HashMap<>();
         if (temperature == null) {
@@ -226,14 +279,19 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
             BigDecimal bdValue;
             if (temperature instanceof BigDecimal) {
                 bdValue = (BigDecimal) temperature;
-            } else if (temperature instanceof BigInteger || temperature instanceof Integer || temperature instanceof Long) {
+            } else if (
+                temperature instanceof BigInteger || temperature instanceof Integer || temperature instanceof Long
+            ) {
                 bdValue = BigDecimal.valueOf(temperature.intValue());
             } else {
                 bdValue = BigDecimal.valueOf(temperature.doubleValue());
             }
             ResponseStatus responseStatus = handlerInst.setTemperatureInIndependentMode(bdValue);
             if (responseStatus != ResponseStatus.OK) {
-                result.put("result", "Failed: " + (responseStatus == null ? "Missing response" : responseStatus.getDescription()));
+                result.put(
+                    "result",
+                    "Failed: " + (responseStatus == null ? "Missing response" : responseStatus.getDescription())
+                );
             } else {
                 result.put("result", "The \"independent device\" mode temperature was set to " + temperature);
             }
@@ -264,6 +322,12 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         return result;
     }
 
+    /**
+     * Sets the custom name of the device.
+     *
+     * @param customName the new custom name.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
     public Map<String, Object> setCustomName(@Nullable String customName) {
         Map<String, Object> result = new HashMap<>();
         AbstractMillThingHandler handlerInst = thingHandler;
@@ -275,7 +339,10 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         try {
             ResponseStatus responseStatus = handlerInst.setCustomName(MillUtil.isBlank(customName) ? "" : customName);
             if (responseStatus != ResponseStatus.OK) {
-                result.put("result", "Failed: " + (responseStatus == null ? "Missing response" : responseStatus.getDescription()));
+                result.put(
+                    "result",
+                    "Failed: " + (responseStatus == null ? "Missing response" : responseStatus.getDescription())
+                );
             } else {
                 if (MillUtil.isBlank(customName)) {
                     result.put("result", "The custom device name was removed");
@@ -294,6 +361,18 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         return result;
     }
 
+    /**
+     * Sets the open window parameters.
+     *
+     * @param dropTempThr the temperature drop required to trigger (activate) the open
+     *        window function in °C.
+     * @param dropTimeRange the time range for which a drop in temperature will be evaluated in seconds.
+     * @param incTempThr the temperature increase required to deactivate the open window
+     *        function in °C.
+     * @param incTimeRange the time range for which an increase in temperature will be evaluated in seconds.
+     * @param maxTime the maximum time the open window function will remain active.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
     public Map<String, Object> setOpenWindowParameters(
         @Nullable Double dropTempThr,
         @Nullable Integer dropTimeRange,
@@ -308,7 +387,13 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
             result.put("result", "Failed: The Thing handler is null");
             return result;
         }
-        if (dropTempThr == null || dropTimeRange == null || incTempThr == null || incTimeRange == null || maxTime == null) {
+        if (
+            dropTempThr == null ||
+            dropTimeRange == null ||
+            incTempThr == null ||
+            incTimeRange == null ||
+            maxTime == null
+        ) {
             logger.warn("Call to setOpenWindowParameters Action failed because some parameters were null");
             result.put("result", "All open window parameters must be specified!");
             return result;
@@ -328,6 +413,18 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         }
     }
 
+    /**
+     * Sets a new API key in the device.
+     * <p>
+     * <b>WARNING: Setting an API key will switch the device to {@code HTTPS}, and the key cannot be removed
+     * (only changed). To restore {@code HTTP} and/or remove the API key, a factory reset is required</b>.
+     * <p>
+     * <b>Note:</b> This method will take some time, since a timeout must elapse before it returns.
+     *
+     * @param apiKey the new API key.
+     * @param confirm the confirmation code that must match the last section of the {@link ThingUID}.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
     public Map<String, Object> setAPIKey(String apiKey, String confirm) {
         Map<String, Object> result = new HashMap<>();
         AbstractMillThingHandler handlerInst = thingHandler;
@@ -344,7 +441,8 @@ public class MillBaseActions implements ThingActions { // TODO: (Nad) Javadocs
         String id = handlerInst.getThing().getUID().getId();
         if (!id.equals(confirm)) {
             logger.warn(
-                "Call to setAPIKey Action failed because the confirmation \"{}\" didn't match the required value \"{}\"",
+                "Call to setAPIKey Action failed because the confirmation " +
+                "\"{}\" didn't match the required value \"{}\"",
                 confirm,
                 id
             );
