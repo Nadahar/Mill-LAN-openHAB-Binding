@@ -628,7 +628,7 @@ public class MillAPITool {
      *
      * @param hostname the hostname or IP address to contact.
      * @param apiKey the API key or {@code null}.
-     * @param value heating power in percentage (40%, 60% or 100%).
+     * @param value the heating power in percentage (40%, 60% or 100%).
      * @return The resulting {@link Response}.
      * @throws MillException If an error occurs during the operation.
      */

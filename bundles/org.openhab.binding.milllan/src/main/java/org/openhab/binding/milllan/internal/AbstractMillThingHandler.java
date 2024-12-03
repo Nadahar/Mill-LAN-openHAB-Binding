@@ -82,66 +82,82 @@ import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.thing.binding.ThingConfigStatusSource;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerCallback;
 import org.openhab.core.thing.binding.ThingHandlerService;
+import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
- * The {@link AbstractMillThingHandler} is responsible for handling commands, which are
- * sent to one of the channels.
+ * The {@link AbstractMillThingHandler} is the common {@link ThingHandler} for all {@link ThingType}s of this
+ * binding, where most of the communications between openHAB and the device takes place.
  *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractMillThingHandler extends BaseThingHandler implements ConfigStatusProvider { // TODO: (Nad) JavaDocs
+public abstract class AbstractMillThingHandler extends BaseThingHandler implements ConfigStatusProvider {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractMillThingHandler.class);
 
+    /** The {@link ConfigStatusCallback} */
     @Nullable
     protected ConfigStatusCallback configStatusCallback;
 
+    /** The {@link MillConfigDescriptionProvider} */
     protected final MillConfigDescriptionProvider configDescriptionProvider;
 
+    /** The {@link MillHTTPClientProvider} */
     protected final MillHTTPClientProvider httpClientProvider;
 
-    //Doc: Must be synced on itself
+    /** The {@link Map} of current {@link ConfigStatusMessage}s, <b>must be synchronized</b> on itself!
+     */
     protected final Map<String, ConfigStatusMessage> configStatusMessages = new HashMap<>();
 
-    /** The object used for synchronization of class fields */
+    /** The object used for synchronization of most class fields */
     protected final Object lock = new Object();
 
-    /** Current online state, must be synchronized on {@link #lock} */
+    /** Current online state, <b>must be synchronized</b> on {@link #lock}! */
     protected boolean isOnline;
 
-    // must be synched on lock
+    /** Whether the current online state is with an error, <b>must be synchronized</b> on {@link #lock}! */
     protected boolean onlineWithError;
 
-    // Must be synced on lock
+    /** Current frequent poll task or {@code null}, <b>must be synchronized</b> on {@link #lock}! */
     @Nullable
     protected ScheduledFuture<?> frequentPollTask;
 
-    // Must be synced on lock
+    /** Current infrequent poll task or {@code null}, <b>must be synchronized</b> on {@link #lock}! */
     @Nullable
     protected ScheduledFuture<?> infrequentPollTask;
 
-    // Must be synced on lock
+    /** Current offline poll task or {@code null}, <b>must be synchronized</b> on {@link #lock}! */
     @Nullable
     protected ScheduledFuture<?> offlinePollTask;
 
-    // Must be synced on lock
+    /** Whether the handler is currently "disposed"/not initialized, <b>must be synchronized</b> on {@link #lock}! */
     protected boolean isDisposed = true;
 
+    /** The {@link MillAPITool} instance */
     protected final MillAPITool apiTool;
 
+    /**
+     * Creates a new instance using the specified parameters.
+     *
+     * @param thing the {@link Thing} for which to create a handler.
+     * @param configDescriptionProvider the {@link MillConfigDescriptionProvider} to use.
+     * @param httpClientProvider the {@link MillHTTPClientProvider} to use.
+     */
     public AbstractMillThingHandler(
         Thing thing,
         MillConfigDescriptionProvider configDescriptionProvider,
@@ -181,9 +197,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         pollTemperatureCalibrationOffset();
                     } else if (command instanceof QuantityType) {
                         @SuppressWarnings("unchecked")
-                        QuantityType<?> celsiusOffset = ((QuantityType<Temperature>) command).toUnitRelative(SIUnits.CELSIUS);
+                        QuantityType<?> celsiusOffset =
+                            ((QuantityType<Temperature>) command).toUnitRelative(SIUnits.CELSIUS);
                         if (celsiusOffset == null) {
-                            logger.warn("Failed to set temperature calibration offset: Could not convert {} to degrees celsius", command);
+                            logger.warn(
+                                "Failed to set temperature calibration offset: Could not convert {} to degrees celsius",
+                                command
+                            );
                         } else {
                             setTemperatureCalibrationOffset(celsiusOffset.toBigDecimal());
                         }
@@ -217,9 +237,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         @SuppressWarnings("unchecked")
                         QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
                         if (celsiusValue == null) {
-                            logger.warn("Failed to set \"normal\" set-temperature: Could not convert {} to degrees celsius", command);
+                            logger.warn(
+                                "Failed to set \"normal\" set-temperature: Could not convert {} to degrees celsius",
+                                command
+                            );
                         } else {
-                            setSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL, celsiusValue.toBigDecimal());
+                            setSetTemperature(
+                                NORMAL_SET_TEMPERATURE,
+                                TemperatureType.NORMAL,
+                                celsiusValue.toBigDecimal()
+                            );
                         }
                     }
                     break;
@@ -230,9 +257,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         @SuppressWarnings("unchecked")
                         QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
                         if (celsiusValue == null) {
-                            logger.warn("Failed to set \"comfort\" set-temperature: Could not convert {} to degrees celsius", command);
+                            logger.warn(
+                                "Failed to set \"comfort\" set-temperature: Could not convert {} to degrees celsius",
+                                command
+                            );
                         } else {
-                            setSetTemperature(COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT, celsiusValue.toBigDecimal());
+                            setSetTemperature(
+                                COMFORT_SET_TEMPERATURE,
+                                TemperatureType.COMFORT,
+                                celsiusValue.toBigDecimal()
+                            );
                         }
                     }
                     break;
@@ -243,9 +277,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         @SuppressWarnings("unchecked")
                         QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
                         if (celsiusValue == null) {
-                            logger.warn("Failed to set \"sleep\" set-temperature: Could not convert {} to degrees celsius", command);
+                            logger.warn(
+                                "Failed to set \"sleep\" set-temperature: Could not convert {} to degrees celsius",
+                                command
+                            );
                         } else {
-                            setSetTemperature(SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP, celsiusValue.toBigDecimal());
+                            setSetTemperature(
+                                SLEEP_SET_TEMPERATURE,
+                                TemperatureType.SLEEP,
+                                celsiusValue.toBigDecimal()
+                            );
                         }
                     }
                     break;
@@ -256,7 +297,10 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         @SuppressWarnings("unchecked")
                         QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
                         if (celsiusValue == null) {
-                            logger.warn("Failed to set \"away\" set-temperature: Could not convert {} to degrees celsius", command);
+                            logger.warn(
+                                "Failed to set \"away\" set-temperature: Could not convert {} to degrees celsius",
+                                command
+                            );
                         } else {
                             setSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY, celsiusValue.toBigDecimal());
                         }
@@ -360,6 +404,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the device status and updates the affected properties if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollStatus() throws MillException { //TODO: (Nad) Remember to run: mvn i18n:generate-default-translations
         StatusResponse statusResponse = apiTool.getStatus(getHostname(), getAPIKey());
         setOnline();
@@ -409,6 +458,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the device control status and updates the {@link Channel}s if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollControlStatus() throws MillException {
         ControlStatusResponse controlStatusResponse = apiTool.getControlStatus(getHostname(), getAPIKey());
         setOnline();
@@ -454,6 +508,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the {@link OperationMode} and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollOperationMode() throws MillException {
         OperationModeResponse operationModeResponse;
         try {
@@ -473,6 +532,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the operation mode value to the device and immediately queries the device for
+     * the same value, so that the result of the operation is known.
+     *
+     * @param modeValue the operation mode value {@link String}. Must be a valid {@link OperationMode}
+     *                  or no action is taken.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setOperationMode(@Nullable String modeValue) throws MillException {
         OperationMode mode = OperationMode.typeOf(modeValue);
         if (mode == null) {
@@ -500,8 +567,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the temperature calibration offset and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollTemperatureCalibrationOffset() throws MillException {
-        TemperatureCalibrationOffsetResponse calibrationOffsetResponse = apiTool.getTemperatureCalibrationOffset(getHostname(), getAPIKey());
+        TemperatureCalibrationOffsetResponse calibrationOffsetResponse = apiTool.getTemperatureCalibrationOffset(
+            getHostname(),
+            getAPIKey()
+        );
         setOnline();
         Double d;
         if ((d = calibrationOffsetResponse.getValue()) != null) {
@@ -509,6 +584,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the specified temperature calibration offset value to the device and immediately queries
+     * the device for the same value, so that the result of the operation is known.
+     *
+     * @param offset the temperature calibration offset in °C.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setTemperatureCalibrationOffset(BigDecimal offset) throws MillException {
         Response response = apiTool.setTemperatureCalibrationOffset(getHostname(), getAPIKey(), offset);
         pollTemperatureCalibrationOffset();
@@ -531,6 +613,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the commercial lock state and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollCommercialLock() throws MillException {
         CommercialLockResponse commercialLockResponse;
         try {
@@ -550,6 +637,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the specified commercial lock enabled value to the device and immediately queries the
+     * device for the same value, so that the result of the operation is known.
+     *
+     * @param value the commercial lock enabled value.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setCommercialLock(Boolean value) throws MillException {
         Response response = apiTool.setCommercialLock(getHostname(), getAPIKey(), value);
         pollCommercialLock();
@@ -572,6 +666,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the child lock state and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollChildLock() throws MillException {
         ChildLockResponse childLockResponse;
         try {
@@ -591,6 +690,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the specified child lock enabled value value to the device and immediately queries the device for
+     * the same value, so that the result of the operation is known.
+     *
+     * @param value the child lock enabled value.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setChildLock(Boolean value) throws MillException {
         Response response = apiTool.setChildLock(getHostname(), getAPIKey(), value);
         pollChildLock();
@@ -613,6 +719,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the {@link DisplayUnit} and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollDisplayUnit() throws MillException {
         DisplayUnitResponse displayUnitResponse;
         try {
@@ -632,6 +743,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the specified display unit value to the device and immediately queries the device for
+     * the same value, so that the result of the operation is known.
+     *
+     * @param unitValue the display unit value {@link String}. Must be a valid {@link DisplayUnit}
+     *                  or no action is taken.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setDisplayUnit(@Nullable String unitValue) throws MillException {
         DisplayUnit displayUnit = DisplayUnit.typeOf(unitValue);
         if (displayUnit == null) {
@@ -659,8 +778,19 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the set-temperature value in °C and updates the {@link Channel} if necessary.
+     *
+     * @param channel the ID of the {@link Channel} to update.
+     * @param temperatureType the {@link TemperatureType} to retrieve.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollSetTemperature(String channel, TemperatureType temperatureType) throws MillException {
-        SetTemperatureResponse setTemperatureResponse = apiTool.getSetTemperature(getHostname(), getAPIKey(), temperatureType);
+        SetTemperatureResponse setTemperatureResponse = apiTool.getSetTemperature(
+            getHostname(),
+            getAPIKey(),
+            temperatureType
+        );
         setOnline();
         BigDecimal bd;
         if ((bd = setTemperatureResponse.getSetTemperature()) != null) {
@@ -668,7 +798,20 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
-    public void setSetTemperature(String channel, TemperatureType temperatureType, BigDecimal value) throws MillException {
+    /**
+     * Sends the specified set-temperature and {@link TemperatureType} values to the device and immediately
+     * queries the device for the same value, so that the result of the operation is known.
+     *
+     * @param channel the ID of the {@link Channel} to update.
+     * @param temperatureType the {@link TemperatureType} to set.
+     * @param value the new set-temperature in °C.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void setSetTemperature(
+        String channel,
+        TemperatureType temperatureType,
+        BigDecimal value
+    ) throws MillException {
         Response response = apiTool.setSetTemperature(getHostname(), getAPIKey(), temperatureType, value);
         pollSetTemperature(channel, temperatureType);
         pollControlStatus();
@@ -691,6 +834,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the limited heating power value and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollLimitedHeatingPower() throws MillException {
         LimitedHeatingPowerResponse heatingPowerResponse;
         try {
@@ -710,6 +858,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the specified limited heating power value to the device and immediately queries the device for
+     * the same value, so that the result of the operation is known.
+     *
+     * @param value the limited heating power percentage value.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setLimitedHeatingPower(Integer value) throws MillException {
         Response response = apiTool.setLimitedHeatingPower(getHostname(), getAPIKey(), value);
         pollLimitedHeatingPower();
@@ -732,6 +887,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the {@link ControllerType} and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollControllerType() throws MillException {
         ControllerTypeResponse controllerTypeResponse;
         try {
@@ -751,10 +911,21 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the specified controller type value to the device and immediately queries the device for
+     * the same value, so that the result of the operation is known.
+     *
+     * @param controllerTypeValue the controller type value {@link String}. Must be a valid
+     *                  {@link ControllerType} or no action is taken.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setControllerType(@Nullable String controllerTypeValue) throws MillException {
         ControllerType controllerType = ControllerType.typeOf(controllerTypeValue);
         if (controllerType == null) {
-            logger.warn("setControllerType() received an invalid controller type value {} - ignoring", controllerTypeValue);
+            logger.warn(
+                "setControllerType() received an invalid controller type value {} - ignoring",
+                controllerTypeValue
+            );
             return;
         }
 
@@ -779,6 +950,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the {@link PredictiveHeatingType} and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollPredictiveHeatingType() throws MillException {
         PredictiveHeatingTypeResponse response;
         try {
@@ -798,10 +974,21 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the specified predictive heating type value to the device and immediately queries the device for
+     * the same value, so that the result of the operation is known.
+     *
+     * @param typeValue the predictive heating type value {@link String}. Must be a valid
+     *                  {@link PredictiveHeatingType} or no action is taken.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setPredictiveHeatingType(@Nullable String typeValue) throws MillException {
         PredictiveHeatingType type = PredictiveHeatingType.typeOf(typeValue);
         if (type == null) {
-            logger.warn("setPredictiveHeatingType() received an invalid predictive heating type value {} - ignoring", typeValue);
+            logger.warn(
+                "setPredictiveHeatingType() received an invalid predictive heating type value {} - ignoring",
+                typeValue
+            );
             return;
         }
 
@@ -826,6 +1013,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the oil heater power value and updates the {@link Channel} if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollOilHeaterPower() throws MillException {
         OilHeaterPowerResponse heatingPowerResponse;
         try {
@@ -845,8 +1037,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the specified time oil heater power value to the device and immediately queries
+     * the device for the same value, so that the result of the operation is known.
+     *
+     * @param value the heating power in percentage (40%, 60% or 100%).
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setOilHeaterPower(Integer value) throws MillException {
-        Response response = apiTool.setLimitedHeatingPower(getHostname(), getAPIKey(), value);
+        Response response = apiTool.setOilHeaterPower(getHostname(), getAPIKey(), value);
         pollOilHeaterPower();
         pollControlStatus();
 
@@ -867,6 +1066,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the time zone offset and returns the value.
+     *
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the retrieved value.
+     * @return The retrieved value.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public Integer pollTimeZoneOffset(boolean updateConfiguration) throws MillException {
         TimeZoneOffsetResponse offset;
@@ -897,6 +1103,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return i;
     }
 
+    /**
+     * Sends the specified time zone offset value to the device and immediately queries the device for
+     * the same value, so that the result of the operation is known.
+     *
+     * @param value the time zone offset from UTC in minutes.
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the new value.
+     * @return The resulting {@link Integer} from the follow-up query.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public Integer setTimeZoneOffset(Integer value, boolean updateConfiguration) throws MillException {
         Response response = apiTool.setTimeZoneOffset(getHostname(), getAPIKey(), value);
@@ -921,9 +1136,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     }
 
     /**
-     * Polls the device for PID parameters.
+     * Retrieves the PID parameters and returns the values.
      *
-     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the fetched values.
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the retrieved values.
      * @return The resulting {@link PIDParametersResponse}.
      * @throws MillException If an error occurs during the operation.
      */
@@ -1003,6 +1218,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    /**
+     * Retrieves the cloud communication enabled state and returns the it.
+     *
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the retrieved state.
+     * @return The retrieved state.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public Boolean pollCloudCommunication(boolean updateConfiguration) throws MillException {
         CloudCommunicationResponse enabled;
@@ -1033,6 +1255,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return b;
     }
 
+    /**
+     * Sends the specified cloud communication value to the device and immediately queries the device
+     * for the same value, so that the result of the operation is known.
+     *
+     * @param enabled whether cloud communication is enabled or not.
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the new values.
+     * @return The resulting {@link Boolean} from the follow-up query.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public Boolean setCloudCommunication(Boolean enabled, boolean updateConfiguration) throws MillException {
         Response response = apiTool.setCloudCommunication(getHostname(), getAPIKey(), enabled);
@@ -1056,6 +1287,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    /**
+     * Retrieves the hysteresis parameters and returns the values.
+     *
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the retrieved values.
+     * @return The resulting {@link HysteresisParametersResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public HysteresisParametersResponse pollHysteresisParameters(boolean updateConfiguration) throws MillException {
         HysteresisParametersResponse params;
@@ -1102,13 +1340,28 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return params;
     }
 
+    /**
+     * Sends the specified hysteresis parameters to the device and immediately queries the device for the
+     * same parameters, so that the result of the operation is known.
+     *
+     * @param upper the upper hysteresis limit in °C.
+     * @param lower the lower hysteresis limit in °C.
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the new values.
+     * @return The resulting {@link HysteresisParametersResponse} from the follow-up query.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public HysteresisParametersResponse setHysteresisParameters(
         Number upper,
         Number lower,
         boolean updateConfiguration
     ) throws MillException {
-        Response response = apiTool.setHysteresisParameters(getHostname(), getAPIKey(), upper.doubleValue(), lower.doubleValue());
+        Response response = apiTool.setHysteresisParameters(
+            getHostname(),
+            getAPIKey(),
+            upper.doubleValue(),
+            lower.doubleValue()
+        );
         HysteresisParametersResponse result = pollHysteresisParameters(updateConfiguration);
 
         // Set status after polling, or it will be overwritten
@@ -1128,7 +1381,17 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
-    //Doc: Will return http status 503 if not in "independent device" mode
+    /**
+     * Sends the specified set-temperature value to the device and immediately
+     * queries the device for the same value, so that the result of the operation is known.
+     * <p>
+     * <b>Note:</b> This command will <i>only</i> work if the device is in "independent device" mode.
+     * If not, {@code HTTP} status 503 will be returned in the form of a {@link MillHTTPResponseException}.
+     *
+     * @param value the set-temperature in °C.
+     * @return The {@link ResponseStatus} received after sending the command.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public ResponseStatus setTemperatureInIndependentMode(BigDecimal value) throws MillException {
         Response response = apiTool.setTemperatureInIndependentMode(getHostname(), getAPIKey(), value);
@@ -1152,6 +1415,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return responseStatus;
     }
 
+    /**
+     * Instructs the device to set the specified new custom name, and immediately
+     * queries the device for the same value, so that the result of the operation is known.
+     *
+     * @param customName the new custom name.
+     * @return The {@link ResponseStatus} received after sending the command.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public ResponseStatus setCustomName(@Nullable String customName) throws MillException {
         Response response = apiTool.setCustomName(getHostname(), getAPIKey(), customName == null ? "" : customName);
@@ -1175,8 +1446,17 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return responseStatus;
     }
 
+    /**
+     * Retrieves the commercial lock customization parameters and returns the values.
+     *
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the retrieved values.
+     * @return The resulting {@link CommercialLockCustomizationResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
-    public CommercialLockCustomizationResponse pollCommercialLockCustomization(boolean updateConfiguration) throws MillException {
+    public CommercialLockCustomizationResponse pollCommercialLockCustomization(
+        boolean updateConfiguration
+    ) throws MillException {
         CommercialLockCustomizationResponse response;
         try {
             response = apiTool.getCommercialLockCustomization(getHostname(), getAPIKey());
@@ -1227,13 +1507,28 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return response;
     }
 
+    /**
+     * Sends the specified commercial lock customization parameters to the device and immediately
+     * queries the device for the same parameters, so that the result of the operation is known.
+     *
+     * @param min the minimum set-temperature in °C.
+     * @param max the maximum set-temperature in °C.
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the new values.
+     * @return The resulting {@link HysteresisParametersResponse} from the follow-up query.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public CommercialLockCustomizationResponse setCommercialLockCustomization(
         Number min,
         Number max,
         boolean updateConfiguration
     ) throws MillException {
-        Response response = apiTool.setCommercialLockCustomization(getHostname(), getAPIKey(), min.doubleValue(), max.doubleValue());
+        Response response = apiTool.setCommercialLockCustomization(
+            getHostname(),
+            getAPIKey(),
+            min.doubleValue(),
+            max.doubleValue()
+        );
         CommercialLockCustomizationResponse result = pollCommercialLockCustomization(updateConfiguration);
 
         // Set status after polling, or it will be overwritten
@@ -1253,6 +1548,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    /**
+     * Retrieves the open window status and updates the {@link Channel}s if necessary.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void pollOpenWindow() throws MillException {
         OpenWindowParametersResponse params = apiTool.getOpenWindowParameters(getHostname(), getAPIKey());
         setOnline();
@@ -1265,6 +1565,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sends the specified open window function enabled value to the device and immediately
+     * queries the device for the same value, so that the result of the operation is known.
+     *
+     * @param enabled whether the open window function should be enabled.
+     * @throws MillException If an error occurs during the operation.
+     */
     public void setOpenWindowEnabled(Boolean enabled) throws MillException {
         OpenWindowParameters parameters = new OpenWindowParameters();
         parameters.setEnabled(enabled);
@@ -1315,6 +1622,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Retrieves the open window parameters and returns the values.
+     *
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the retrieved values.
+     * @return The resulting {@link OpenWindowParametersResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public OpenWindowParametersResponse pollOpenWindowParameters(boolean updateConfiguration) throws MillException {
         OpenWindowParametersResponse params;
@@ -1349,6 +1663,21 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return params;
     }
 
+    /**
+     * Sends the specified open window parameters to the device and immediately queries the device
+     * for the same parameters, so that the result of the operation is known.
+     *
+     * @param dropTemperatureThreshold the temperature drop required to trigger (activate) the open
+     *        window function in °C.
+     * @param dropTimeRange the time range for which a drop in temperature will be evaluated in seconds.
+     * @param increaseTemperatureThreshold the temperature increase required to deactivate the open window
+     *        function in °C.
+     * @param increaseTimeRange the time range for which an increase in temperature will be evaluated in seconds.
+     * @param maxTime the maximum time the open window function will remain active.
+     * @param updateConfiguration if {@code true}, the {@link Configuration} is updated with the new values.
+     * @return The resulting {@link HysteresisParametersResponse} from the follow-up query.
+     * @throws MillException If an error occurs during the operation.
+     */
     @Nullable
     public OpenWindowParametersResponse setOpenWindowParameters(
         Number dropTemperatureThreshold,
@@ -1405,7 +1734,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
-    //Doc: The device API doesn't support null or blank keys, so they are forbidden
+    /**
+     * Instructs the device to set the specified new API key. If the command succeeds the device will reboot,
+     * after which the new API key will be effective immediately.
+     * <p>
+     * <b>WARNING: Setting an API key will switch the device to {@code HTTPS}, and the key cannot be removed
+     * (only changed). To restore {@code HTTP} and/or remove the API key, a factory reset is required</b>.
+     * <p>
+     * <b>Note:</b> This method will take some time, since a timeout must elapse before it returns.
+     *
+     * @param apiKey the new API key, cannot be blank and has a maximum size of 63 bytes in UTF-8 encoded form.
+     * @throws MillException If {@code apiKey} is blank, if an error occurs during the operation.
+     */
     public void setAPIKey(String apiKey) throws MillException {
         if (apiKey.isBlank()) {
             throw new MillException("API key cannot be blank");
@@ -1446,6 +1786,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Instructs the device to reboot.
+     * <p>
+     * <b>Note:</b> This method will take some time, since a timeout must elapse before it returns.
+     *
+     * @throws MillException If an error occurs during the operation.
+     */
     public void sendReboot() throws MillException {
         Response response = null;
         try {
@@ -1479,6 +1826,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Enables the configuration descriptions for all PID parameters.
+     */
     protected void enablePIDDescriptions() {
         configDescriptionProvider.enableDescriptions(
             thing.getUID(),
@@ -1490,6 +1840,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         );
     }
 
+    /**
+     * Disables the configuration descriptions for all PID parameters.
+     */
     protected void disablePIDDescriptions() {
         configDescriptionProvider.disableDescriptions(
             thing.getUID(),
@@ -1501,6 +1854,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         );
     }
 
+    /**
+     * Enables the configuration descriptions for all open window parameters.
+     */
     protected void enableOpenWindowDescriptions() {
         configDescriptionProvider.enableDescriptions(
             thing.getUID(),
@@ -1512,6 +1868,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         );
     }
 
+    /**
+     * Disables the configuration descriptions for all open window parameters.
+     */
     protected void disableOpenWindowDescriptions() {
         configDescriptionProvider.disableDescriptions(
             thing.getUID(),
@@ -1523,7 +1882,17 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         );
     }
 
-    protected boolean applyPIDParamsResponseToConfig(PIDParametersResponse parametersResponse, Configuration configuration) {
+    /**
+     * Applies the specified PID parameters to the supplied {@link Configuration}.
+     *
+     * @param parametersResponse the PID parameters.
+     * @param configuration the {@link Configuration} to update.
+     * @return {@code true} if the {@link Configuration} was updated.
+     */
+    protected boolean applyPIDParamsResponseToConfig(
+        PIDParametersResponse parametersResponse,
+        Configuration configuration
+    ) {
         Double d;
         Object object;
         boolean result = false;
@@ -1565,7 +1934,17 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
-    protected boolean applyOpenWindowParamsResponseToConfig(OpenWindowParametersResponse parametersResponse, Configuration configuration) {
+    /**
+     * Applies the specified open window parameters to the supplied {@link Configuration}.
+     *
+     * @param parametersResponse the open window parameters.
+     * @param configuration the {@link Configuration} to update.
+     * @return {@code true} if the {@link Configuration} was updated.
+     */
+    protected boolean applyOpenWindowParamsResponseToConfig(
+        OpenWindowParametersResponse parametersResponse,
+        Configuration configuration
+    ) {
         Double d;
         Integer i;
         Object object;
@@ -1608,16 +1987,28 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    /**
+     * @return {@code true} if the {@link Thing} is currently online.
+     */
     protected boolean isOnline() {
         synchronized (lock) {
             return isOnline;
         }
     }
 
+    /**
+     * Sets the {@link Thing} status to online without errors.
+     */
     protected void setOnline() {
         setOnline(null, null);
     }
 
+    /**
+     * Sets the {@link Thing} status to online with errors.
+     *
+     * @param statusDetail the {@link ThingStatusDetail} to set.
+     * @param description the error description to set.
+     */
     protected void setOnline(@Nullable ThingStatusDetail statusDetail, @Nullable String description) {
         boolean isError = statusDetail != null && statusDetail != ThingStatusDetail.NONE;
         synchronized (lock) {
@@ -1734,6 +2125,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sets the {@link Thing} status to offline, retrieving the details from the specified {@link MillException}.
+     *
+     * @param e the {@link MillException} that caused the {@link Thing} to go offline.
+     */
     protected void setOffline(MillException e) {
         Object object;
         if (e.getCause() instanceof ConnectException) {
@@ -1750,6 +2146,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sets the {@link Thing} status to offline with the specified details.
+     *
+     * @param statusDetail the {@link ThingStatusDetail} to set.
+     * @param description the error description to set.
+     */
     protected void setOffline(@Nullable ThingStatusDetail statusDetail, @Nullable String description) {
         ThingStatusDetail detail = statusDetail;
         String desc = description;
@@ -1810,12 +2212,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         );
                     } else if (addresses == null) {
                         logger.debug(
-                            "Not starting offline polling for Mill device \"{}\" because an IP address could not be resolved",
+                            "Not starting offline polling for Mill device \"{}\"" +
+                            " because an IP address could not be resolved",
                             getThing().getUID()
                         );
                     } else {
                         logger.debug(
-                            "Not starting offline polling for Mill device \"{}\" because the refresh interval is invalid",
+                            "Not starting offline polling for Mill device \"{}\"" +
+                            " because the refresh interval is invalid",
                             getThing().getUID()
                         );
                     }
@@ -1845,6 +2249,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Gets the hostname from the current {@link Configuration}.
+     *
+     * @return The hostname.
+     * @throws MillException If the hostname can't be retrieved or is invalid.
+     */
     protected String getHostname() throws MillException {
         Object object = getConfig().get(CONFIG_PARAM_HOSTNAME);
         if (!(object instanceof String)) {
@@ -1871,6 +2281,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return result;
     }
 
+    /**
+     * Gets the API key from the current {@link Configuration}.
+     *
+     * @return The API key.
+     * @throws MillException If the hostname can't be retrieved.
+     */
     @Nullable
     protected String getAPIKey() throws MillException {
         Object object = getConfig().get(CONFIG_PARAM_API_KEY);
@@ -1890,6 +2306,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return isBlank((String) object) ? null : (String) object;
     }
 
+    /**
+     * Gets the frequent refresh interval from the current {@link Configuration}.
+     *
+     * @return The frequent refresh interval in seconds.
+     * @throws MillException If the refresh interval can't be retrieved or is invalid.
+     */
     protected int getRefreshInterval() throws MillException {
         Object object = getConfig().get(CONFIG_PARAM_REFRESH_INTERVAL);
         if (!(object instanceof Number)) {
@@ -1917,6 +2339,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return i;
     }
 
+    /**
+     * Gets the infrequent refresh interval from the current {@link Configuration}.
+     *
+     * @return The infrequent refresh interval in seconds.
+     * @throws MillException If the refresh interval can't be retrieved or is invalid.
+     */
     protected int getInfrequentRefreshInterval() throws MillException {
         Object object = getConfig().get(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL);
         if (!(object instanceof Number)) {
@@ -1934,7 +2362,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         if (i <= 0) {
             logger.warn("Configuration parameter infrequent refresh interval must be positive ({})", object);
             setConfigParameterMessage(ConfigStatusMessage.Builder
-                .error(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL).withMessageKeySuffix("illegal-refresh-interval").build()
+                .error(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL)
+                .withMessageKeySuffix("illegal-refresh-interval").build()
             );
             throw new MillException(
                 "Invalid configuration: infrequent refresh interval must be positive",
@@ -1944,6 +2373,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return i;
     }
 
+    /**
+     * Tries to resolve the IP address(es) of the configured hostname.
+     *
+     * @return The array of {@link InetAddress}es or {@code null} if none were resolved.
+     */
     protected InetAddress @Nullable [] resolveOfflineAddresses() {
         String hostname;
         try {
@@ -2013,10 +2447,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             configuration.put(CONFIG_PARAM_API_KEY, configurationParameters.get(CONFIG_PARAM_API_KEY));
         }
         if (modifiedParameters.contains(CONFIG_PARAM_REFRESH_INTERVAL)) {
-            configuration.put(CONFIG_PARAM_REFRESH_INTERVAL, configurationParameters.get(CONFIG_PARAM_REFRESH_INTERVAL));
+            configuration.put(
+                CONFIG_PARAM_REFRESH_INTERVAL,
+                configurationParameters.get(CONFIG_PARAM_REFRESH_INTERVAL)
+            );
         }
         if (modifiedParameters.contains(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL)) {
-            configuration.put(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL, configurationParameters.get(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL));
+            configuration.put(
+                CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL,
+                configurationParameters.get(CONFIG_PARAM_INFREQUENT_REFRESH_INTERVAL)
+            );
         }
         if (modifiedParameters.contains(CONFIG_PARAM_TIMEZONE_OFFSET)) {
             handleTimeZoneOffsetUpdate(configuration, configurationParameters, online);
@@ -2092,6 +2532,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Handles the update of the current configuration with a new time zone offset, including
+     * setting and logging error states.
+     *
+     * @param config the {@link Configuration} to update.
+     * @param newParameters the new configuration parameters to apply.
+     * @param online whether the {@link Thing} is currently online.
+     */
     protected void handleTimeZoneOffsetUpdate(
         Configuration config,
         Map<String, Object> newParameters,
@@ -2150,6 +2598,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return;
     }
 
+    /**
+     * Handles the update of the current configuration with new PID parameters, including
+     * setting and logging error states.
+     *
+     * @param config the {@link Configuration} to update.
+     * @param newParameters the new configuration parameters to apply.
+     * @param online whether the {@link Thing} is currently online.
+     */
     protected void handlePIDParametersUpdate(
         Configuration config,
         Map<String, Object> newParameters,
@@ -2289,7 +2745,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                         if ((d = result.getKdFilterN()) != null && d.doubleValue() != newKdFilterN.doubleValue()) {
                             logger.warn(
-                                "The device returned a different PID Kd filter value ({}) than what was attempted set ({})",
+                                "The device returned a different PID Kd filter value ({})" +
+                                " than what was attempted set ({})",
                                 d,
                                 newKdFilterN
                             );
@@ -2303,7 +2760,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             d.doubleValue() != newWindupLimit.doubleValue()
                         ) {
                             logger.warn(
-                                "The device returned a different PID windup limit ({}) than what was attempted set ({})",
+                                "The device returned a different PID windup limit ({})" +
+                                " than what was attempted set ({})",
                                 d,
                                 newWindupLimit
                             );
@@ -2371,6 +2829,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Handles the update of the current configuration with a new cloud communication state, including
+     * setting and logging error states.
+     *
+     * @param config the {@link Configuration} to update.
+     * @param newParameters the new configuration parameters to apply.
+     * @param online whether the {@link Thing} is currently online.
+     * @return {@code true} if the {@link Configuration} was updated.
+     */
     protected boolean handleCloudCommunicationUpdate(
         Configuration config,
         Map<String, Object> newParameters,
@@ -2430,6 +2897,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return false;
     }
 
+    /**
+     * Handles the update of the current configuration with new hysteresis parameters, including
+     * setting and logging error states.
+     *
+     * @param config the {@link Configuration} to update.
+     * @param newParameters the new configuration parameters to apply.
+     * @param online whether the {@link Thing} is currently online.
+     * @return {@code true} if the {@link Configuration} was updated.
+     */
     protected boolean handleHysteresisParametersUpdate(
         Configuration config,
         Map<String, Object> newParameters,
@@ -2473,14 +2949,17 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                     if (result == null || !result.isComplete()) {
                         logger.warn("An empty or partial response was received after setting hysteresis parameters");
                         setConfigParameterMessage(ConfigStatusMessage.Builder
-                            .error(CONFIG_PARAM_HYSTERESIS_UPPER).withMessageKeySuffix("store-failed-hysteresis").build());
+                            .error(CONFIG_PARAM_HYSTERESIS_UPPER)
+                            .withMessageKeySuffix("store-failed-hysteresis").build());
                         setConfigParameterMessage(ConfigStatusMessage.Builder
-                            .error(CONFIG_PARAM_HYSTERESIS_LOWER).withMessageKeySuffix("store-failed-hysteresis").build());
+                            .error(CONFIG_PARAM_HYSTERESIS_LOWER)
+                            .withMessageKeySuffix("store-failed-hysteresis").build());
                         setFailed = true;
                     } else {
                         if ((d = result.getUpper()) != null && d.doubleValue() != newUpper.doubleValue()) {
                             logger.warn(
-                                "The device returned a different hysteresis upper limit ({}) than what was attempted set ({})",
+                                "The device returned a different hysteresis upper limit ({})" +
+                                " than what was attempted set ({})",
                                 d,
                                 newUpper
                             );
@@ -2491,7 +2970,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                         if ((d = result.getLower()) != null && d.doubleValue() != newLower.doubleValue()) {
                             logger.warn(
-                                "The device returned a different hysteresis lower limit ({}) than what was attempted set ({})",
+                                "The device returned a different hysteresis lower limit ({})" +
+                                " than what was attempted set ({})",
                                 d,
                                 newLower
                             );
@@ -2534,6 +3014,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         return false;
     }
 
+    /**
+     * Handles the update of the current configuration with new commercial lock parameters, including
+     * setting and logging error states.
+     *
+     * @param config the {@link Configuration} to update.
+     * @param newParameters the new configuration parameters to apply.
+     * @param online whether the {@link Thing} is currently online.
+     */
     protected void handleCommercialLockParametersUpdate(
         Configuration config,
         Map<String, Object> newParameters,
@@ -2575,16 +3063,21 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                     Double d;
                     boolean setFailed = false;
                     if (result == null || !result.isComplete()) {
-                        logger.warn("An empty or partial response was received after setting commercial lock parameters");
+                        logger.warn(
+                            "An empty or partial response was received after setting commercial lock parameters"
+                        );
                         setConfigParameterMessage(ConfigStatusMessage.Builder
-                            .error(CONFIG_PARAM_COMMERCIAL_LOCK_MIN).withMessageKeySuffix("store-failed-commercial-lock").build());
+                            .error(CONFIG_PARAM_COMMERCIAL_LOCK_MIN)
+                            .withMessageKeySuffix("store-failed-commercial-lock").build());
                         setConfigParameterMessage(ConfigStatusMessage.Builder
-                            .error(CONFIG_PARAM_COMMERCIAL_LOCK_MAX).withMessageKeySuffix("store-failed-commercial-lock").build());
+                            .error(CONFIG_PARAM_COMMERCIAL_LOCK_MAX)
+                            .withMessageKeySuffix("store-failed-commercial-lock").build());
                         setFailed = true;
                     } else {
                         if ((d = result.getMinimum()) != null && d.doubleValue() != newMin.doubleValue()) {
                             logger.warn(
-                                "The device returned a different commercial lock minimum temperature ({}) than what was attempted set ({})",
+                                "The device returned a different commercial lock minimum temperature ({})" +
+                                " than what was attempted set ({})",
                                 d,
                                 newMin
                             );
@@ -2595,7 +3088,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                         if ((d = result.getMaximum()) != null && d.doubleValue() != newMax.doubleValue()) {
                             logger.warn(
-                                "The device returned a different commercial lock maximum temperature ({}) than what was attempted set ({})",
+                                "The device returned a different commercial lock maximum temperature ({})" +
+                                " than what was attempted set ({})",
                                 d,
                                 newMax
                             );
@@ -2606,7 +3100,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                     }
                     if (!setFailed) {
-                        clearConfigParameterMessages(CONFIG_PARAM_COMMERCIAL_LOCK_MIN, CONFIG_PARAM_COMMERCIAL_LOCK_MAX);
+                        clearConfigParameterMessages(
+                            CONFIG_PARAM_COMMERCIAL_LOCK_MIN, CONFIG_PARAM_COMMERCIAL_LOCK_MAX
+                        );
                         config.put(CONFIG_PARAM_COMMERCIAL_LOCK_MIN, newMin);
                         config.put(CONFIG_PARAM_COMMERCIAL_LOCK_MAX, newMax);
                     }
@@ -2636,6 +3132,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Handles the update of the current configuration with new open window customization parameters, including
+     * setting and logging error states.
+     *
+     * @param config the {@link Configuration} to update.
+     * @param newParameters the new configuration parameters to apply.
+     * @param online whether the {@link Thing} is currently online.
+     */
     protected void handleOpenWindowParametersUpdate(
         Configuration config,
         Map<String, Object> newParameters,
@@ -2735,21 +3239,29 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                     if (result == null || !result.isComplete()) {
                         logger.warn("An empty or partial response was received after setting open window parameters");
                         setConfigParameterMessage(ConfigStatusMessage.Builder
-                            .error(CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR).withMessageKeySuffix("store-failed-open-window").build());
+                            .error(CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR)
+                            .withMessageKeySuffix("store-failed-open-window").build());
                         setConfigParameterMessage(ConfigStatusMessage.Builder
-                            .error(CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE).withMessageKeySuffix("store-failed-open-window").build());
+                            .error(CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE)
+                            .withMessageKeySuffix("store-failed-open-window").build());
                         setConfigParameterMessage(ConfigStatusMessage.Builder
-                            .error(CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR).withMessageKeySuffix("store-failed-open-window").build());
+                            .error(CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR)
+                            .withMessageKeySuffix("store-failed-open-window").build());
                         setConfigParameterMessage(ConfigStatusMessage.Builder
-                            .error(CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE).withMessageKeySuffix("store-failed-open-window").build());
+                            .error(CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE)
+                            .withMessageKeySuffix("store-failed-open-window").build());
                         setConfigParameterMessage(ConfigStatusMessage.Builder
                             .error(CONFIG_PARAM_OPEN_WINDOW_MAX_TIME)
                             .withMessageKeySuffix("store-failed-open-window").build());
                         setFailed = true;
                     } else {
-                        if ((d = result.getDropTemperatureThreshold()) != null && d.doubleValue() != newDropTempThr.doubleValue()) {
+                        if (
+                                (d = result.getDropTemperatureThreshold()) != null &&
+                                d.doubleValue() != newDropTempThr.doubleValue()
+                            ) {
                             logger.warn(
-                                "The device returned a different open window drop temperature threshold ({}) than what was attempted set ({})",
+                                "The device returned a different open window drop temperature threshold ({})" +
+                                " than what was attempted set ({})",
                                 d,
                                 newDropTempThr
                             );
@@ -2760,7 +3272,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                         if ((i = result.getDropTimeRange()) != null && i.intValue() != newDropTimeRange.intValue()) {
                             logger.warn(
-                                "The device returned a different open window drop time range ({}) than what was attempted set ({})",
+                                "The device returned a different open window drop time range ({})" +
+                                " than what was attempted set ({})",
                                 i,
                                 newDropTimeRange
                             );
@@ -2769,9 +3282,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newDropTimeRange).build());
                             setFailed = true;
                         }
-                        if ((d = result.getIncreaseTemperatureThreshold()) != null && d.doubleValue() != newIncTempThr.doubleValue()) {
+                        if (
+                            (d = result.getIncreaseTemperatureThreshold()) != null &&
+                            d.doubleValue() != newIncTempThr.doubleValue()
+                        ) {
                             logger.warn(
-                                "The device returned a different open window increase temperature threshold ({}) than what was attempted set ({})",
+                                "The device returned a different open window increase temperature threshold ({})" +
+                                " than what was attempted set ({})",
                                 d,
                                 newIncTempThr
                             );
@@ -2782,7 +3299,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                         if ((i = result.getIncreaseTimeRange()) != null && i.intValue() != newIncTimeRange.intValue()) {
                             logger.warn(
-                                "The device returned a different open window increase time range ({}) than what was attempted set ({})",
+                                "The device returned a different open window increase time range ({})" +
+                                " than what was attempted set ({})",
                                 i,
                                 newIncTimeRange
                             );
@@ -2793,7 +3311,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                         if ((i = result.getMaxTime()) != null && i.intValue() != newMaxTime.intValue()) {
                             logger.warn(
-                                "The device returned a different open window maximum time ({}) than what was attempted set ({})",
+                                "The device returned a different open window maximum time ({})" +
+                                " than what was attempted set ({})",
                                 i,
                                 newMaxTime
                             );
@@ -2870,12 +3389,22 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Sets the specified configuration status message.
+     *
+     * @param statusMessage the {@link ConfigStatusMessage} to set.
+     */
     protected void setConfigParameterMessage(ConfigStatusMessage statusMessage) {
         synchronized (configStatusMessages) {
             configStatusMessages.put(statusMessage.parameterName, statusMessage);
         }
     }
 
+    /**
+     * Clears the configuration status messages for the specified parameters.
+     *
+     * @param parameterNames the parameters whose configuration status messages to clear.
+     */
     protected void clearConfigParameterMessages(String... parameterNames) {
         synchronized (configStatusMessages) {
             for (String parameterName : parameterNames) {
@@ -2884,6 +3413,9 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Clears all configuration status messages.
+     */
     protected void clearAllConfigParameterMessages() {
         synchronized (configStatusMessages) {
             configStatusMessages.clear();
@@ -2902,6 +3434,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * Compares the values of the specified configuration parameters with the specified configuration,
+     * and returns the ID of the parameters that has changed.
+     *
+     * @param configuration the current {@link Configuration}.
+     * @param configurationParameters the configuration parameters whose values to compare.
+     * @return A {@link Set} with the IDs of the parameters whose values differ.
+     */
     protected Set<String> getModifiedParameters(
         Configuration configuration,
         Map<String, Object> configurationParameters
@@ -2933,18 +3473,42 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         this.configStatusCallback = configStatusCallback;
     }
 
+    /**
+     * Creates a new initializer task.
+     *
+     * @return The new initializer task.
+     */
     protected Runnable createInitializeTask() {
         return new Initializer();
     }
 
+    /**
+     * Creates a new frequent polling task.
+     *
+     * @return The new frequent polling task.
+     */
     protected abstract Runnable createFrequentTask();
 
+    /**
+     * Creates a new infrequent polling task.
+     *
+     * @return The new infrequent polling task.
+     */
     protected abstract Runnable createInfrequentTask();
 
+    /**
+     * Creates a new offline polling task.
+     *
+     * @param addresses the array of {@link InetAddress}es to ping.
+     * @return The new offline polling task.
+     */
     protected Runnable createOfflineTask(InetAddress[] addresses) {
         return new PingOffline(addresses);
     }
 
+    /**
+     * The default initializer task implementation.
+     */
     protected class Initializer implements Runnable {
 
         @Override
@@ -2957,10 +3521,18 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
     }
 
+    /**
+     * The default offline polling task.
+     */
     protected class PingOffline implements Runnable {
 
         private final InetAddress[] addresses;
 
+        /**
+         * Creates a new instance with that will ping the specified addresses.
+         *
+         * @param addresses the array of {@link InetAddress}es.
+         */
         public PingOffline(InetAddress[] addresses) {
             this.addresses = addresses;
         }
