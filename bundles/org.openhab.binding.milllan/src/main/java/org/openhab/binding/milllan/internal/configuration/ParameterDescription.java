@@ -27,10 +27,14 @@ import org.osgi.framework.Bundle;
 
 
 /**
+ * This enum holds all the parameter descriptions for the "dynamic parameters" of this binding.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
-public enum ParameterDescription { // TODO: (Nad) JavaDocs
+public enum ParameterDescription {
+
+    /** The time zone offset configuration parameter */
     CONFIG_PARAM_TIMEZONE_OFFSET(
         MillBindingConstants.CONFIG_PARAM_TIMEZONE_OFFSET,
         "thing-general.config.milllan.timezone-offset.label",
@@ -38,6 +42,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.timezone-offset.description",
         "The time zone offset from UTC in minutes."
     ),
+
+    /** The proportional gain factor configuration parameter */
     CONFIG_PARAM_PID_KP(
         MillBindingConstants.CONFIG_PARAM_PID_KP,
         "",
@@ -45,6 +51,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.pid-kp.description",
         "The PID controller's proportional gain factor K<sub>p</sub>."
     ),
+
+    /** The integral gain factor configuration parameter */
     CONFIG_PARAM_PID_KI(
         MillBindingConstants.CONFIG_PARAM_PID_KI,
         "",
@@ -52,6 +60,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.pid-ki.description",
         "The PID controller's integral gain factor K<sub>i</sub>."
     ),
+
+    /** The derivative gain factor configuration parameter */
     CONFIG_PARAM_PID_KD(
         MillBindingConstants.CONFIG_PARAM_PID_KD,
         "",
@@ -59,6 +69,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.pid-kd.description",
         "The PID controller's derivative gain factor K<sub>d</sub>."
     ),
+
+    /** The derivative filter time coefficient configuration parameter */
     CONFIG_PARAM_PID_KD_FILTER_N(
         MillBindingConstants.CONFIG_PARAM_PID_KD_FILTER_N,
         "thing-general.config.milllan.pid-kd-filter.label",
@@ -66,6 +78,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.pid-kd-filter.description",
         "The PID controller's derivative (K<sub>d</sub>) filter time coefficient."
     ),
+
+    /** The wind-up limit for the integral part from 0 to 100 configuration parameter */
     CONFIG_PARAM_PID_WINDUP_LIMIT_PCT(
         MillBindingConstants.CONFIG_PARAM_PID_WINDUP_LIMIT_PCT,
         "thing-general.config.milllan.pid-kd-wind-up.label",
@@ -73,6 +87,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.pid-kd-wind-up.description",
         "The PID controller's wind-up limit for integral part (K<sub>i</sub>) in percent (0 to 100)."
     ),
+
+    /** The cloud communication configuration parameter */
     CONFIG_PARAM_CLOUD_COMMUNICATION(
         MillBindingConstants.CONFIG_PARAM_CLOUD_COMMUNICATION,
         "thing-general.config.milllan.cloud-communication.label",
@@ -80,6 +96,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.cloud-communication.description",
         "Whether cloud communication is enabled in the device. Changing this will reboot the device."
     ),
+
+    /** The hysteresis upper limit configuration parameter */
     CONFIG_PARAM_HYSTERESIS_UPPER(
         MillBindingConstants.CONFIG_PARAM_HYSTERESIS_UPPER,
         "thing-general.config.milllan.hysteresis-upper.label",
@@ -87,6 +105,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.hysteresis-upper.description",
         "The upper limit: Set temperature + upper limit = stop heating."
     ),
+
+    /** The hysteresis lower limit configuration parameter */
     CONFIG_PARAM_HYSTERESIS_LOWER(
         MillBindingConstants.CONFIG_PARAM_HYSTERESIS_LOWER,
         "thing-general.config.milllan.hysteresis-lower.label",
@@ -94,6 +114,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.hysteresis-lower.description",
         "The lower limit: Set temperature - lower limit = start heating."
     ),
+
+    /** The commercial lock minimum temperature configuration parameter */
     CONFIG_PARAM_COMMERCIAL_LOCK_MIN(
         MillBindingConstants.CONFIG_PARAM_COMMERCIAL_LOCK_MIN,
         "thing-general.config.milllan.commercial-lock-min.label",
@@ -101,6 +123,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.commercial-lock-min.description",
         "The minimum temperature that can be set while the commercial lock is active."
     ),
+
+    /** The commercial lock maximum temperature configuration parameter */
     CONFIG_PARAM_COMMERCIAL_LOCK_MAX(
         MillBindingConstants.CONFIG_PARAM_COMMERCIAL_LOCK_MAX,
         "thing-general.config.milllan.commercial-lock-max.label",
@@ -108,6 +132,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.commercial-lock-max.description",
         "The maximum temperature that can be set while the commercial lock is active."
     ),
+
+    /** The open window drop temperature threshold configuration parameter */
     CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR(
         MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR,
         "thing-general.config.milllan.open-window-drop-temp-thr.label",
@@ -115,6 +141,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.open-window-drop-temp-thr.description",
         "The temperature drop required to trigger (activate) the open window function."
     ),
+
+    /** The open window drop time range configuration parameter */
     CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE(
         MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE,
         "thing-general.config.milllan.open-window-drop-time-range.label",
@@ -122,6 +150,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.open-window-drop-time-range.description",
         "The time range for which a drop in temperature will be evaluated."
     ),
+
+    /** The open window increase temperature threshold configuration parameter */
     CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR(
         MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR,
         "thing-general.config.milllan.open-window-inc-temp-thr.label",
@@ -129,6 +159,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.open-window-inc-temp-thr.description",
         "The temperature increase required to deactivate the open window function."
     ),
+
+    /** The open window increase time range configuration parameter */
     CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE(
         MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE,
         "thing-general.config.milllan.open-window-inc-time-range.label",
@@ -136,6 +168,8 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         "thing-general.config.milllan.open-window-inc-time-range.description",
         "The time range for which an increase in temperature will be evaluated."
     ),
+
+    /** The open window maximum time configuration parameter */
     CONFIG_PARAM_OPEN_WINDOW_MAX_TIME(
         MillBindingConstants.CONFIG_PARAM_OPEN_WINDOW_MAX_TIME,
         "thing-general.config.milllan.open-window-max-time.label",
@@ -165,6 +199,16 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         this.defaultDescr = defaultDescr;
     }
 
+    /**
+     * Builds and returns a localized {@link ConfigDescriptionParameter} for this {@link ParameterDescription}.
+     * If either of the parameters are {@code null}, the result won't be localized.
+     *
+     * @param bundle the {@link Bundle} to use when retrieving localized strings.
+     * @param provider the {@link TranslationProvider} to use when retrieving localized strings.
+     * @param locale the {@link Locale} to localize for.
+     * @return The resulting {@link ConfigDescriptionParameter}.
+     * @throws IllegalStateException If there's a problem with this enum.
+     */
     public ConfigDescriptionParameter getConfigDescriptionParameter(
         @Nullable Bundle bundle,
         @Nullable TranslationProvider provider,
@@ -291,6 +335,9 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         return builder.build();
     }
 
+    /**
+     * @return The parameter name/ID.
+     */
     public String getName() {
         return name;
     }
@@ -300,6 +347,12 @@ public enum ParameterDescription { // TODO: (Nad) JavaDocs
         return name;
     }
 
+    /**
+     * Looks for a {@link ParameterDescription} that matches the specified name/ID.
+     *
+     * @param name the parameter name/ID.
+     * @return The matching {@link ParameterDescription} or {@code null} if no match was found.
+     */
     @Nullable
     public static ParameterDescription typeOf(@Nullable String name) {
         if (name == null) {

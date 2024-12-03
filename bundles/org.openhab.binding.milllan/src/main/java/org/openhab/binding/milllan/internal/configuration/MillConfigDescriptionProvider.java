@@ -35,6 +35,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
@@ -46,11 +47,14 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * A {@link ConfigDescriptionProvider} implementation that provides configuration descriptions
+ * for dynamic configuration parameters.
+ *
  * @author Nadahar - Initial contribution
  */
 @NonNullByDefault
 @Component(service = {ConfigDescriptionProvider.class, MillConfigDescriptionProvider.class})
-public class MillConfigDescriptionProvider implements ConfigDescriptionProvider { // TODO: (Nad) JavaDocs
+public class MillConfigDescriptionProvider implements ConfigDescriptionProvider {
 
     private final Logger logger = LoggerFactory.getLogger(MillConfigDescriptionProvider.class);
 
@@ -63,12 +67,20 @@ public class MillConfigDescriptionProvider implements ConfigDescriptionProvider 
 
     private final LocaleProvider localeProvider;
 
-    // Doc must be synchronized on this
+    /** The {@link Map} of enabled parameter descriptions, <b>must be synchronized</b> on {@code this}! */
     protected final Map<URI, Map<String, ParameterDescription>> enabledParameters = new HashMap<>();
 
-    // Doc must be synchronized on this
-    protected final Map<URI, Map<Locale, Map<String, ConfigDescriptionParameter>>> localizedParameters = new HashMap<>();
+    /** The {@link Map} of cached, localized parameter descriptions, <b>must be synchronized</b> on {@code this}! */
+    protected final Map<URI, Map<Locale, Map<String, ConfigDescriptionParameter>>> localizedParameters =
+        new HashMap<>();
 
+    /**
+     * Creates a new instance using the specified parameters.
+     *
+     * @param componentContext the {@link ComponentContext} to use.
+     * @param i18nProvider the {@link TranslationProvider} to use.
+     * @param localeProvider the {@link LocaleProvider} to use.
+     */
     @Activate
     public MillConfigDescriptionProvider(
         ComponentContext componentContext,
@@ -134,6 +146,12 @@ public class MillConfigDescriptionProvider implements ConfigDescriptionProvider 
         }
     }
 
+    /**
+     * Enables the specified configuration parameter descriptions.
+     *
+     * @param uid the {@link ThingUID} for which to enable configuration parameter descriptions.
+     * @param configParameterNames the names/IDs of the configuration parameters whose descriptions to enable.
+     */
     public void enableDescriptions(@Nullable ThingUID uid, @Nullable String... configParameterNames) {
         if (uid == null) {
             return;
@@ -141,6 +159,12 @@ public class MillConfigDescriptionProvider implements ConfigDescriptionProvider 
         enableDescriptions(URI.create(uriPrefix + uid.getAsString()), configParameterNames);
     }
 
+    /**
+     * Enables the specified configuration parameter descriptions.
+     *
+     * @param uri the URI identifying the {@link Thing} for which to enable configuration parameter descriptions.
+     * @param configParameterNames the names/IDs of the configuration parameters whose descriptions to enable.
+     */
     @SuppressWarnings("null")
     public void enableDescriptions(@Nullable URI uri, @Nullable String... configParameterNames) {
         if (uri == null || configParameterNames == null || configParameterNames.length == 0) {
@@ -178,6 +202,12 @@ public class MillConfigDescriptionProvider implements ConfigDescriptionProvider 
         }
     }
 
+    /**
+     * Disables the specified configuration parameter descriptions.
+     *
+     * @param uid the {@link ThingUID} for which to disable configuration parameter descriptions.
+     * @param configParameterNames the names/IDs of the configuration parameters whose descriptions to disable.
+     */
     public void disableDescriptions(@Nullable ThingUID uid, @Nullable String... configParameterNames) {
         if (uid == null) {
             return;
@@ -185,6 +215,12 @@ public class MillConfigDescriptionProvider implements ConfigDescriptionProvider 
         disableDescriptions(URI.create(uriPrefix + uid.getAsString()), configParameterNames);
     }
 
+    /**
+     * Disables the specified configuration parameter descriptions.
+     *
+     * @param uri the {@link URI} identifying the {@link Thing} for which to disable parameter descriptions.
+     * @param configParameterNames the names/IDs of the configuration parameters whose descriptions to disable.
+     */
     @SuppressWarnings("null")
     public void disableDescriptions(@Nullable URI uri, @Nullable String... configParameterNames) {
         if (uri == null || configParameterNames == null || configParameterNames.length == 0) {
@@ -213,7 +249,10 @@ public class MillConfigDescriptionProvider implements ConfigDescriptionProvider 
                     enabledParameters.remove(uri);
                 }
                 if (localeMap != null) {
-                    for (Iterator<Map<String, ConfigDescriptionParameter>> iterator = localeMap.values().iterator(); iterator.hasNext();) {
+                    for (
+                        Iterator<Map<String, ConfigDescriptionParameter>> iterator = localeMap.values().iterator();
+                        iterator.hasNext();
+                    ) {
                         thingMap = iterator.next();
                         if (thingMap.isEmpty()) {
                             iterator.remove();
@@ -227,6 +266,11 @@ public class MillConfigDescriptionProvider implements ConfigDescriptionProvider 
         }
     }
 
+    /**
+     * Disables all configuration parameter descriptiosn for the specified {@link ThingUID}.
+     *
+     * @param uid the {@link ThingUID} for which to disable configuration parameter descriptions.
+     */
     public void disableDescriptions(@Nullable ThingUID uid) {
         if (uid == null) {
             return;
@@ -234,6 +278,11 @@ public class MillConfigDescriptionProvider implements ConfigDescriptionProvider 
         disableDescriptions(URI.create(uriPrefix + uid.getAsString()));
     }
 
+    /**
+     * Disables all configuration parameter descriptiosn for the specified {@link ThingUID}.
+     *
+     * @param uri the {@link URI} identifying the {@link Thing} for which to disable parameter descriptions.
+     */
     public void disableDescriptions(@Nullable URI uri) {
         if (uri == null) {
             return;
@@ -244,6 +293,13 @@ public class MillConfigDescriptionProvider implements ConfigDescriptionProvider 
         }
     }
 
+    /**
+     * Returns the specified number of parts from the specified {@link URI}.
+     *
+     * @param uri the {@link URI} to split into parts.
+     * @param parts the number of parts to return from the beginning of the {@link URI}.
+     * @return The resulting {@link String}.
+     */
     protected String getURIParts(URI uri, int parts) {
         if (parts == 0) {
             return "";
