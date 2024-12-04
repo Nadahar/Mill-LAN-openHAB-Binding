@@ -27,6 +27,7 @@ import org.openhab.binding.milllan.internal.exception.MillException;
 import org.openhab.binding.milllan.internal.exception.MillHTTPResponseException;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.annotation.ActionOutput;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.slf4j.Logger;
@@ -410,6 +411,57 @@ public class MillBaseActions implements ThingActions {
                 e.getMessage()
             );
             result.put("result", "Failed to execute setOpenWindowParameters Action: " + e.getMessage());
+            return result;
+        }
+    }
+
+    /**
+     * Attempts to set a new {@code API key} in the device and returns the result of the {@link Action}.
+     * <p>
+     * <b>WARNING: Setting an API key will switch the device to {@code HTTPS}, and the key cannot be removed
+     * (only changed). To restore {@code HTTP} and/or remove the API key, a factory reset is required</b>.
+     * <p>
+     * <b>Note:</b> This method will take some time, since a timeout must elapse before it returns.
+     *
+     * @param apiKey the new API key.
+     * @param confirm the confirmation code that must match the last section of the {@link ThingUID}.
+     * @return The resulting {@link ActionOutput} {@link Map}.
+     */
+    public Map<String, Object> setAPIKey(String apiKey, String confirm) {
+        Map<String, Object> result = new HashMap<>();
+        AbstractMillThingHandler handlerInst = thingHandler;
+        if (handlerInst == null) {
+            logger.warn("Call to setAPIKey Action failed because the thingHandler was null");
+            result.put("result", "Failed: The Thing handler is null");
+            return result;
+        }
+        if (MillUtil.isBlank(apiKey)) {
+            logger.warn("Call to setAPIKey Action failed because the API key was blank");
+            result.put("result", "Failed: The API key is blank");
+            return result;
+        }
+        String id = handlerInst.getThing().getUID().getId();
+        if (!id.equals(confirm)) {
+            logger.warn(
+                "Call to setAPIKey Action failed because the confirmation " +
+                "\"{}\" didn't match the required value \"{}\"",
+                confirm,
+                id
+            );
+            result.put("result", "Failed: Value \"" + confirm + "\" doesn't match \"" + id + '"');
+            return result;
+        }
+        try {
+            handlerInst.setAPIKey(apiKey);
+            result.put("result", "The device is rebooting.");
+            return result;
+        } catch (MillException e) {
+            logger.warn(
+                "Failed to execute setAPIKey Action on Thing {}: {}",
+                handlerInst.getThing().getUID(),
+                e.getMessage()
+            );
+            result.put("result", "Failed to execute setAPIKey Action: " + e.getMessage());
             return result;
         }
     }

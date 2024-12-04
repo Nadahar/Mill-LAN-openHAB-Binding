@@ -21,6 +21,7 @@ import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
 import org.openhab.core.automation.annotation.ActionOutputs;
 import org.openhab.core.automation.annotation.RuleAction;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.thing.binding.ThingActionsScope;
 import org.osgi.service.component.annotations.Component;
@@ -195,6 +196,29 @@ public class MillPanelActions extends MillBaseActions {
         return super.setOpenWindowParameters(dropTempThr, dropTimeRange, incTempThr, incTimeRange, maxTime);
     }
 
+    @Override
+    @ActionOutputs(value = {@ActionOutput(name = "result", type = "java.lang.String")})
+    @RuleAction(
+        label = "@text/actions.milllan.set-api-key.label",
+        description = "@text/actions.milllan.set-api-key.description"
+    )
+    public @ActionOutput(name = "result", type = "java.lang.String") Map<String, Object> setAPIKey(
+        @ActionInput(
+            name = "apiKey",
+            label = "@text/actions-input.milllan.set-api-key.key.label",
+            description = "@text/actions-input.milllan.set-api-key.key.description",
+            required = true
+        ) String apiKey,
+        @ActionInput(
+            name = "confirm",
+            label = "@text/actions-input.milllan.set-api-key.confirm.label",
+            description = "@text/actions-input.milllan.set-api-key.confirm.description",
+            required = true
+        ) String confirm
+    ) {
+        return super.setAPIKey(apiKey, confirm);
+    }
+
     // Methods for Rules DSL rule support
 
     /**
@@ -296,5 +320,21 @@ public class MillPanelActions extends MillBaseActions {
             incTimeRange,
             maxTime
         );
+    }
+
+    /**
+     * Attempts to set a new {@code API key} in the device.
+     * <p>
+     * <b>WARNING: Setting an API key will switch the device to {@code HTTPS}, and the key cannot be removed
+     * (only changed). To restore {@code HTTP} and/or remove the API key, a factory reset is required</b>.
+     * <p>
+     * <b>Note:</b> This method will take some time, since a timeout must elapse before it returns.
+     *
+     * @param actions the {@link ThingActions} instance.
+     * @param apiKey the new API key.
+     * @param confirm the confirmation code that must match the last section of the {@link ThingUID}.
+     */
+    public static void setAPIKey(ThingActions actions, String apiKey, String confirm) {
+        ((MillPanelActions) actions).setAPIKey(apiKey, confirm);
     }
 }
