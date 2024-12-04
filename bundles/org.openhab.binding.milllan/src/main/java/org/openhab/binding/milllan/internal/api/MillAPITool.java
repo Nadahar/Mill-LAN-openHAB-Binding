@@ -33,8 +33,10 @@ import org.openhab.binding.milllan.internal.MillUtil;
 import org.openhab.binding.milllan.internal.api.response.ChildLockResponse;
 import org.openhab.binding.milllan.internal.api.response.CommercialLockResponse;
 import org.openhab.binding.milllan.internal.api.response.ControlStatusResponse;
+import org.openhab.binding.milllan.internal.api.response.ControllerTypeResponse;
 import org.openhab.binding.milllan.internal.api.response.DisplayUnitResponse;
 import org.openhab.binding.milllan.internal.api.response.GenericResponse;
+import org.openhab.binding.milllan.internal.api.response.LimitedHeatingPowerResponse;
 import org.openhab.binding.milllan.internal.api.response.OperationModeResponse;
 import org.openhab.binding.milllan.internal.api.response.Response;
 import org.openhab.binding.milllan.internal.api.response.SetTemperatureResponse;
@@ -390,6 +392,98 @@ public class MillAPITool {
             null,
             HttpMethod.POST,
             "/set-temperature",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/limited-heating-power} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link LimitedHeatingPowerResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public LimitedHeatingPowerResponse getLimitedHeatingPower(String hostname) throws MillException {
+        return request(
+            LimitedHeatingPowerResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/limited-heating-power",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/limited-heating-power} to the device's REST API and returns the response.
+     * <p>
+     * <b>Note:</b> Has no effect on the actual output power of tested devices
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param value the maximum heating power in percentage.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setLimitedHeatingPower(String hostname, Integer value) throws MillException {
+        JsonObject object = new JsonObject();
+        object.addProperty("limited_heating_power", value);
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/limited-heating-power",
+            gson.toJson(object),
+            1L,
+            TimeUnit.SECONDS,
+            false
+        );
+    }
+
+    /**
+     * Sends {@code GET/controller-type} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @return The resulting {@link ControllerTypeResponse}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public ControllerTypeResponse getControllerType(String hostname) throws MillException {
+        return request(
+            ControllerTypeResponse.class,
+            hostname,
+            null,
+            HttpMethod.GET,
+            "/controller-type",
+            null,
+            1L,
+            TimeUnit.SECONDS,
+            true
+        );
+    }
+
+    /**
+     * Sends {@code POST/controller-type} to the device's REST API and returns the response.
+     *
+     * @param hostname the hostname or IP address to contact.
+     * @param controllerType the {@link ControllerType}.
+     * @return The resulting {@link Response}.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public Response setControllerType(String hostname, ControllerType controllerType) throws MillException {
+        JsonObject object = new JsonObject();
+        object.add("regulator_type", gson.toJsonTree(controllerType));
+        return request(
+            GenericResponse.class,
+            hostname,
+            null,
+            HttpMethod.POST,
+            "/controller-type",
             gson.toJson(object),
             1L,
             TimeUnit.SECONDS,

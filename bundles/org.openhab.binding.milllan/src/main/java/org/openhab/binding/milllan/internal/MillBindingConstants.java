@@ -87,6 +87,9 @@ public class MillBindingConstants {
     /** The Child Lock {@link Channel} */
     public static final String CHILD_LOCK = "child-lock";
 
+    /** The Display Unit {@link Channel} */
+    public static final String DISPLAY_UNIT = "display-unit";
+
     /** The Normal Set Temperature {@link Channel} */
     public static final String NORMAL_SET_TEMPERATURE = "normal-set-temperature";
 
@@ -98,6 +101,12 @@ public class MillBindingConstants {
 
     /** The Away Set Temperature {@link Channel} */
     public static final String AWAY_SET_TEMPERATURE = "away-set-temperature";
+
+    /** The Limited Heating Power {@link Channel} */
+    public static final String LIMITED_HEATING_POWER = "limited-heating-power";
+
+    /** The Controller Type {@link Channel} */
+    public static final String CONTROLLER_TYPE = "controller-type";
 
     // Property constants
 

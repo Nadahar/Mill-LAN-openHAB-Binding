@@ -212,4 +212,30 @@
 		<state min="0" max="99" step="0.5" pattern="%.1f %unit%"/>
 		<autoUpdatePolicy>veto</autoUpdatePolicy>
 	</channel-type>
+	<channel-type id="limited-heating-power">
+		<item-type>Dimmer</item-type>
+		<label>Max Heating Power</label>
+		<description>The maximum heating power limit in percent (10-100%). Doesn't seem to work on all devices.</description>
+		<category>Heating</category>
+		<tags>
+			<tag>Control</tag>
+		</tags>
+		<state min="10" max="100" pattern="%.0f %%"/>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="controller-type">
+		<item-type>String</item-type>
+		<label>Controller Type</label>
+		<description>The regulator controller type.</description>
+		<tags>
+			<tag>Control</tag>
+		</tags>
+		<state>
+			<options>
+				<option value="PID">PID</option>
+				<option value="SLOW_PID">Slow PID</option>
+			</options>
+		</state>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
 </thing:thing-descriptions>
