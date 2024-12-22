@@ -24,12 +24,11 @@ There is a special `Thing-Type` called "All Functions" in this binding that expo
 If you contact Mill support, they will tell you that to configure it for your Wi-Fi network you must install their mobile application and use that, in combination with Bluetooth, to configure the device. 
 This also requires you to register with Mill.
 
-Luckily for those of us that don't want our every move to be registered, this isn't true.
-What you need to do to configure the device without registration, is to set it in "Access Point mode".
-The exact procedure might vary between models, but for the tested panel heaters, all that's needed is to enter the "settings menu" on the device and select the `AP` option.
-Once that's done, you can use any mobile device or computer with Wi-Fi and a web browser to configure the Mill device.
+Luckily for those of us that don't want our every move to be registered, this isn't true if your device has "Access Point mode" and you can figure out how to enable this mode. The documentation is sparse at best, and the exact procedure might vary between models. For some panel heaters, all that's needed is to enter the "settings menu" on the device and select the `AP` option.
+
+Once the device is in "Access Point mode", you can use any mobile device or computer with Wi-Fi and a web browser to configure the Mill device.
 You will need to search for Wi-Fi networks, and you should find a network called Mill something that is unsecured/open.
-Connect to that network, and your web browser will either open a new page automatically, or you might need to enter the address in the browser manually by typing `http://192.168.4.1`.
+Connect to that network, and your web browser will either open a new page automatically, or you must enter the address in the browser manually by typing `http://192.168.4.1`.
 
 This should bring you to the device configuration page, where you can enter the SSID and password for your local Wi-Fi network. Make sure that the local API is enabled as well, and press `Connect`.
 
@@ -112,7 +111,7 @@ _Please note that if you set an API key and forget or lose it, there is no other
 | apiKey        | text    | API key to access the device         | N/A     | no      | no       |
 
 There are other configuration parameters, but they are created dynamically after the binding has connected to a device.
-These aren't Thing configurations, they configure the device itself, and the settings stored in the device.
+These aren't Thing configurations, they configure the device itself, and the settings are stored in the device.
 
 ## Channels
 
@@ -124,7 +123,7 @@ These aren't Thing configurations, they configure the device itself, and the set
 | control-signal | Number:Dimensionless | R | The current control signal of the PID regulator (0-100%) |
 | lock-status | String | R | The current lock status |
 | open-window-status | String | R | The "open window" status |
-| set-temperature | Number:Temperature | R | The current target temperature |
+| set-temperature | Number:Temperature | R | The current target temperature the device is working towards, cannot be set directly |
 | connected-to-cloud | Switch | R | Whether the device is currently connected to the cloud |
 | operation-mode | String | RW | The current mode of operation |
 | temperature-calibration-offset | Number:Temperature | RW | The calibration offset value |
