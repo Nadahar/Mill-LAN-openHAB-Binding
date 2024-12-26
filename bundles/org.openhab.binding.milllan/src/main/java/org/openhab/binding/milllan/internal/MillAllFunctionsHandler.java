@@ -75,10 +75,10 @@ public class MillAllFunctionsHandler extends AbstractMillThingHandler {
         public void run() {
             try {
                 pollControlStatus();
-                pollSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
-                pollSetTemperature(COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
-                pollSetTemperature(SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
-                pollSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
+                pollSetTemperature(CHANNEL_NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
+                pollSetTemperature(CHANNEL_COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
+                pollSetTemperature(CHANNEL_SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
+                pollSetTemperature(CHANNEL_AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
             } catch (MillException e) {
                 setOffline(e);
             }

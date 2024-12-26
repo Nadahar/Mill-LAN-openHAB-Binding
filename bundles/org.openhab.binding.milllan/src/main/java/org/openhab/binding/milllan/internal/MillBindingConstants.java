@@ -72,73 +72,73 @@ public class MillBindingConstants {
     // List of all Channel IDs
 
     /** The Ambient Temperature {@link Channel} */
-    public static final String AMBIENT_TEMPERATURE = "ambient-temperature";
+    public static final String CHANNEL_AMBIENT_TEMPERATURE = "ambient-temperature";
 
     /** The Raw Ambient Temperature {@link Channel} */
-    public static final String RAW_AMBIENT_TEMPERATURE = "raw-ambient-temperature";
+    public static final String CHANNEL_RAW_AMBIENT_TEMPERATURE = "raw-ambient-temperature";
 
     /** The Current Power {@link Channel} */
-    public static final String CURRENT_POWER = "current-power";
+    public static final String CHANNEL_CURRENT_POWER = "current-power";
 
     /** The Control Signal {@link Channel} */
-    public static final String CONTROL_SIGNAL = "control-signal";
+    public static final String CHANNEL_CONTROL_SIGNAL = "control-signal";
 
     /** The Lock Status {@link Channel} */
-    public static final String LOCK_STATUS = "lock-status";
+    public static final String CHANNEL_LOCK_STATUS = "lock-status";
 
     /** The Open Window Status {@link Channel} */
-    public static final String OPEN_WINDOW_STATUS = "open-window-status";
+    public static final String CHANNEL_OPEN_WINDOW_STATUS = "open-window-status";
 
     /** The Set Temperature {@link Channel} */
-    public static final String SET_TEMPERATURE = "set-temperature";
+    public static final String CHANNEL_SET_TEMPERATURE = "set-temperature";
 
     /** The Connected to Cloud {@link Channel} */
-    public static final String CONNECTED_CLOUD = "connected-to-cloud";
+    public static final String CHANNEL_CONNECTED_CLOUD = "connected-to-cloud";
 
     /** The Operation Mode {@link Channel} */
-    public static final String OPERATION_MODE = "operation-mode";
+    public static final String CHANNEL_OPERATION_MODE = "operation-mode";
 
     /** The Temperature Calibration Offset {@link Channel} */
-    public static final String TEMPERATURE_CALIBRATION_OFFSET = "temperature-calibration-offset";
+    public static final String CHANNEL_TEMPERATURE_CALIBRATION_OFFSET = "temperature-calibration-offset";
 
     /** The Commercial Lock {@link Channel} */
-    public static final String COMMERCIAL_LOCK = "commercial-lock";
+    public static final String CHANNEL_COMMERCIAL_LOCK = "commercial-lock";
 
     /** The Child Lock {@link Channel} */
-    public static final String CHILD_LOCK = "child-lock";
+    public static final String CHANNEL_CHILD_LOCK = "child-lock";
 
     /** The Display Unit {@link Channel} */
-    public static final String DISPLAY_UNIT = "display-unit";
+    public static final String CHANNEL_DISPLAY_UNIT = "display-unit";
 
     /** The Normal Set Temperature {@link Channel} */
-    public static final String NORMAL_SET_TEMPERATURE = "normal-set-temperature";
+    public static final String CHANNEL_NORMAL_SET_TEMPERATURE = "normal-set-temperature";
 
     /** The Comfort Set Temperature {@link Channel} */
-    public static final String COMFORT_SET_TEMPERATURE = "comfort-set-temperature";
+    public static final String CHANNEL_COMFORT_SET_TEMPERATURE = "comfort-set-temperature";
 
     /** The Sleep Set Temperature {@link Channel} */
-    public static final String SLEEP_SET_TEMPERATURE = "sleep-set-temperature";
+    public static final String CHANNEL_SLEEP_SET_TEMPERATURE = "sleep-set-temperature";
 
     /** The Away Set Temperature {@link Channel} */
-    public static final String AWAY_SET_TEMPERATURE = "away-set-temperature";
+    public static final String CHANNEL_AWAY_SET_TEMPERATURE = "away-set-temperature";
 
     /** The Limited Heating Power {@link Channel} */
-    public static final String LIMITED_HEATING_POWER = "limited-heating-power";
+    public static final String CHANNEL_LIMITED_HEATING_POWER = "limited-heating-power";
 
     /** The Controller Type {@link Channel} */
-    public static final String CONTROLLER_TYPE = "controller-type";
+    public static final String CHANNEL_CONTROLLER_TYPE = "controller-type";
 
     /** The Predictive Heating Type {@link Channel} */
-    public static final String PREDICTIVE_HEATING_TYPE = "predictive-heating-type";
+    public static final String CHANNEL_PREDICTIVE_HEATING_TYPE = "predictive-heating-type";
 
     /** The Oil Heater Power {@link Channel} */
-    public static final String OIL_HEATER_POWER = "oil-heater-power";
+    public static final String CHANNEL_OIL_HEATER_POWER = "oil-heater-power";
 
     /** The Open Window Active {@link Channel} */
-    public static final String OPEN_WINDOW_ACTIVE = "open-window-active";
+    public static final String CHANNEL_OPEN_WINDOW_ACTIVE = "open-window-active";
 
     /** The Open Window Enabled {@link Channel} */
-    public static final String OPEN_WINDOW_ENABLED = "open-window-enabled";
+    public static final String CHANNEL_OPEN_WINDOW_ENABLED = "open-window-enabled";
 
     // Property constants
 
