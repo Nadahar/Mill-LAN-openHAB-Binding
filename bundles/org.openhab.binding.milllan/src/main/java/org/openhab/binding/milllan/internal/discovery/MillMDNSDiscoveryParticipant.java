@@ -125,26 +125,30 @@ public class MillMDNSDiscoveryParticipant implements MDNSDiscoveryParticipant {
         }
 
         /*
-         * There is no documentation regarding what properties devices will broadcast, so this
+         * There is no documentation regarding what properties the devices will broadcast, so this
          * logic must be adapted as devices are tested. So far, these properties have been seen:
          *
-         * id = "mill_modular_<MAC ADDRESS WITHOUT SEPARATORS> - name = "Panel Heater Modular"
+         * id = "mill_modular_<MAC ADDRESS WITHOUT SEPARATORS>", name = "Panel Heater Modular"
+         * id = "mill_panel_heater_<MAC ADDRESS WITHOUT SEPARATORS>", name = "panel heater"
          */
         String id = service.getPropertyString(MDNS_PROPERTY_ID);
         String name = service.getPropertyString(MDNS_PROPERTY_NAME);
         if (name != null) {
             name = name.toLowerCase(Locale.ROOT);
         }
-        if (id != null && id.startsWith("mill_modular_") && name != null && name.contains("panel heater")) {
-            return new ThingUID(THING_TYPE_PANEL_HEATER, id.substring(13));
-        } else {
-            logger.warn(
-                "Mill LAN discovered an unrecognized Mill device. The details should be reported to the binding " +
-                "developer so that it can be recognized in the future. id=\"{}\", name=\"{}\"",
-                id,
-                name
-            );
+        if (id != null && id.startsWith("mill_") && name != null && name.contains("panel heater")) {
+            String[] parts = id.split("_");
+            if (parts.length > 0 && parts[parts.length - 1].length() == 12) {
+                return new ThingUID(THING_TYPE_PANEL_HEATER, parts[parts.length - 1]);
+            }
         }
+        logger.warn(
+            "Mill LAN discovered an unrecognized Mill device. The details should be reported to the binding " +
+            "developer so that it can be recognized in the future. id=\"{}\", name=\"{}\", ip addresses=\"{}\"",
+            id,
+            name,
+            service.getInetAddresses()
+        );
         return null;
     }
 
