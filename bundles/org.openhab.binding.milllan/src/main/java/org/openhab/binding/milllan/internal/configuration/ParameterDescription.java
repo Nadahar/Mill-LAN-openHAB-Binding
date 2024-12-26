@@ -271,13 +271,13 @@ public enum ParameterDescription {
             case CONFIG_PARAM_HYSTERESIS_UPPER:
                 builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
                     .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(5L))
-                    .withStepSize(BigDecimal.valueOf(0.25)).withGroupName("hysteresis")
+                    .withStepSize(BigDecimal.valueOf(0.05)).withGroupName("hysteresis")
                     .withAdvanced(true).withDefault("1");
                 break;
             case CONFIG_PARAM_HYSTERESIS_LOWER:
                 builder = ConfigDescriptionParameterBuilder.create(name, Type.DECIMAL)
                     .withMinimum(BigDecimal.valueOf(0L)).withMaximum(BigDecimal.valueOf(5L))
-                    .withStepSize(BigDecimal.valueOf(0.25)).withGroupName("hysteresis")
+                    .withStepSize(BigDecimal.valueOf(0.05)).withGroupName("hysteresis")
                     .withAdvanced(true).withDefault("0.5");
                 break;
             case CONFIG_PARAM_COMMERCIAL_LOCK_MIN:

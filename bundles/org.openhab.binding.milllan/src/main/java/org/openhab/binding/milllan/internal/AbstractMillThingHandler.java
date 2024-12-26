@@ -15,7 +15,7 @@ package org.openhab.binding.milllan.internal;
 
 import static org.openhab.binding.milllan.internal.MillBindingConstants.*;
 import static org.openhab.binding.milllan.internal.MillUtil.isBlank;
-
+import static org.openhab.binding.milllan.internal.MillUtil.sameValue;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.ConnectException;
@@ -172,26 +172,26 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     public void handleCommand(ChannelUID channelUID, Command command) {
         try {
             switch (channelUID.getId()) {
-                case AMBIENT_TEMPERATURE:
-                case RAW_AMBIENT_TEMPERATURE:
-                case CURRENT_POWER:
-                case CONTROL_SIGNAL:
-                case SET_TEMPERATURE:
-                case LOCK_STATUS:
-                case OPEN_WINDOW_STATUS:
-                case CONNECTED_CLOUD:
+                case CHANNEL_AMBIENT_TEMPERATURE:
+                case CHANNEL_RAW_AMBIENT_TEMPERATURE:
+                case CHANNEL_CURRENT_POWER:
+                case CHANNEL_CONTROL_SIGNAL:
+                case CHANNEL_SET_TEMPERATURE:
+                case CHANNEL_LOCK_STATUS:
+                case CHANNEL_OPEN_WINDOW_STATUS:
+                case CHANNEL_CONNECTED_CLOUD:
                     if (command instanceof RefreshType) {
                         pollControlStatus();
                     }
                     break;
-                case OPERATION_MODE:
+                case CHANNEL_OPERATION_MODE:
                     if (command instanceof RefreshType) {
                         pollOperationMode();
                     } else if (command instanceof StringType) {
                         setOperationMode(command.toString());
                     }
                     break;
-                case TEMPERATURE_CALIBRATION_OFFSET:
+                case CHANNEL_TEMPERATURE_CALIBRATION_OFFSET:
                     if (command instanceof RefreshType) {
                         pollTemperatureCalibrationOffset();
                     } else if (command instanceof QuantityType) {
@@ -208,30 +208,30 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                     }
                     break;
-                case COMMERCIAL_LOCK:
+                case CHANNEL_COMMERCIAL_LOCK:
                     if (command instanceof RefreshType) {
                         pollCommercialLock();
                     } else if (command instanceof OnOffType) {
                         setCommercialLock(command == OnOffType.ON);
                     }
                     break;
-                case CHILD_LOCK:
+                case CHANNEL_CHILD_LOCK:
                     if (command instanceof RefreshType) {
                         pollChildLock();
                     } else if (command instanceof OnOffType) {
                         setChildLock(command == OnOffType.ON);
                     }
                     break;
-                case DISPLAY_UNIT:
+                case CHANNEL_DISPLAY_UNIT:
                     if (command instanceof RefreshType) {
                         pollDisplayUnit();
                     } else if (command instanceof StringType) {
                         setDisplayUnit(command.toString());
                     }
                     break;
-                case NORMAL_SET_TEMPERATURE:
+                case CHANNEL_NORMAL_SET_TEMPERATURE:
                     if (command instanceof RefreshType) {
-                        pollSetTemperature(NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
+                        pollSetTemperature(CHANNEL_NORMAL_SET_TEMPERATURE, TemperatureType.NORMAL);
                     } else if (command instanceof QuantityType) {
                         @SuppressWarnings("unchecked")
                         QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
@@ -242,16 +242,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             );
                         } else {
                             setSetTemperature(
-                                NORMAL_SET_TEMPERATURE,
+                                CHANNEL_NORMAL_SET_TEMPERATURE,
                                 TemperatureType.NORMAL,
                                 celsiusValue.toBigDecimal()
                             );
                         }
                     }
                     break;
-                case COMFORT_SET_TEMPERATURE:
+                case CHANNEL_COMFORT_SET_TEMPERATURE:
                     if (command instanceof RefreshType) {
-                        pollSetTemperature(COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
+                        pollSetTemperature(CHANNEL_COMFORT_SET_TEMPERATURE, TemperatureType.COMFORT);
                     } else if (command instanceof QuantityType) {
                         @SuppressWarnings("unchecked")
                         QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
@@ -262,16 +262,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             );
                         } else {
                             setSetTemperature(
-                                COMFORT_SET_TEMPERATURE,
+                                CHANNEL_COMFORT_SET_TEMPERATURE,
                                 TemperatureType.COMFORT,
                                 celsiusValue.toBigDecimal()
                             );
                         }
                     }
                     break;
-                case SLEEP_SET_TEMPERATURE:
+                case CHANNEL_SLEEP_SET_TEMPERATURE:
                     if (command instanceof RefreshType) {
-                        pollSetTemperature(SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
+                        pollSetTemperature(CHANNEL_SLEEP_SET_TEMPERATURE, TemperatureType.SLEEP);
                     } else if (command instanceof QuantityType) {
                         @SuppressWarnings("unchecked")
                         QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
@@ -282,16 +282,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             );
                         } else {
                             setSetTemperature(
-                                SLEEP_SET_TEMPERATURE,
+                                CHANNEL_SLEEP_SET_TEMPERATURE,
                                 TemperatureType.SLEEP,
                                 celsiusValue.toBigDecimal()
                             );
                         }
                     }
                     break;
-                case AWAY_SET_TEMPERATURE:
+                case CHANNEL_AWAY_SET_TEMPERATURE:
                     if (command instanceof RefreshType) {
-                        pollSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
+                        pollSetTemperature(CHANNEL_AWAY_SET_TEMPERATURE, TemperatureType.AWAY);
                     } else if (command instanceof QuantityType) {
                         @SuppressWarnings("unchecked")
                         QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
@@ -301,11 +301,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 command
                             );
                         } else {
-                            setSetTemperature(AWAY_SET_TEMPERATURE, TemperatureType.AWAY, celsiusValue.toBigDecimal());
+                            setSetTemperature(
+                                CHANNEL_AWAY_SET_TEMPERATURE,
+                                TemperatureType.AWAY,
+                                celsiusValue.toBigDecimal()
+                            );
                         }
                     }
                     break;
-                case LIMITED_HEATING_POWER:
+                case CHANNEL_LIMITED_HEATING_POWER:
                     if (command instanceof RefreshType) {
                         pollLimitedHeatingPower();
                     } else if (command instanceof Number) {
@@ -317,21 +321,21 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                     }
                     break;
-                case CONTROLLER_TYPE:
+                case CHANNEL_CONTROLLER_TYPE:
                     if (command instanceof RefreshType) {
                         pollControllerType();
                     } else if (command instanceof StringType) {
                         setControllerType(command.toString());
                     }
                     break;
-                case PREDICTIVE_HEATING_TYPE:
+                case CHANNEL_PREDICTIVE_HEATING_TYPE:
                     if (command instanceof RefreshType) {
                         pollPredictiveHeatingType();
                     } else if (command instanceof StringType) {
                         setPredictiveHeatingType(command.toString());
                     }
                     break;
-                case OIL_HEATER_POWER:
+                case CHANNEL_OIL_HEATER_POWER:
                     if (command instanceof RefreshType) {
                         pollOilHeaterPower();
                     } else if (command instanceof Number) {
@@ -343,12 +347,12 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         }
                     }
                     break;
-                case OPEN_WINDOW_ACTIVE:
+                case CHANNEL_OPEN_WINDOW_ACTIVE:
                     if (command instanceof RefreshType) {
                         pollOpenWindow();
                     }
                     break;
-                case OPEN_WINDOW_ENABLED:
+                case CHANNEL_OPEN_WINDOW_ENABLED:
                     if (command instanceof RefreshType) {
                         pollOpenWindow();
                     } else if (command instanceof OnOffType) {
@@ -467,43 +471,55 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         setOnline();
         Double d;
         if ((d = controlStatusResponse.getAmbientTemperature()) != null) {
-            updateState(AMBIENT_TEMPERATURE, new QuantityType<>(d, SIUnits.CELSIUS));
+            updateState(
+                CHANNEL_AMBIENT_TEMPERATURE,
+                new QuantityType<>(DecimalPrecision.CHANNEL_AMBIENT_TEMPERATURE.round(d), SIUnits.CELSIUS)
+            );
         }
         if ((d = controlStatusResponse.getCurrentPower()) != null) {
-            updateState(CURRENT_POWER, new QuantityType<>(d, Units.WATT));
+            updateState(CHANNEL_CURRENT_POWER, new QuantityType<>(d, Units.WATT));
         }
         if ((d = controlStatusResponse.getControlSignal()) != null) {
-            updateState(CONTROL_SIGNAL, new QuantityType<>(d, Units.PERCENT));
+            updateState(CHANNEL_CONTROL_SIGNAL, new QuantityType<>(d, Units.PERCENT));
         }
         if ((d = controlStatusResponse.getRawAmbientTemperature()) != null) {
-            updateState(RAW_AMBIENT_TEMPERATURE, new QuantityType<>(d, SIUnits.CELSIUS));
+            updateState(
+                CHANNEL_RAW_AMBIENT_TEMPERATURE,
+                new QuantityType<>(DecimalPrecision.CHANNEL_RAW_AMBIENT_TEMPERATURE.round(d), SIUnits.CELSIUS)
+            );
         }
         LockStatus ls;
         if ((ls = controlStatusResponse.getLockStatus()) != null) {
-            updateState(LOCK_STATUS, new StringType(ls.name()));
-            updateState(CHILD_LOCK, ls == LockStatus.CHILD_LOCK ? OnOffType.ON : OnOffType.OFF);
+            updateState(CHANNEL_LOCK_STATUS, new StringType(ls.name()));
+            updateState(CHANNEL_CHILD_LOCK, ls == LockStatus.CHILD_LOCK ? OnOffType.ON : OnOffType.OFF);
         }
         OpenWindowStatus ows;
         if ((ows = controlStatusResponse.getOpenWindowStatus()) != null) {
-            updateState(OPEN_WINDOW_STATUS, new StringType(ows.name()));
-            updateState(OPEN_WINDOW_ACTIVE, ows == OpenWindowStatus.ENABLED_ACTIVE ? OnOffType.ON : OnOffType.OFF);
+            updateState(CHANNEL_OPEN_WINDOW_STATUS, new StringType(ows.name()));
             updateState(
-                OPEN_WINDOW_ENABLED,
+                CHANNEL_OPEN_WINDOW_ACTIVE,
+                ows == OpenWindowStatus.ENABLED_ACTIVE ? OnOffType.ON : OnOffType.OFF
+            );
+            updateState(
+                CHANNEL_OPEN_WINDOW_ENABLED,
                 ows == OpenWindowStatus.ENABLED_ACTIVE || ows == OpenWindowStatus.ENABLED_INACTIVE ?
                     OnOffType.ON :
                     OnOffType.OFF
             );
         }
         if ((d = controlStatusResponse.getSetTemperature()) != null) {
-            updateState(SET_TEMPERATURE, new QuantityType<>(d, SIUnits.CELSIUS));
+            updateState(
+                CHANNEL_SET_TEMPERATURE,
+                new QuantityType<>(DecimalPrecision.CHANNEL_SET_TEMPERATURE.round(d), SIUnits.CELSIUS)
+            );
         }
         Boolean b;
         if ((b = controlStatusResponse.getConnectedToCloud()) != null) {
-            updateState(CONNECTED_CLOUD, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
+            updateState(CHANNEL_CONNECTED_CLOUD, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
         }
         OperationMode om;
         if ((om = controlStatusResponse.getOperatingMode()) != null) {
-            updateState(OPERATION_MODE, new StringType(om.name()));
+            updateState(CHANNEL_OPERATION_MODE, new StringType(om.name()));
         }
     }
 
@@ -527,7 +543,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         OperationMode om;
         if ((om = operationModeResponse.getMode()) != null) {
-            updateState(OPERATION_MODE, new StringType(om.name()));
+            updateState(CHANNEL_OPERATION_MODE, new StringType(om.name()));
         }
     }
 
@@ -579,7 +595,10 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         setOnline();
         Double d;
         if ((d = calibrationOffsetResponse.getValue()) != null) {
-            updateState(TEMPERATURE_CALIBRATION_OFFSET, new QuantityType<>(d, SIUnits.CELSIUS));
+            updateState(
+                CHANNEL_TEMPERATURE_CALIBRATION_OFFSET,
+                new QuantityType<>(DecimalPrecision.CHANNEL_TEMPERATURE_CALIBRATION_OFFSET.round(d), SIUnits.CELSIUS)
+            );
         }
     }
 
@@ -632,7 +651,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         Boolean b;
         if ((b = commercialLockResponse.getValue()) != null) {
-            updateState(COMMERCIAL_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
+            updateState(CHANNEL_COMMERCIAL_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
         }
     }
 
@@ -685,7 +704,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         Boolean b;
         if ((b = childLockResponse.getValue()) != null) {
-            updateState(CHILD_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
+            updateState(CHANNEL_CHILD_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
         }
     }
 
@@ -738,7 +757,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         DisplayUnit du;
         if ((du = displayUnitResponse.getDisplayUnit()) != null) {
-            updateState(DISPLAY_UNIT, new StringType(du.name()));
+            updateState(CHANNEL_DISPLAY_UNIT, new StringType(du.name()));
         }
     }
 
@@ -793,7 +812,10 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         setOnline();
         BigDecimal bd;
         if ((bd = setTemperatureResponse.getSetTemperature()) != null) {
-            updateState(channel, new QuantityType<>(bd, SIUnits.CELSIUS));
+            updateState(
+                channel,
+                new QuantityType<>(DecimalPrecision.CHANNEL_SET_TEMPERATURE.round(bd), SIUnits.CELSIUS)
+            );
         }
     }
 
@@ -853,7 +875,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         Integer i;
         if ((i = heatingPowerResponse.getValue()) != null) {
-            updateState(LIMITED_HEATING_POWER, new PercentType(i.intValue()));
+            updateState(CHANNEL_LIMITED_HEATING_POWER, new PercentType(i.intValue()));
         }
     }
 
@@ -906,7 +928,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         ControllerType ct;
         if ((ct = controllerTypeResponse.getControllerType()) != null) {
-            updateState(CONTROLLER_TYPE, new StringType(ct.name()));
+            updateState(CHANNEL_CONTROLLER_TYPE, new StringType(ct.name()));
         }
     }
 
@@ -969,7 +991,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         PredictiveHeatingType pht;
         if ((pht = response.getPredictiveHeatingType()) != null) {
-            updateState(PREDICTIVE_HEATING_TYPE, new StringType(pht.name()));
+            updateState(CHANNEL_PREDICTIVE_HEATING_TYPE, new StringType(pht.name()));
         }
     }
 
@@ -1032,7 +1054,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         Integer i;
         if ((i = heatingPowerResponse.getValue()) != null) {
-            updateState(OIL_HEATER_POWER, new PercentType(i.intValue()));
+            updateState(CHANNEL_OIL_HEATER_POWER, new PercentType(i.intValue()));
         }
     }
 
@@ -1093,7 +1115,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             if (updateConfiguration) {
                 Configuration configuration = editConfiguration();
                 Object object = configuration.get(CONFIG_PARAM_TIMEZONE_OFFSET);
-                if (!(object instanceof Number) || ((Number) object).intValue() != i.intValue()) {
+                if (!(object instanceof Number) || !sameValue((Number) object, i)) {
                     configuration.put(CONFIG_PARAM_TIMEZONE_OFFSET, BigDecimal.valueOf(i));
                     updateConfiguration(configuration);
                 }
@@ -1320,15 +1342,25 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             boolean changed = false;
             if ((d = params.getUpper()) != null) {
                 Object object = configuration.get(CONFIG_PARAM_HYSTERESIS_UPPER);
-                if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                    configuration.put(CONFIG_PARAM_HYSTERESIS_UPPER, BigDecimal.valueOf(d));
+                if (!(object instanceof Number) || !sameValue(
+                    (Number) object, d, DecimalPrecision.CONFIG_PARAM_HYSTERESIS_UPPER.getDelta()
+                )) {
+                    configuration.put(
+                        CONFIG_PARAM_HYSTERESIS_UPPER,
+                        DecimalPrecision.CONFIG_PARAM_HYSTERESIS_UPPER.round(d)
+                    );
                     changed |= true;
                 }
             }
             if ((d = params.getLower()) != null) {
                 Object object = configuration.get(CONFIG_PARAM_HYSTERESIS_LOWER);
-                if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                    configuration.put(CONFIG_PARAM_HYSTERESIS_LOWER, BigDecimal.valueOf(d));
+                if (!(object instanceof Number) || !sameValue(
+                    (Number) object, d, DecimalPrecision.CONFIG_PARAM_HYSTERESIS_LOWER.getDelta()
+                )) {
+                    configuration.put(
+                        CONFIG_PARAM_HYSTERESIS_LOWER,
+                        DecimalPrecision.CONFIG_PARAM_HYSTERESIS_LOWER.round(d)
+                    );
                     changed |= true;
                 }
             }
@@ -1471,7 +1503,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
         Boolean b = response.getEnabled();
         if (b != null) {
-            updateState(COMMERCIAL_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
+            updateState(CHANNEL_COMMERCIAL_LOCK, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
         }
 
         if (response.isComplete()) {
@@ -1487,15 +1519,25 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             boolean changed = false;
             if ((d = response.getMinimum()) != null) {
                 Object object = configuration.get(CONFIG_PARAM_COMMERCIAL_LOCK_MIN);
-                if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                    configuration.put(CONFIG_PARAM_COMMERCIAL_LOCK_MIN, BigDecimal.valueOf(d));
+                if (!(object instanceof Number) || !sameValue(
+                    (Number) object, d, DecimalPrecision.CONFIG_PARAM_COMMERCIAL_LOCK_MIN.getDelta()
+                )) {
+                    configuration.put(
+                        CONFIG_PARAM_COMMERCIAL_LOCK_MIN,
+                        DecimalPrecision.CONFIG_PARAM_COMMERCIAL_LOCK_MIN.round(d)
+                    );
                     changed |= true;
                 }
             }
             if ((d = response.getMaximum()) != null) {
                 Object object = configuration.get(CONFIG_PARAM_COMMERCIAL_LOCK_MAX);
-                if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                    configuration.put(CONFIG_PARAM_COMMERCIAL_LOCK_MAX, BigDecimal.valueOf(d));
+                if (!(object instanceof Number) || !sameValue(
+                    (Number) object, d, DecimalPrecision.CONFIG_PARAM_COMMERCIAL_LOCK_MAX.getDelta()
+                )) {
+                    configuration.put(
+                        CONFIG_PARAM_COMMERCIAL_LOCK_MAX,
+                        DecimalPrecision.CONFIG_PARAM_COMMERCIAL_LOCK_MAX.round(d)
+                    );
                     changed |= true;
                 }
             }
@@ -1557,10 +1599,10 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         setOnline();
         Boolean b;
         if ((b = params.getActiveNow()) != null) {
-            updateState(OPEN_WINDOW_ACTIVE, OnOffType.from(b.booleanValue()));
+            updateState(CHANNEL_OPEN_WINDOW_ACTIVE, OnOffType.from(b.booleanValue()));
         }
         if ((b = params.getEnabled()) != null) {
-            updateState(OPEN_WINDOW_ENABLED, OnOffType.from(b.booleanValue()));
+            updateState(CHANNEL_OPEN_WINDOW_ENABLED, OnOffType.from(b.booleanValue()));
         }
     }
 
@@ -1644,10 +1686,10 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         Boolean b;
         if ((b = params.getActiveNow()) != null) {
-            updateState(OPEN_WINDOW_ACTIVE, OnOffType.from(b.booleanValue()));
+            updateState(CHANNEL_OPEN_WINDOW_ACTIVE, OnOffType.from(b.booleanValue()));
         }
         if ((b = params.getEnabled()) != null) {
-            updateState(OPEN_WINDOW_ENABLED, OnOffType.from(b.booleanValue()));
+            updateState(CHANNEL_OPEN_WINDOW_ENABLED, OnOffType.from(b.booleanValue()));
         }
 
         if (params.isComplete()) {
@@ -1897,36 +1939,52 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         boolean result = false;
         if ((d = parametersResponse.getKp()) != null) {
             object = configuration.get(CONFIG_PARAM_PID_KP);
-            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                configuration.put(CONFIG_PARAM_PID_KP, BigDecimal.valueOf(d));
+            if (!(object instanceof Number) || !sameValue(
+                (Number) object, d, DecimalPrecision.CONFIG_PARAM_PID_KP.getDelta()
+            )) {
+                configuration.put(CONFIG_PARAM_PID_KP, DecimalPrecision.CONFIG_PARAM_PID_KP.round(d));
                 result |= true;
             }
         }
         if ((d = parametersResponse.getKi()) != null) {
             object = configuration.get(CONFIG_PARAM_PID_KI);
-            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                configuration.put(CONFIG_PARAM_PID_KI, BigDecimal.valueOf(d));
+            if (!(object instanceof Number) || !sameValue(
+                (Number) object, d, DecimalPrecision.CONFIG_PARAM_PID_KI.getDelta()
+            )) {
+                configuration.put(CONFIG_PARAM_PID_KI, DecimalPrecision.CONFIG_PARAM_PID_KI.round(d));
                 result |= true;
             }
         }
         if ((d = parametersResponse.getKd()) != null) {
             object = configuration.get(CONFIG_PARAM_PID_KD);
-            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                configuration.put(CONFIG_PARAM_PID_KD, BigDecimal.valueOf(d));
+            if (!(object instanceof Number) || !sameValue(
+                (Number) object, d, DecimalPrecision.CONFIG_PARAM_PID_KD.getDelta()
+            )) {
+                configuration.put(CONFIG_PARAM_PID_KD, DecimalPrecision.CONFIG_PARAM_PID_KD.round(d));
                 result |= true;
             }
         }
         if ((d = parametersResponse.getKdFilterN()) != null) {
             object = configuration.get(CONFIG_PARAM_PID_KD_FILTER_N);
-            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                configuration.put(CONFIG_PARAM_PID_KD_FILTER_N, BigDecimal.valueOf(d));
+            if (!(object instanceof Number) || !sameValue(
+                (Number) object, d, DecimalPrecision.CONFIG_PARAM_PID_KD_FILTER_N.getDelta()
+            )) {
+                configuration.put(
+                    CONFIG_PARAM_PID_KD_FILTER_N,
+                    DecimalPrecision.CONFIG_PARAM_PID_KD_FILTER_N.round(d)
+                );
                 result |= true;
             }
         }
         if ((d = parametersResponse.getWindupLimitPercentage()) != null) {
             object = configuration.get(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT);
-            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                configuration.put(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, BigDecimal.valueOf(d));
+            if (!(object instanceof Number) || !sameValue(
+                (Number) object, d, DecimalPrecision.CONFIG_PARAM_PID_WINDUP_LIMIT_PCT.getDelta()
+            )) {
+                configuration.put(
+                    CONFIG_PARAM_PID_WINDUP_LIMIT_PCT,
+                    DecimalPrecision.CONFIG_PARAM_PID_WINDUP_LIMIT_PCT.round(d)
+                );
                 result |= true;
             }
         }
@@ -1950,35 +2008,45 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         boolean result = false;
         if ((d = parametersResponse.getDropTemperatureThreshold()) != null) {
             object = configuration.get(CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR);
-            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                configuration.put(CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR, BigDecimal.valueOf(d));
+            if (!(object instanceof Number) || !sameValue(
+                (Number) object, d, DecimalPrecision.CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR.getDelta()
+            )) {
+                configuration.put(
+                    CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR,
+                    DecimalPrecision.CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR.round(d)
+                );
                 result |= true;
             }
         }
         if ((i = parametersResponse.getDropTimeRange()) != null) {
             object = configuration.get(CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE);
-            if (!(object instanceof Number) || ((Number) object).intValue() != i.intValue()) {
+            if (!(object instanceof Number) || !sameValue((Number) object, d)) {
                 configuration.put(CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE, BigDecimal.valueOf(i));
                 result |= true;
             }
         }
         if ((d = parametersResponse.getIncreaseTemperatureThreshold()) != null) {
             object = configuration.get(CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR);
-            if (!(object instanceof Number) || ((Number) object).doubleValue() != d.doubleValue()) {
-                configuration.put(CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR, BigDecimal.valueOf(d));
+            if (!(object instanceof Number) || !sameValue(
+                (Number) object, d, DecimalPrecision.CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR.getDelta()
+            )) {
+                configuration.put(
+                    CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR,
+                    DecimalPrecision.CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR.round(d)
+                );
                 result |= true;
             }
         }
         if ((i = parametersResponse.getIncreaseTimeRange()) != null) {
             object = configuration.get(CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE);
-            if (!(object instanceof Number) || ((Number) object).intValue() != i.intValue()) {
+            if (!(object instanceof Number) || !sameValue((Number) object, d)) {
                 configuration.put(CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE, BigDecimal.valueOf(i));
                 result |= true;
             }
         }
         if ((i = parametersResponse.getMaxTime()) != null) {
             object = configuration.get(CONFIG_PARAM_OPEN_WINDOW_MAX_TIME);
-            if (!(object instanceof Number) || ((Number) object).intValue() != i.intValue()) {
+            if (!(object instanceof Number) || !sameValue((Number) object, d)) {
                 configuration.put(CONFIG_PARAM_OPEN_WINDOW_MAX_TIME, BigDecimal.valueOf(i));
                 result |= true;
             }
@@ -2687,7 +2755,6 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         newWindupLimit,
                         false
                     );
-                    Double d;
                     boolean setFailed = false;
                     if (result == null || !result.isComplete()) {
                         logger.warn("An empty or partial response was received after setting PID parameters");
@@ -2704,10 +2771,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             .withMessageKeySuffix("store-failed-pid").build());
                         setFailed = true;
                     } else {
-                        if ((d = result.getKp()) != null && d.doubleValue() != newKp.doubleValue()) {
+                        if (!sameValue(
+                            result.getKp(),
+                            newKp,
+                            DecimalPrecision.CONFIG_PARAM_PID_KP.getDelta()
+                        )) {
                             logger.warn(
                                 "The device returned a different PID Kp ({}) than what was attempted set ({})",
-                                d,
+                                result.getKp(),
                                 newKp
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -2715,10 +2786,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newKp).build());
                             setFailed = true;
                         }
-                        if ((d = result.getKi()) != null && d.doubleValue() != newKi.doubleValue()) {
+                        if (!sameValue(
+                            result.getKi(),
+                            newKi,
+                            DecimalPrecision.CONFIG_PARAM_PID_KI.getDelta()
+                        )) {
                             logger.warn(
                                 "The device returned a different PID Ki ({}) than what was attempted set ({})",
-                                d,
+                                result.getKi(),
                                 newKi
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -2726,10 +2801,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newKi).build());
                             setFailed = true;
                         }
-                        if ((d = result.getKd()) != null && d.doubleValue() != newKd.doubleValue()) {
+                        if (!sameValue(
+                            result.getKd(),
+                            newKd,
+                            DecimalPrecision.CONFIG_PARAM_PID_KD.getDelta()
+                        )) {
                             logger.warn(
                                 "The device returned a different PID Kd ({}) than what was attempted set ({})",
-                                d,
+                                result.getKd(),
                                 newKd
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -2737,11 +2816,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newKd).build());
                             setFailed = true;
                         }
-                        if ((d = result.getKdFilterN()) != null && d.doubleValue() != newKdFilterN.doubleValue()) {
+                        if (!sameValue(
+                            result.getKdFilterN(),
+                            newKdFilterN,
+                            DecimalPrecision.CONFIG_PARAM_PID_KD_FILTER_N.getDelta()
+                        )) {
                             logger.warn(
                                 "The device returned a different PID Kd filter value ({})" +
                                 " than what was attempted set ({})",
-                                d,
+                                result.getKdFilterN(),
                                 newKdFilterN
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -2749,14 +2832,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newKdFilterN).build());
                             setFailed = true;
                         }
-                        if (
-                            (d = result.getWindupLimitPercentage()) != null &&
-                            d.doubleValue() != newWindupLimit.doubleValue()
-                        ) {
+                        if (!sameValue(
+                            result.getWindupLimitPercentage(),
+                            newWindupLimit,
+                            DecimalPrecision.CONFIG_PARAM_PID_WINDUP_LIMIT_PCT.getDelta()
+                        )) {
                             logger.warn(
                                 "The device returned a different PID windup limit ({})" +
                                 " than what was attempted set ({})",
-                                d,
+                                result.getWindupLimitPercentage(),
                                 newWindupLimit
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -2773,11 +2857,17 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             CONFIG_PARAM_PID_KD_FILTER_N,
                             CONFIG_PARAM_PID_WINDUP_LIMIT_PCT
                         );
-                        config.put(CONFIG_PARAM_PID_KP, newKp);
-                        config.put(CONFIG_PARAM_PID_KI, newKi);
-                        config.put(CONFIG_PARAM_PID_KD, newKd);
-                        config.put(CONFIG_PARAM_PID_KD_FILTER_N, newKdFilterN);
-                        config.put(CONFIG_PARAM_PID_WINDUP_LIMIT_PCT, newWindupLimit);
+                        config.put(CONFIG_PARAM_PID_KP, DecimalPrecision.CONFIG_PARAM_PID_KP.round(newKp));
+                        config.put(CONFIG_PARAM_PID_KI, DecimalPrecision.CONFIG_PARAM_PID_KI.round(newKi));
+                        config.put(CONFIG_PARAM_PID_KD, DecimalPrecision.CONFIG_PARAM_PID_KD.round(newKd));
+                        config.put(
+                            CONFIG_PARAM_PID_KD_FILTER_N,
+                            DecimalPrecision.CONFIG_PARAM_PID_KD_FILTER_N.round(newKdFilterN)
+                        );
+                        config.put(
+                            CONFIG_PARAM_PID_WINDUP_LIMIT_PCT,
+                            DecimalPrecision.CONFIG_PARAM_PID_WINDUP_LIMIT_PCT.round(newWindupLimit)
+                        );
                     }
                 } catch (MillException e) {
                     logger.warn(
@@ -2938,7 +3028,6 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             if (newUpper != null && newLower != null) {
                 try {
                     HysteresisParametersResponse result = setHysteresisParameters(newUpper, newLower, false);
-                    Double d;
                     boolean setFailed = false;
                     if (result == null || !result.isComplete()) {
                         logger.warn("An empty or partial response was received after setting hysteresis parameters");
@@ -2950,11 +3039,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             .withMessageKeySuffix("store-failed-hysteresis").build());
                         setFailed = true;
                     } else {
-                        if ((d = result.getUpper()) != null && d.doubleValue() != newUpper.doubleValue()) {
+                        if (!sameValue(
+                            result.getUpper(), newUpper, DecimalPrecision.CONFIG_PARAM_HYSTERESIS_UPPER.getDelta()
+                        )) {
                             logger.warn(
                                 "The device returned a different hysteresis upper limit ({})" +
                                 " than what was attempted set ({})",
-                                d,
+                                result.getUpper(),
                                 newUpper
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -2962,11 +3053,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newUpper).build());
                             setFailed = true;
                         }
-                        if ((d = result.getLower()) != null && d.doubleValue() != newLower.doubleValue()) {
+                        if (!sameValue(
+                            result.getLower(), newLower, DecimalPrecision.CONFIG_PARAM_HYSTERESIS_LOWER.getDelta()
+                        )) {
                             logger.warn(
                                 "The device returned a different hysteresis lower limit ({})" +
                                 " than what was attempted set ({})",
-                                d,
+                                result.getLower(),
                                 newLower
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -2977,8 +3070,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                     }
                     if (!setFailed) {
                         clearConfigParameterMessages(CONFIG_PARAM_HYSTERESIS_UPPER, CONFIG_PARAM_HYSTERESIS_LOWER);
-                        config.put(CONFIG_PARAM_HYSTERESIS_UPPER, newUpper);
-                        config.put(CONFIG_PARAM_HYSTERESIS_LOWER, newLower);
+                        config.put(
+                            CONFIG_PARAM_HYSTERESIS_UPPER,
+                            DecimalPrecision.CONFIG_PARAM_HYSTERESIS_UPPER.round(newUpper)
+                        );
+                        config.put(
+                            CONFIG_PARAM_HYSTERESIS_LOWER,
+                            DecimalPrecision.CONFIG_PARAM_HYSTERESIS_LOWER.round(newLower)
+                        );
                         return true;
                     }
                 } catch (MillException e) {
@@ -3054,7 +3153,6 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             if (newMin != null && newMax != null) {
                 try {
                     CommercialLockCustomizationResponse result = setCommercialLockCustomization(newMin, newMax, false);
-                    Double d;
                     boolean setFailed = false;
                     if (result == null || !result.isComplete()) {
                         logger.warn(
@@ -3068,11 +3166,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             .withMessageKeySuffix("store-failed-commercial-lock").build());
                         setFailed = true;
                     } else {
-                        if ((d = result.getMinimum()) != null && d.doubleValue() != newMin.doubleValue()) {
+                        if (!sameValue(
+                            result.getMinimum(), newMin, DecimalPrecision.CONFIG_PARAM_COMMERCIAL_LOCK_MIN.getDelta()
+                        )) {
                             logger.warn(
                                 "The device returned a different commercial lock minimum temperature ({})" +
                                 " than what was attempted set ({})",
-                                d,
+                                result.getMinimum(),
                                 newMin
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -3080,11 +3180,13 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newMin).build());
                             setFailed = true;
                         }
-                        if ((d = result.getMaximum()) != null && d.doubleValue() != newMax.doubleValue()) {
+                        if (!sameValue(
+                            result.getMaximum(), newMax, DecimalPrecision.CONFIG_PARAM_COMMERCIAL_LOCK_MAX.getDelta()
+                        )) {
                             logger.warn(
                                 "The device returned a different commercial lock maximum temperature ({})" +
                                 " than what was attempted set ({})",
-                                d,
+                                result.getMaximum(),
                                 newMax
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -3097,8 +3199,14 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         clearConfigParameterMessages(
                             CONFIG_PARAM_COMMERCIAL_LOCK_MIN, CONFIG_PARAM_COMMERCIAL_LOCK_MAX
                         );
-                        config.put(CONFIG_PARAM_COMMERCIAL_LOCK_MIN, newMin);
-                        config.put(CONFIG_PARAM_COMMERCIAL_LOCK_MAX, newMax);
+                        config.put(
+                            CONFIG_PARAM_COMMERCIAL_LOCK_MIN,
+                            DecimalPrecision.CONFIG_PARAM_COMMERCIAL_LOCK_MIN.round(newMin)
+                        );
+                        config.put(
+                            CONFIG_PARAM_COMMERCIAL_LOCK_MAX,
+                            DecimalPrecision.CONFIG_PARAM_COMMERCIAL_LOCK_MAX.round(newMax)
+                        );
                     }
                 } catch (MillException e) {
                     logger.warn(
@@ -3227,8 +3335,6 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         newMaxTime,
                         false
                     );
-                    Double d;
-                    Integer i;
                     boolean setFailed = false;
                     if (result == null || !result.isComplete()) {
                         logger.warn("An empty or partial response was received after setting open window parameters");
@@ -3250,13 +3356,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                         setFailed = true;
                     } else {
                         if (
-                                (d = result.getDropTemperatureThreshold()) != null &&
-                                d.doubleValue() != newDropTempThr.doubleValue()
-                            ) {
+                            !sameValue(
+                                result.getDropTemperatureThreshold(),
+                                newDropTempThr,
+                                DecimalPrecision.CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR.getDelta()
+                            )
+                        ) {
                             logger.warn(
                                 "The device returned a different open window drop temperature threshold ({})" +
                                 " than what was attempted set ({})",
-                                d,
+                                result.getDropTemperatureThreshold(),
                                 newDropTempThr
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -3264,11 +3373,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newDropTempThr).build());
                             setFailed = true;
                         }
-                        if ((i = result.getDropTimeRange()) != null && i.intValue() != newDropTimeRange.intValue()) {
+                        if (!sameValue(result.getDropTimeRange(), newDropTimeRange)) {
                             logger.warn(
                                 "The device returned a different open window drop time range ({})" +
                                 " than what was attempted set ({})",
-                                i,
+                                result.getDropTimeRange(),
                                 newDropTimeRange
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -3277,13 +3386,16 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             setFailed = true;
                         }
                         if (
-                            (d = result.getIncreaseTemperatureThreshold()) != null &&
-                            d.doubleValue() != newIncTempThr.doubleValue()
+                            !sameValue(
+                                result.getIncreaseTemperatureThreshold(),
+                                newIncTempThr,
+                                DecimalPrecision.CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR.getDelta()
+                            )
                         ) {
                             logger.warn(
                                 "The device returned a different open window increase temperature threshold ({})" +
                                 " than what was attempted set ({})",
-                                d,
+                                result.getIncreaseTemperatureThreshold(),
                                 newIncTempThr
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -3291,11 +3403,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newIncTempThr).build());
                             setFailed = true;
                         }
-                        if ((i = result.getIncreaseTimeRange()) != null && i.intValue() != newIncTimeRange.intValue()) {
+                        if (!sameValue(result.getIncreaseTimeRange(), newIncTimeRange)) {
                             logger.warn(
                                 "The device returned a different open window increase time range ({})" +
                                 " than what was attempted set ({})",
-                                i,
+                                result.getIncreaseTimeRange(),
                                 newIncTimeRange
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -3303,11 +3415,11 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 .withArguments(newIncTimeRange).build());
                             setFailed = true;
                         }
-                        if ((i = result.getMaxTime()) != null && i.intValue() != newMaxTime.intValue()) {
+                        if (!sameValue(result.getMaxTime(), newMaxTime)) {
                             logger.warn(
                                 "The device returned a different open window maximum time ({})" +
                                 " than what was attempted set ({})",
-                                i,
+                                result.getMaxTime(),
                                 newMaxTime
                             );
                             setConfigParameterMessage(ConfigStatusMessage.Builder
@@ -3324,9 +3436,15 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                             CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE,
                             CONFIG_PARAM_OPEN_WINDOW_MAX_TIME
                         );
-                        config.put(CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR, newDropTempThr);
+                        config.put(
+                            CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR,
+                            DecimalPrecision.CONFIG_PARAM_OPEN_WINDOW_DROP_TEMP_THR.round(newDropTempThr)
+                        );
                         config.put(CONFIG_PARAM_OPEN_WINDOW_DROP_TIME_RANGE, newDropTimeRange);
-                        config.put(CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR, newIncTempThr);
+                        config.put(
+                            CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR,
+                            DecimalPrecision.CONFIG_PARAM_OPEN_WINDOW_INC_TEMP_THR.round(newIncTempThr)
+                        );
                         config.put(CONFIG_PARAM_OPEN_WINDOW_INC_TIME_RANGE, newIncTimeRange);
                         config.put(CONFIG_PARAM_OPEN_WINDOW_MAX_TIME, newMaxTime);
                     }
@@ -3444,14 +3562,17 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         Object oldObject, newObject;
         for (Entry<String, Object> entry : configurationParameters.entrySet()) {
             newObject = entry.getValue();
-            if (!Objects.equals(oldObject = configuration.get(entry.getKey()), newObject)) {
-                if (oldObject instanceof BigDecimal && newObject instanceof BigDecimal) {
-                    if (((BigDecimal) oldObject).compareTo((BigDecimal) newObject) != 0) {
-                        result.add(entry.getKey());
-                    }
-                } else {
+            oldObject = configuration.get(entry.getKey());
+            if (oldObject instanceof Number && newObject instanceof Number) {
+                if (!sameValue(
+                    (Number) oldObject,
+                    (Number) newObject,
+                    DecimalPrecision.typeOf(entry.getKey()).getDelta()
+                )) {
                     result.add(entry.getKey());
                 }
+            } else if (!Objects.equals(oldObject, newObject)) {
+                result.add(entry.getKey());
             }
         }
         return result;
