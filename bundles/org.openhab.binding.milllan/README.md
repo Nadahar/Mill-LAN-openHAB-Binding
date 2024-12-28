@@ -21,6 +21,8 @@ There is a special `Thing-Type` called "All Functions" in this binding that expo
 
 ## Configuring Wi-Fi on the Mill device
 
+#### **Warning**: Regardless of which method you use to configure Wi-Fi on the device, you will **lose access** to the device if you mess up the configuration by for example registering the wrong SSID or forgetting to enter some information. Also note that for this binding to work, `local API` *must* be enabled. If you know how to enter "Access Point mode" you can repeat that procedure and try again, but if not, you will have to factory reset the device and use the mobile application to configure it from scratch. Making sure that you enter the correct information in the first place can save you time and frustration.
+
 If you contact Mill support, they will tell you that to configure it for your Wi-Fi network you must install their mobile application and use that, in combination with Bluetooth, to configure the device. 
 This also requires you to register with Mill.
 
@@ -31,8 +33,6 @@ You will need to search for Wi-Fi networks, and you should find a network called
 Connect to that network, and your web browser will either open a new page automatically, or you must enter the address in the browser manually by typing `http://192.168.4.1`.
 
 This should bring you to the device configuration page, where you can enter the SSID and password for your local Wi-Fi network. Make sure that the local API is enabled as well, and press `Connect`.
-
-**Warning**: Whatever method you use to configure the Wi-Fi on the device, you will *lose access* to the device if you mess up the configuration by for example registering the wrong SSID. If you know how to enter "Access Point mode" you can repeat that procedure and try again, but if not, you have to factory reset the device and use the mobile application to configure it from scratch. Making sure that you enter the correct information in the first place can save you time and frustration.
 
 ![Device Configuration page](doc/AP_setup.png)
 
