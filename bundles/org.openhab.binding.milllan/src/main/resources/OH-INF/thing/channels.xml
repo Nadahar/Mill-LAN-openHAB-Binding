@@ -212,6 +212,18 @@
 		<state min="0" max="99" step="0.5" pattern="%.1f %unit%"/>
 		<autoUpdatePolicy>veto</autoUpdatePolicy>
 	</channel-type>
+	<channel-type id="independent-mode-set-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Independent Mode Set-Temperature</label>
+		<description>The "Independent Device mode" set-temperature value. Setting fails if the device is in a different mode. Special values 0 and 99 means "Off" and "Always On" respectively.</description>
+		<category>Temperature</category>
+		<tags>
+			<tag>Setpoint</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state min="0" max="99" step="0.5" pattern="%.1f %unit%"/>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
 	<channel-type id="limited-heating-power">
 		<item-type>Dimmer</item-type>
 		<label>Max Heating Power</label>

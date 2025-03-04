@@ -132,10 +132,11 @@ These aren't Thing configurations, they configure the device itself, and the set
 | commercial-lock | Switch | RW | The status of the commercial-lock |
 | child-lock | Switch | RW | The status of the child-lock |
 | display-unit | String | RW | The temperature unit ("Celsius" or "Fahrenheit") displayed on the device |
-| normal-set-temperature | Number:Temperature | RW |The "normal" set-temperature value |
-| comfort-set-temperature | Number:Temperature | RW |The "comfort" set-temperature value |
-| sleep-set-temperature | Number:Temperature | RW |The "sleep" set-temperature value |
-| away-set-temperature | Number:Temperature | RW |The "away" set-temperature value |
+| normal-set-temperature | Number:Temperature | RW | The "normal" set-temperature value |
+| comfort-set-temperature | Number:Temperature | RW | The "comfort" set-temperature value |
+| sleep-set-temperature | Number:Temperature | RW | The "sleep" set-temperature value |
+| away-set-temperature | Number:Temperature | RW | The "away" set-temperature value |
+| independent-mode-set-temperature | Number:Temperature | RW | The "Independent Device mode" set-temperature value. Setting fails if the device is in a different mode. Special values `0` and `99` means "Off" and "Always On" respectively |
 | limited-heating-power | Dimmer | RW | The maximum heating power limit in percent (10-100%) |
 | controller-type | String | RW | The regulator controller type |
 | predictive-heating-type | String | RW | The predictive heating type |
@@ -188,7 +189,7 @@ Sets the hysteresis parameters for the heating controller (not for panel heaters
 
 ### `setIndependentModeTemperature`
 
-Sets the "Independent Mode" target temperature. Fails if the device is in a different mode.
+Sets the "Independent Device mode" target temperature. Fails if the device is in a different mode.
 
 | Parameter | Type   | Description |
 |-----------|--------|-------------|
@@ -266,6 +267,7 @@ Number:Temperature NormalSetTemperature "Normal Set Temperature" <temperature> [
 Number:Temperature ComfortSetTemperature "Comfort Set Temperature" <temperature> ["Setpoint", "Temperature"] {channel="milllan:panel-heater:id:comfort-set-temperature", unit="°C", stateDescription=" "[ pattern="%.1f %unit%" ] }
 Number:Temperature SleepSetTemperature "Sleep Set Temperature" <temperature> ["Setpoint", "Temperature"] {channel="milllan:panel-heater:id:sleep-set-temperature", unit="°C", stateDescription=" "[ pattern="%.1f %unit%" ] }
 Number:Temperature AwaySetTemperature "Away Set Temperature" <temperature> ["Setpoint", "Temperature"] {channel="milllan:panel-heater:id:away-set-temperature", unit="°C", stateDescription=" "[ pattern="%.1f %unit%" ] }
+Number:Temperature IndependentModeSetTemperature "Independent Mode Set Temperature" <temperature> ["Setpoint", "Temperature"] {channel="milllan:panel-heater:id:independent-mode-set-temperature", unit="°C", stateDescription=" "[ pattern="%.1f %unit%" ] }
 Dimmer LimitedHeatingPower "Max Heating Power" <heating> ["Control"] {channel="milllan:panel-heater:id:limited-heating-power", unit="%", stateDescription=" "[ pattern="%.0f %%" ] }
 String ControllerType "Controller Type" ["Control"] {channel="milllan:panel-heater:id:controller-type"}
 String PredictiveHeatingType "Predictive Heating Type" ["Control"] {channel="milllan:panel-heater:id:predictive-heating-type"}

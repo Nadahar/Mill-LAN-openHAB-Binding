@@ -95,6 +95,7 @@ import org.openhab.core.thing.binding.ThingHandlerService;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +150,10 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
     /** The {@link MillAPITool} instance */
     protected final MillAPITool apiTool;
+
+    /** The cached operation mode */
+    @Nullable
+    protected volatile OperationMode lastOperationMode;
 
     /**
      * Creates a new instance using the specified parameters.
@@ -306,6 +311,35 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                                 TemperatureType.AWAY,
                                 celsiusValue.toBigDecimal()
                             );
+                        }
+                    }
+                    break;
+                case CHANNEL_INDEPENDENT_MODE_SET_TEMPERATURE:
+                    if (command instanceof RefreshType) {
+                        pollControlStatus();
+                    } else if (command instanceof QuantityType) {
+                        if (lastOperationMode != OperationMode.INDEPENDENT_DEVICE) {
+                            logger.warn(
+                                "Failed to set \"Independent Device mode\" set-temperature: The device is in mode \"{}\"",
+                                lastOperationMode
+                            );
+                            updateState(CHANNEL_INDEPENDENT_MODE_SET_TEMPERATURE, UnDefType.UNDEF);
+                            setOnline(
+                                ThingStatusDetail.CONFIGURATION_ERROR,
+                                "Can only set Independent Device mode set-temperature when in Independent Device mode"
+                            );
+                        } else {
+                            @SuppressWarnings("unchecked")
+                            QuantityType<?> celsiusValue = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
+                            if (celsiusValue == null) {
+                                logger.warn(
+                                    "Failed to set \"Independent Device mode\" set-temperature: " +
+                                    "Could not convert {} to degrees celsius",
+                                    command
+                                );
+                            } else {
+                                setIndependentModeSetTemperature(celsiusValue.toBigDecimal());
+                            }
                         }
                     }
                     break;
@@ -507,19 +541,31 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                     OnOffType.OFF
             );
         }
+        OperationMode om;
+        if ((om = controlStatusResponse.getOperatingMode()) != null) {
+            lastOperationMode = om;
+            updateState(CHANNEL_OPERATION_MODE, new StringType(om.name()));
+        }
         if ((d = controlStatusResponse.getSetTemperature()) != null) {
             updateState(
                 CHANNEL_SET_TEMPERATURE,
                 new QuantityType<>(DecimalPrecision.CHANNEL_SET_TEMPERATURE.round(d), SIUnits.CELSIUS)
             );
+            if (om == OperationMode.INDEPENDENT_DEVICE) {
+                updateState(
+                    CHANNEL_INDEPENDENT_MODE_SET_TEMPERATURE,
+                    new QuantityType<>(
+                        DecimalPrecision.CHANNEL_SET_TEMPERATURE.round(d),
+                        SIUnits.CELSIUS
+                    )
+                );
+            } else {
+                updateState(CHANNEL_INDEPENDENT_MODE_SET_TEMPERATURE, UnDefType.UNDEF);
+            }
         }
         Boolean b;
         if ((b = controlStatusResponse.getConnectedToCloud()) != null) {
             updateState(CHANNEL_CONNECTED_CLOUD, b.booleanValue() ? OnOffType.ON : OnOffType.OFF);
-        }
-        OperationMode om;
-        if ((om = controlStatusResponse.getOperatingMode()) != null) {
-            updateState(CHANNEL_OPERATION_MODE, new StringType(om.name()));
         }
     }
 
@@ -543,6 +589,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
         }
         OperationMode om;
         if ((om = operationModeResponse.getMode()) != null) {
+            lastOperationMode = om;
             updateState(CHANNEL_OPERATION_MODE, new StringType(om.name()));
         }
     }
@@ -843,6 +890,34 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
             logger.warn(
                 "Failed to set {} set-temperature to \"{}\": {}",
                 temperatureType.name(),
+                value,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+            setOnline(
+                ThingStatusDetail.COMMUNICATION_ERROR,
+                responseStatus == null ? null : responseStatus.getDescription()
+            );
+        } else {
+            setOnline();
+        }
+    }
+
+    /**
+     * Sends the "Independent Device mode" set-temperature to the device and immediately
+     * queries the device for the same value, so that the result of the operation is known.
+     *
+     * @param value the new set-temperature in °C.
+     * @throws MillException If an error occurs during the operation.
+     */
+    public void setIndependentModeSetTemperature(BigDecimal value) throws MillException {
+        Response response = apiTool.setTemperatureInIndependentMode(getHostname(), getAPIKey(), value);
+        pollControlStatus();
+
+        // Set status after polling, or it will be overwritten
+        ResponseStatus responseStatus;
+        if ((responseStatus = response.getStatus()) != ResponseStatus.OK) {
+            logger.warn(
+                "Failed to set independent device mode set-temperature to \"{}\": {}",
                 value,
                 responseStatus == null ? null : responseStatus.getDescription()
             );

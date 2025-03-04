@@ -30,6 +30,7 @@
 			<channel typeId="comfort-set-temperature" id="comfort-set-temperature"/>
 			<channel typeId="sleep-set-temperature" id="sleep-set-temperature"/>
 			<channel typeId="away-set-temperature" id="away-set-temperature"/>
+			<channel typeId="independent-mode-set-temperature" id="independent-mode-set-temperature"/>
 			<channel typeId="predictive-heating-type" id="predictive-heating-type"></channel>
 		</channels>
 

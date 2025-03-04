@@ -876,7 +876,7 @@ public class MillAPITool {
     /**
      * Sends {@code POST/set-temperature-in-independent-mode-now} to the device's REST API and returns the response.
      * <p>
-     * <b>Note:</b> Will fail is the device isn't in "Independent device" mode.
+     * <b>Note:</b> Will fail if the device isn't in "Independent device" mode.
      *
      * @param hostname the hostname or IP address to contact.
      * @param apiKey the API key or {@code null}.

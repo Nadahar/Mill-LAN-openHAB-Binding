@@ -152,14 +152,15 @@ public enum DecimalPrecision {
                 return parameter;
             }
         }
-        if (
-            MillBindingConstants.CHANNEL_NORMAL_SET_TEMPERATURE.equals(name) ||
-            MillBindingConstants.CHANNEL_COMFORT_SET_TEMPERATURE.equals(name) ||
-            MillBindingConstants.CHANNEL_SLEEP_SET_TEMPERATURE.equals(name) ||
-            MillBindingConstants.CHANNEL_AWAY_SET_TEMPERATURE.equals(name)
-        ) {
-            return DecimalPrecision.CHANNEL_SET_TEMPERATURE;
+        switch (name) {
+            case MillBindingConstants.CHANNEL_NORMAL_SET_TEMPERATURE:
+            case MillBindingConstants.CHANNEL_COMFORT_SET_TEMPERATURE:
+            case MillBindingConstants.CHANNEL_SLEEP_SET_TEMPERATURE:
+            case MillBindingConstants.CHANNEL_AWAY_SET_TEMPERATURE:
+            case MillBindingConstants.CHANNEL_INDEPENDENT_MODE_SET_TEMPERATURE:
+                return DecimalPrecision.CHANNEL_SET_TEMPERATURE;
+            default:
+                return INTEGER;
         }
-        return INTEGER;
     }
 }

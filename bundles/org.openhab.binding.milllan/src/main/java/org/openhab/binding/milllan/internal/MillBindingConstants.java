@@ -122,6 +122,9 @@ public class MillBindingConstants {
     /** The Away Set Temperature {@link Channel} */
     public static final String CHANNEL_AWAY_SET_TEMPERATURE = "away-set-temperature";
 
+    /** The Independent Device Mode Set Temperature {@link Channel} */
+    public static final String CHANNEL_INDEPENDENT_MODE_SET_TEMPERATURE = "independent-mode-set-temperature";
+
     /** The Limited Heating Power {@link Channel} */
     public static final String CHANNEL_LIMITED_HEATING_POWER = "limited-heating-power";
 
