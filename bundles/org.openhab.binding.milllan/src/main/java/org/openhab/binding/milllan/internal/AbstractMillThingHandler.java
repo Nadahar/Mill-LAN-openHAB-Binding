@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.measure.quantity.Temperature;
 
@@ -108,6 +110,8 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public abstract class AbstractMillThingHandler extends BaseThingHandler implements ConfigStatusProvider {
+
+    private static final Pattern NON_DIGIT_PATTERN = Pattern.compile("[^\\d]+");
 
     private final Logger logger = LoggerFactory.getLogger(AbstractMillThingHandler.class);
 
@@ -1171,6 +1175,21 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
      */
     @Nullable
     public Integer pollTimeZoneOffset(boolean updateConfiguration) throws MillException {
+        // It seems like Mill has broken time zone offset in firmware 260422 and forward
+        // it's unknown at this point if it will ever be fixed again, so we disable it for
+        // all later versions for now.
+        int fwVersion = getNumericFirmwareVersion();
+        if (fwVersion >= 260422) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                    "Thing \"{}\" runs firmware version {} where retrieving the timezone offset is bugged" +
+                    " - skipping request",
+                    getThing().getUID(),
+                    getThing().getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)
+                );
+                return null;
+            }
+        }
         TimeZoneOffsetResponse offset;
         try {
             offset = apiTool.getTimeZoneOffset(getHostname(), getAPIKey());
@@ -2441,7 +2460,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                 .error(CONFIG_PARAM_HOSTNAME).withMessageKeySuffix("invalid-parameter").withArguments(object).build()
             );
             throw new MillException(
-                "Invalid configuration: hostname must be a string",
+                "Invalid configuration: apiKey must be a string",
                 ThingStatusDetail.CONFIGURATION_ERROR
             );
         }
@@ -3623,7 +3642,7 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
 
     /**
      * Compares the values of the specified configuration parameters with the specified configuration,
-     * and returns the ID of the parameters that has changed.
+     * and returns the ID of the parameters that have changed.
      *
      * @param configuration the current {@link Configuration}.
      * @param configurationParameters the configuration parameters whose values to compare.
@@ -3695,6 +3714,27 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
     protected Runnable createOfflineTask(InetAddress[] addresses) {
         return new PingOffline(addresses);
     }
+
+    /**
+     * @return The digits of the firmware version turned into an {@code int}, or {@code -1}.
+     */
+    protected int getNumericFirmwareVersion() {
+        String firmwareVersion = getThing().getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION);
+        if (firmwareVersion == null || firmwareVersion.isBlank()) {
+            return -1;
+        }
+        Matcher m = NON_DIGIT_PATTERN.matcher(firmwareVersion);
+        String digits = m.replaceAll("");
+        if (digits.isBlank()) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
 
     /**
      * The default initializer task implementation.
