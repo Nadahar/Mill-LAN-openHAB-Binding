@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-06-10
+
+### Fixed
+
+- Disable time zone retrieval for broken firmware versions (>= `0x260422`).
+
 ## [1.0.1] - 2025-03-04
 
 ### Added
@@ -23,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### First release
 
-[Unreleased]: https://github.com/Nadahar/Mill-LAN-openHAB-Binding/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/Nadahar/Mill-LAN-openHAB-Binding/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/Nadahar/Mill-LAN-openHAB-Binding/releases/tag/v1.0.2
 [1.0.1]: https://github.com/Nadahar/Mill-LAN-openHAB-Binding/releases/tag/v1.0.1
 [1.0.0]: https://github.com/Nadahar/Mill-LAN-openHAB-Binding/releases/tag/v1.0.0
