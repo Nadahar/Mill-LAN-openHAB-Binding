@@ -1187,8 +1187,8 @@ public abstract class AbstractMillThingHandler extends BaseThingHandler implemen
                     getThing().getUID(),
                     getThing().getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION)
                 );
-                return null;
             }
+            return null;
         }
         TimeZoneOffsetResponse offset;
         try {
